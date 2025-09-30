@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
 Git Sync Script for Codespace to GitHub
-Automates the git workflow while giving you control at each step
+Shows you what will happen first, then lets you decide
 """
 
 import subprocess
 import sys
 
-def run_command(command, description):
-    """Run a command and return the result"""
-    print(f"\n{'='*50}")
-    print(f"RUNNING: {description}")
+def run_command_preview(command, description):
+    """Run a command and return the result for preview"""
+    print(f"\n{'='*60}")
+    print(f"PREVIEW: {description}")
     print(f"Command: {command}")
-    print(f"{'='*50}")
+    print(f"{'='*60}")
     
     try:
         result = subprocess.run(command, shell=True, capture_output=True, text=True)

@@ -1,0 +1,5 @@
+# Programming-Class-Project
+
+User Prompt: Dos or Wordy
+
+A simple command line interface (CLI) application that lets users play a game similar to Wordle, but with a twist: the words are randomly generated from a predefined list, and users must guess the word within a limited number of attempts. The worlds are not limited to 5 letters, and the game provides feedback on the number of correct letters in the correct position and the number of correct letters in the wrong position. It will also tell you if the amount of words is wrong but not dirrectly tell you how many letters there are. There is also an option to play Dos, a game that is similar to Uno, where players must match colors or numbers to get rid of their cards. The game will keep track of the score and display it at the end of each round.
