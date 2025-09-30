@@ -34,6 +34,25 @@ def run_command_preview(command, description):
         print(f"Error running command: {e}")
         return None
 
+def run_command_execute(command, description):
+    """Execute a command for real"""
+    print(f"\n✅ EXECUTING: {description}")
+    print(f"Command: {command}")
+    
+    try:
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        
+        if result.stdout:
+            print(result.stdout)
+        if result.stderr:
+            print(result.stderr)
+        
+        return result
+    
+    except Exception as e:
+        print(f"Error executing command: {e}")
+        return None
+
 def get_user_input(prompt, allow_empty=False):
     """Get user input with option to allow empty responses"""
     while True:
@@ -44,93 +63,93 @@ def get_user_input(prompt, allow_empty=False):
 
 def main():
     print("🚀 Git Sync Script - Codespace to GitHub")
-    print("This script will help you sync your changes to GitHub step by step.\n")
+    print("This script will show you what changes will be made, then ask for your approval.\n")
     
-    # Step 1: Check git status
-    print("Step 1: Checking what files have changed...")
-    result = run_command("git status", "Check current git status")
+    # PREVIEW PHASE - Show everything first
+    print("📋 PREVIEW PHASE - Here's what your git commands will do:")
+    print("=" * 80)
     
-    if result is None or result.returncode != 0:
-        print("❌ Failed to check git status. Exiting.")
-        sys.exit(1)
+    # Step 1: Preview what git add will stage
+    print("\n1️⃣  What 'git add .' will stage:")
+    add_preview = run_command_preview("git add . --dry-run", "Preview what files will be added")
     
-    continue_choice = get_user_input("\nDo you want to continue with adding files? (y/n): ")
-    if continue_choice.lower() != 'y':
-        print("Exiting script.")
+    # Step 2: Show what files will be staged (simulate)
+    print("\n2️⃣  After adding files, status would be:")
+    # We'll run git add . and then git status, but reset afterward for the preview
+    temp_add = subprocess.run("git add .", shell=True, capture_output=True)
+    if temp_add.returncode == 0:
+        staged_result = run_command_preview("git status", "Status after staging files")
+        # Reset the staging for now
+        subprocess.run("git reset", shell=True, capture_output=True)
+    
+    # DECISION PHASE
+    print("\n" + "🤔" * 20)
+    print("DECISION TIME!")
+    print("🤔" * 20)
+    
+    proceed = get_user_input("\nBased on the preview above, do you want to proceed with syncing to GitHub? (y/n): ")
+    
+    if proceed.lower() != 'y':
+        print("❌ Sync cancelled. No changes were made.")
         sys.exit(0)
     
-    # Step 2: Add files
-    print("\nStep 2: Adding files to staging area...")
-    result = run_command("git add .", "Add all changed files")
+    # Get commit message
+    commit_message = get_user_input("\n💬 Enter your commit message: ")
     
-    if result is None or result.returncode != 0:
-        print("❌ Failed to add files. Exiting.")
-        sys.exit(1)
+    # Confirm commit message
+    print(f"\nCommit message: '{commit_message}'")
+    confirm_message = get_user_input("Is this commit message correct? (y/n): ")
     
-    # Show what's staged
-    print("\nLet's see what's staged for commit:")
-    run_command("git status", "Check staged files")
-    
-    continue_choice = get_user_input("\nDo you want to continue with committing? (y/n): ")
-    if continue_choice.lower() != 'y':
-        print("Exiting script. You can unstage files with 'git reset' if needed.")
-        sys.exit(0)
-    
-    # Step 3: Get commit message and commit
-    print("\nStep 3: Creating a commit...")
-    
-    # Get commit message from user
-    commit_message = get_user_input("Enter your commit message: ")
-    
-    # Show a preview of the commit
-    print(f"\nCommit message will be: '{commit_message}'")
-    confirm = get_user_input("Is this correct? (y/n): ")
-    
-    if confirm.lower() != 'y':
-        # Allow them to re-enter the message
+    if confirm_message.lower() != 'y':
         commit_message = get_user_input("Enter your commit message again: ")
     
-    # Run the commit
-    commit_command = f'git commit -m "{commit_message}"'
-    result = run_command(commit_command, "Commit changes")
+    # EXECUTION PHASE
+    print("\n" + "⚡" * 20)
+    print("EXECUTING COMMANDS...")
+    print("⚡" * 20)
     
-    if result is None or result.returncode != 0:
-        print("❌ Failed to commit changes. Exiting.")
+    # Execute Step 1: Add files
+    print("\n1️⃣  Adding files to staging area...")
+    add_result = run_command_execute("git add .", "Add all changed files")
+    
+    if add_result is None or add_result.returncode != 0:
+        print("❌ Failed to add files. Stopping.")
         sys.exit(1)
     
-    continue_choice = get_user_input("\nDo you want to continue with pushing to GitHub? (y/n): ")
-    if continue_choice.lower() != 'y':
-        print("Exiting script. Your changes are committed locally but not pushed to GitHub.")
-        sys.exit(0)
+    # Execute Step 2: Commit
+    print("\n2️⃣  Committing changes...")
+    commit_command = f'git commit -m "{commit_message}"'
+    commit_result = run_command_execute(commit_command, "Commit changes")
     
-    # Step 4: Push to GitHub
-    print("\nStep 4: Pushing to GitHub...")
-    result = run_command("git push", "Push changes to GitHub")
+    if commit_result is None or commit_result.returncode != 0:
+        print("❌ Failed to commit changes. Stopping.")
+        sys.exit(1)
     
-    if result is None or result.returncode != 0:
+    # Execute Step 3: Push
+    print("\n3️⃣  Pushing to GitHub...")
+    push_result = run_command_execute("git push", "Push changes to GitHub")
+    
+    if push_result is None or push_result.returncode != 0:
         print("❌ Failed to push to GitHub.")
-        print("You might need to pull first if there are remote changes.")
+        print("This might be due to remote changes. Trying to pull first...")
         
-        pull_choice = get_user_input("Do you want to try pulling first? (y/n): ")
-        if pull_choice.lower() == 'y':
-            pull_result = run_command("git pull", "Pull latest changes from GitHub")
-            if pull_result and pull_result.returncode == 0:
-                push_again = get_user_input("Pull successful. Try pushing again? (y/n): ")
-                if push_again.lower() == 'y':
-                    result = run_command("git push", "Push changes to GitHub (retry)")
+        pull_result = run_command_execute("git pull", "Pull latest changes")
+        if pull_result and pull_result.returncode == 0:
+            print("Pull successful. Trying to push again...")
+            push_result = run_command_execute("git push", "Push changes (retry)")
         
-        if result is None or result.returncode != 0:
+        if push_result is None or push_result.returncode != 0:
             print("❌ Still failed to push. You may need to resolve conflicts manually.")
             sys.exit(1)
     
-    # Success!
-    print("\n" + "🎉" * 20)
+    # SUCCESS!
+    print("\n" + "🎉" * 30)
     print("✅ SUCCESS! Your changes have been synced to GitHub!")
-    print("🎉" * 20)
+    print("🎉" * 30)
     
     # Show final status
     print("\nFinal status:")
-    run_command("git status", "Final git status check")
+    run_command_preview("git status", "Final git status")
 
 if __name__ == "__main__":
     try:
