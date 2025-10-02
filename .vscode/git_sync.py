@@ -65,22 +65,54 @@ def main():
     print("🚀 Git Sync Script - Codespace to GitHub")
     print("This script will show you what changes will be made, then ask for your approval.\n")
     
+    # First, check if there are any changes to commit
+    status_check = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True)
+    has_changes = bool(status_check.stdout.strip())
+    
+    # Check if there are unpushed commits (only if upstream exists)
+    unpushed_check = subprocess.run("git log @{u}..HEAD", shell=True, capture_output=True, text=True)
+    has_unpushed_commits = unpushed_check.returncode == 0 and bool(unpushed_check.stdout.strip())
+    
+    # Check if branch exists on remote
+    branch_check = subprocess.run("git push --dry-run", shell=True, capture_output=True, text=True)
+    branch_needs_upstream = "has no upstream branch" in branch_check.stderr
+    
+    if not has_changes and not has_unpushed_commits and not branch_needs_upstream:
+        print("✅ Everything is already up to date! No changes to sync.")
+        sys.exit(0)
+    
     # PREVIEW PHASE - Show everything first
     print("📋 PREVIEW PHASE - Here's what your git commands will do:")
     print("=" * 80)
     
-    # Step 1: Preview what git add will stage
-    print("\n1️⃣  What 'git add .' will stage:")
-    add_preview = run_command_preview("git add . --dry-run", "Preview what files will be added")
+    # Step 1: Preview what git add will stage (only if there are changes)
+    if has_changes:
+        print("\n1️⃣  What 'git add .' will stage:")
+        add_preview = run_command_preview("git add . --dry-run", "Preview what files will be added")
+        
+        # Step 2: Show what files will be staged (simulate)
+        print("\n2️⃣  After adding files, status would be:")
+        # We'll run git add . and then git status, but reset afterward for the preview
+        temp_add = subprocess.run("git add .", shell=True, capture_output=True)
+        if temp_add.returncode == 0:
+            staged_result = run_command_preview("git status", "Status after staging files")
+            # Reset the staging for now
+            subprocess.run("git reset", shell=True, capture_output=True)
+    else:
+        print("\n✅ No uncommitted changes found.")
     
-    # Step 2: Show what files will be staged (simulate)
-    print("\n2️⃣  After adding files, status would be:")
-    # We'll run git add . and then git status, but reset afterward for the preview
-    temp_add = subprocess.run("git add .", shell=True, capture_output=True)
-    if temp_add.returncode == 0:
-        staged_result = run_command_preview("git status", "Status after staging files")
-        # Reset the staging for now
-        subprocess.run("git reset", shell=True, capture_output=True)
+    # Show what will be pushed
+    if has_unpushed_commits or branch_needs_upstream:
+        print(f"\n{'3️⃣' if has_changes else '1️⃣'}  What will be pushed to GitHub:")
+        if branch_needs_upstream:
+            print("   - This branch doesn't exist on GitHub yet, it will be created")
+        if has_unpushed_commits:
+            print("   - Unpushed commits will be synced")
+            run_command_preview("git log --oneline @{u}..HEAD", "Unpushed commits")
+        elif not branch_needs_upstream:
+            # Show commits on current branch vs main/origin
+            print("   - Local commits will be synced")
+            run_command_preview("git log --oneline origin/main..HEAD", "Local commits to push")
     
     # DECISION PHASE
     print("\n" + "🤔" * 20)
@@ -93,53 +125,61 @@ def main():
         print("❌ Sync cancelled. No changes were made.")
         sys.exit(0)
     
-    # Get commit message
-    commit_message = get_user_input("\n💬 Enter your commit message: ")
-    
-    # Confirm commit message
-    print(f"\nCommit message: '{commit_message}'")
-    confirm_message = get_user_input("Is this commit message correct? (y/n): ")
-    
-    if confirm_message.lower() != 'y':
-        commit_message = get_user_input("Enter your commit message again: ")
+    # Get commit message (only if there are changes to commit)
+    commit_message = None
+    if has_changes:
+        commit_message = get_user_input("\n💬 Enter your commit message: ")
+        
+        # Confirm commit message
+        print(f"\nCommit message: '{commit_message}'")
+        confirm_message = get_user_input("Is this commit message correct? (y/n): ")
+        
+        if confirm_message.lower() != 'y':
+            commit_message = get_user_input("Enter your commit message again: ")
     
     # EXECUTION PHASE
     print("\n" + "⚡" * 20)
     print("EXECUTING COMMANDS...")
     print("⚡" * 20)
     
-    # Execute Step 1: Add files
-    print("\n1️⃣  Adding files to staging area...")
-    add_result = run_command_execute("git add .", "Add all changed files")
+    step_counter = 1
     
-    if add_result is None or add_result.returncode != 0:
-        print("❌ Failed to add files. Stopping.")
-        sys.exit(1)
+    # Execute Step 1: Add files (only if there are changes)
+    if has_changes:
+        print(f"\n{step_counter}️⃣  Adding files to staging area...")
+        add_result = run_command_execute("git add .", "Add all changed files")
+        
+        if add_result is None or add_result.returncode != 0:
+            print("❌ Failed to add files. Stopping.")
+            sys.exit(1)
+        step_counter += 1
     
-    # Execute Step 2: Commit
-    print("\n2️⃣  Committing changes...")
-    commit_command = f'git commit -m "{commit_message}"'
-    commit_result = run_command_execute(commit_command, "Commit changes")
-    
-    if commit_result is None or commit_result.returncode != 0:
-        print("❌ Failed to commit changes. Stopping.")
-        sys.exit(1)
+    # Execute Step 2: Commit (only if there are changes)
+    if has_changes:
+        print(f"\n{step_counter}️⃣  Committing changes...")
+        commit_command = f'git commit -m "{commit_message}"'
+        commit_result = run_command_execute(commit_command, "Commit changes")
+        
+        if commit_result is None or commit_result.returncode != 0:
+            print("❌ Failed to commit changes. Stopping.")
+            sys.exit(1)
+        step_counter += 1
     
     # Execute Step 3: Push
-    print("\n3️⃣  Pushing to GitHub...")
-    push_result = run_command_execute("git push", "Push changes to GitHub")
-    
-    if push_result is None or push_result.returncode != 0:
-        print("❌ Failed to push to GitHub.")
-        print("This might be due to remote changes. Trying to pull first...")
+    if has_unpushed_commits or branch_needs_upstream or has_changes:
+        print(f"\n{step_counter}️⃣  Pushing to GitHub...")
         
-        pull_result = run_command_execute("git pull", "Pull latest changes")
-        if pull_result and pull_result.returncode == 0:
-            print("Pull successful. Trying to push again...")
-            push_result = run_command_execute("git push", "Push changes (retry)")
+        # Use appropriate push command based on whether branch exists
+        if branch_needs_upstream:
+            current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+            push_command = f"git push --set-upstream origin {current_branch}"
+            push_result = run_command_execute(push_command, "Push changes and set upstream")
+        else:
+            push_result = run_command_execute("git push", "Push changes to GitHub")
         
         if push_result is None or push_result.returncode != 0:
-            print("❌ Still failed to push. You may need to resolve conflicts manually.")
+            print("❌ Failed to push to GitHub.")
+            print("This might be due to remote changes. You may need to resolve conflicts manually.")
             sys.exit(1)
     
     # SUCCESS!
