@@ -136,9 +136,17 @@ def main():
     
     # Ask about pull request creation if we're not on main branch
     create_pr = False
+    merge_pr = False
     if is_not_main_branch:
         pr_response = get_user_input(f"\n🔄 After pushing, would you like to create a pull request from '{current_branch}' to 'main'? (y/n): ")
         create_pr = pr_response.lower() == 'y'
+        
+        if create_pr:
+            merge_response = get_user_input("🔀 Would you also like to merge the pull request immediately after creating it? (y/n): ")
+            merge_pr = merge_response.lower() == 'y'
+            
+            if merge_pr:
+                print("⚠️  Note: This will merge the PR without waiting for reviews. Use with caution!")
     
     # Get commit message (only if there are changes to commit)
     commit_message = None
@@ -236,13 +244,60 @@ def main():
             pr_url_result = subprocess.run(f"gh pr view {current_branch} --json url -q .url", shell=True, capture_output=True, text=True)
             if pr_url_result.returncode == 0 and pr_url_result.stdout.strip():
                 print(f"🔗 PR URL: {pr_url_result.stdout.strip()}")
+            
+            # Merge the PR if requested
+            if merge_pr:
+                print(f"\n{step_counter + 1}️⃣  Merging Pull Request...")
+                
+                # Get merge method preference
+                print("\nChoose merge method:")
+                print("1. Merge commit (preserves branch history)")
+                print("2. Squash and merge (combines all commits into one)")
+                print("3. Rebase and merge (replays commits without merge commit)")
+                
+                merge_method_input = get_user_input("Enter choice (1-3, or press Enter for merge commit): ", allow_empty=True)
+                
+                if merge_method_input == "2":
+                    merge_method = "--squash"
+                elif merge_method_input == "3":
+                    merge_method = "--rebase"
+                else:
+                    merge_method = "--merge"
+                
+                merge_command = f"gh pr merge {current_branch} {merge_method}"
+                merge_result = run_command_execute(merge_command, f"Merge pull request using {merge_method} method")
+                
+                if merge_result and merge_result.returncode == 0:
+                    print("✅ Pull request merged successfully!")
+                    
+                    # Switch back to main and pull the merged changes
+                    print(f"\n{step_counter + 2}️⃣  Updating local main branch...")
+                    checkout_result = run_command_execute("git checkout main", "Switch to main branch")
+                    if checkout_result and checkout_result.returncode == 0:
+                        pull_result = run_command_execute("git pull", "Pull merged changes")
+                        if pull_result and pull_result.returncode == 0:
+                            print("✅ Local main branch updated with merged changes!")
+                            
+                            # Optionally delete the feature branch
+                            delete_branch = get_user_input(f"\n🗑️  Delete the feature branch '{current_branch}'? (y/n): ")
+                            if delete_branch.lower() == 'y':
+                                # Delete local branch
+                                delete_local = run_command_execute(f"git branch -d {current_branch}", "Delete local feature branch")
+                                # Delete remote branch
+                                delete_remote = run_command_execute(f"git push origin --delete {current_branch}", "Delete remote feature branch")
+                                if delete_local and delete_local.returncode == 0 and delete_remote and delete_remote.returncode == 0:
+                                    print("✅ Feature branch cleaned up!")
+                else:
+                    print("⚠️  Failed to merge pull request. You can merge it manually on GitHub.")
         else:
             print("⚠️  Failed to create pull request, but your changes were pushed successfully.")
             print("You can create the pull request manually on GitHub.")
     
     # SUCCESS!
     print("\n" + "🎉" * 30)
-    if create_pr:
+    if create_pr and merge_pr:
+        print("✅ SUCCESS! Your changes have been synced, PR created, and merged to main!")
+    elif create_pr:
         print("✅ SUCCESS! Your changes have been synced to GitHub and pull request created!")
     else:
         print("✅ SUCCESS! Your changes have been synced to GitHub!")
