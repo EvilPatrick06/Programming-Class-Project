@@ -37,9 +37,9 @@ Wordy is a word-guessing game inspired by Wordle, but with several twists:
 - Words are randomly selected from a predefined list and can be of any length.
 - Players have a limited number of attempts to guess the word.
 - After each guess, feedback is provided:
-      - The number of letters in the correct position.
-      - The number of correct letters in the wrong position.
-      - If your guess has the wrong number of letters, the game will tell you, but it will not reveal the actual word length.
+  - The number of letters in the correct position.
+  - The number of correct letters in the wrong position.
+  - If your guess has the wrong number of letters, the game will tell you, but it will not reveal the actual word length.
 
 ---
 
