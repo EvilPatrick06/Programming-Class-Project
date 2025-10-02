@@ -11,11 +11,12 @@ Description: Create a simple replica of “Wordle” in python and if time and s
 
 Communication Plan: we have a dedicated workspace for this project. It will allow team members to access and edit the same program simultaneously (like a google doc), Using a mixture of GitHub and VSC.
 
-Milestone and deliverable schedule: Regular Wordle-2-3 weeks from now, Wordle w/ difficulty levles- 3-4 weeks from now, more games- 5-6 weeks from now, Interviews/testing 6-7 weeks frpm now
+Milestone and deliverable schedule: Regular Wordle-2-3 weeks from now, Wordle w/ difficulty levels- 3-4 weeks from now, more games- 5-6 weeks from now, Interviews/testing 6-7 weeks from now
 
-Work breakdown structure: Gavin Knotts- Input/OutPut, Jabriel Neal- Processing, and Joshua Casey- Graphics.
+Work breakdown structure: Gavin Knotts- Input/Output, Jabriel Neal- Processing, and Joshua Casey- Graphics.
 
 Flow chart:
+
 
 ![Game Flowchart](GameFlowchart.png)
 
