@@ -17,6 +17,6 @@ Work breakdown structure: Gavin Knotts- Input/OutPut, Jabriel Neal- Processing, 
 
 Flow chart:
 
-![Game Flowchart](Documentation/GameFlowchart.png)
+![Game Flowchart](GameFlowchart.png)
 
 Risk management plan: With our shared workspace, inclement weather, file coruption, or team member unavalability will all not be a problem.
