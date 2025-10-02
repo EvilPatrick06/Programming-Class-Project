@@ -1,0 +1,103 @@
+@startuml GameFlowchart
+
+' Styling configuration
+skinparam backgroundColor #fafaff
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+  BackgroundColor #eaf4fb
+  BorderColor #333366
+}
+
+skinparam diamond {
+  BackgroundColor #f9e6e6
+  BorderColor #aa2222
+}
+
+skinparam oval {
+  BackgroundColor #e5ffe5
+  BorderColor #228822
+}
+
+skinparam actor {
+  BackgroundColor #ffffcc
+  BorderColor #666600
+}
+
+skinparam arrow {
+  Color #333366
+}
+
+' Main flowchart starts here
+start
+
+
+:Run CLI Application;
+
+
+if (Choose Game?) then (Tres)
+  
+  :Deal Cards to Players;
+  
+  repeat
+    :Players Take Turns Playing Cards;
+
+    if (Player has 3 cards?) then (Y)
+      :Initiate Punishment Mechanic;
+      :Player selects number (1-100);
+      :Game generates secret number (1-100);
+      
+      if (Higher) then 
+        :Punish Self - Random number between 1-5 is generated;
+        :Player draws cards based on number generated;
+        
+      elseif (Lower) then 
+        :Punish All Others - Random number between 1-5 is generated;
+        :Other players draw cards based on number generated;
+        
+      elseif (Match) then 
+        :Double Punishment - Random number between 1-5 is generated;
+        :Player draws cards based on number generated times two;
+      endif
+      
+    endif
+    
+  repeat while (Has someone played all cards?) is (N)
+  
+  :Tres Game Ends;
+  
+
+else (Wordy)
+  
+  :Game selects random word;
+  :Initialize guess counter = 0;
+  
+  repeat
+    :Player makes guess;
+    :Increment guess counter;
+    
+    if (Word guessed correctly?) then (Y)
+      :Player Wins;
+      :Wordy Game Ends;
+      :Show Results and Restart Option;
+      stop
+      
+    else (N)
+      :Provide feedback:\n- Word length\n- Correct letters\n- Correct positions;
+    endif
+
+  repeat while (Guess counter <= 5?) is (Y)
+
+  :Player Loses - Too many failed attempts;
+  :Reveal Word;
+  
+  :Wordy Game Ends;
+    
+endif
+
+
+:Show Results and Restart Option;
+
+stop
+@enduml
