@@ -65,6 +65,75 @@ def main():
     print("🚀 Git Sync Script - Codespace to GitHub")
     print("This script will show you what changes will be made, then ask for your approval.\n")
     
+    # Get current branch name
+    current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+    
+    # Check if current branch is behind main (only if not on main branch)
+    is_behind_main = False
+    is_testing_branch = current_branch.lower() in ["testing", "test", "dev", "develop", "development"]
+    
+    if current_branch not in ["main", "master"]:
+        # Check if main branch exists and if current branch is behind it
+        main_exists = subprocess.run("git show-ref --verify --quiet refs/heads/main", shell=True, capture_output=True).returncode == 0
+        if main_exists:
+            behind_check = subprocess.run("git rev-list --count HEAD..main", shell=True, capture_output=True, text=True)
+            if behind_check.returncode == 0:
+                commits_behind = int(behind_check.stdout.strip()) if behind_check.stdout.strip().isdigit() else 0
+                is_behind_main = commits_behind > 0
+                if is_behind_main:
+                    print(f"⚠️  Current branch '{current_branch}' is {commits_behind} commit(s) behind main.")
+                    
+                    if is_testing_branch:
+                        print(f"💡 Since you're on a testing branch, you have options:")
+                        print("   1. Sync with main (merge main into testing branch)")
+                        print("   2. Continue without syncing (your changes will be on top of older main)")
+                        print("   3. Exit and handle manually")
+                        
+                        sync_choice = get_user_input("Choose option (1-3): ")
+                        
+                        if sync_choice == "1":
+                            print("🔄 Syncing testing branch with main...")
+                            # Fetch latest changes
+                            fetch_result = run_command_execute("git fetch origin", "Fetch latest changes from remote")
+                            if fetch_result and fetch_result.returncode == 0:
+                                # Try to merge main into current branch
+                                merge_result = run_command_execute("git merge main", "Merge main into testing branch")
+                                if merge_result and merge_result.returncode == 0:
+                                    print("✅ Successfully synced testing branch with main!")
+                                    is_behind_main = False
+                                else:
+                                    print("⚠️  Merge conflicts detected. Please resolve them manually and run the script again.")
+                                    print("You can resolve conflicts and then run: git add . && git commit")
+                                    sys.exit(1)
+                            else:
+                                print("⚠️  Failed to fetch latest changes from remote.")
+                                sys.exit(1)
+                        elif sync_choice == "2":
+                            print("⚠️  Continuing without syncing. Your changes will be based on an older version of main.")
+                            is_behind_main = False  # Continue anyway
+                        else:
+                            print("❌ Exiting. Please handle the sync manually.")
+                            sys.exit(0)
+                    else:
+                        sync_with_main = get_user_input("Would you like to sync with main first? This will update your branch with the latest changes (y/n): ")
+                        if sync_with_main.lower() == 'y':
+                            print("🔄 Syncing with main branch...")
+                            # Fetch latest changes
+                            fetch_result = run_command_execute("git fetch origin", "Fetch latest changes from remote")
+                            if fetch_result and fetch_result.returncode == 0:
+                                # Try to merge main into current branch
+                                merge_result = run_command_execute("git merge main", "Merge main into current branch")
+                                if merge_result and merge_result.returncode == 0:
+                                    print("✅ Successfully synced with main!")
+                                    is_behind_main = False
+                                else:
+                                    print("⚠️  Merge conflicts detected. Please resolve them manually and run the script again.")
+                                    print("You can resolve conflicts and then run: git add . && git commit")
+                                    sys.exit(1)
+                            else:
+                                print("⚠️  Failed to fetch latest changes from remote.")
+                                sys.exit(1)
+    
     # First, check if there are any changes to commit
     status_check = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True)
     has_changes = bool(status_check.stdout.strip())
@@ -114,8 +183,7 @@ def main():
             print("   - Local commits will be synced")
             run_command_preview("git log --oneline origin/main..HEAD", "Local commits to push")
     
-    # Check if we should offer to create a pull request
-    current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+    # Check if we should offer to create a pull request  
     is_not_main_branch = current_branch != "main" and current_branch != "master"
     
     if is_not_main_branch:
@@ -278,15 +346,52 @@ def main():
                         if pull_result and pull_result.returncode == 0:
                             print("✅ Local main branch updated with merged changes!")
                             
-                            # Optionally delete the feature branch
-                            delete_branch = get_user_input(f"\n🗑️  Delete the feature branch '{current_branch}'? (y/n): ")
-                            if delete_branch.lower() == 'y':
-                                # Delete local branch
-                                delete_local = run_command_execute(f"git branch -d {current_branch}", "Delete local feature branch")
-                                # Delete remote branch
-                                delete_remote = run_command_execute(f"git push origin --delete {current_branch}", "Delete remote feature branch")
-                                if delete_local and delete_local.returncode == 0 and delete_remote and delete_remote.returncode == 0:
-                                    print("✅ Feature branch cleaned up!")
+                            # Handle branch cleanup based on branch type
+                            if is_testing_branch:
+                                print(f"\n🔄 Since '{current_branch}' is a testing branch, updating it with latest main...")
+                                checkout_feature = run_command_execute(f"git checkout {current_branch}", "Switch back to testing branch")
+                                if checkout_feature and checkout_feature.returncode == 0:
+                                    # Merge main into testing branch to keep it up to date
+                                    merge_main = run_command_execute("git merge main", "Update testing branch with latest main")
+                                    if merge_main and merge_main.returncode == 0:
+                                        # Push updated testing branch
+                                        push_updated = run_command_execute(f"git push origin {current_branch}", "Push updated testing branch")
+                                        if push_updated and push_updated.returncode == 0:
+                                            print("✅ Testing branch updated with latest main changes!")
+                                        else:
+                                            print("⚠️  Failed to push updated testing branch, but local branch is updated.")
+                                    else:
+                                        print("⚠️  Failed to merge main into testing branch. You may need to resolve conflicts manually.")
+                                else:
+                                    print("⚠️  Failed to switch back to testing branch.")
+                            else:
+                                # For regular feature branches, offer deletion
+                                delete_branch = get_user_input(f"\n🗑️  Delete the feature branch '{current_branch}'? (y/n): ")
+                                if delete_branch.lower() == 'y':
+                                    # Delete local branch
+                                    delete_local = run_command_execute(f"git branch -d {current_branch}", "Delete local feature branch")
+                                    # Delete remote branch
+                                    delete_remote = run_command_execute(f"git push origin --delete {current_branch}", "Delete remote feature branch")
+                                    if delete_local and delete_local.returncode == 0 and delete_remote and delete_remote.returncode == 0:
+                                        print("✅ Feature branch cleaned up!")
+                                else:
+                                    # If user chooses not to delete the branch, update it to match main
+                                    print(f"\n🔄 Updating feature branch '{current_branch}' to match main...")
+                                    checkout_feature = run_command_execute(f"git checkout {current_branch}", "Switch back to feature branch")
+                                    if checkout_feature and checkout_feature.returncode == 0:
+                                        # Reset feature branch to main
+                                        reset_result = run_command_execute("git reset --hard main", "Update feature branch to match main")
+                                        if reset_result and reset_result.returncode == 0:
+                                            # Force push to update remote branch
+                                            force_push = run_command_execute(f"git push --force-with-lease origin {current_branch}", "Update remote feature branch")
+                                            if force_push and force_push.returncode == 0:
+                                                print("✅ Feature branch updated to match main!")
+                                            else:
+                                                print("⚠️  Failed to update remote feature branch, but local branch is updated.")
+                                        else:
+                                            print("⚠️  Failed to update feature branch.")
+                                    else:
+                                        print("⚠️  Failed to switch back to feature branch.")
                 else:
                     print("⚠️  Failed to merge pull request. You can merge it manually on GitHub.")
         else:
@@ -306,6 +411,28 @@ def main():
     # Show final status
     print("\nFinal status:")
     run_command_preview("git status", "Final git status")
+    
+    # Provide helpful tips based on branch type
+    if is_testing_branch and not create_pr:
+        print(f"\n💡 TESTING BRANCH TIPS:")
+        print(f"   • Your '{current_branch}' branch is now updated and pushed to GitHub")
+        print(f"   • You can continue making changes and running this script to sync")
+        print(f"   • When ready, create a PR from '{current_branch}' to 'main' for code review")
+        print(f"   • The script will keep your testing branch synced with main when merging PRs")
+    elif not create_pr and is_not_main_branch and not is_testing_branch:
+        print(f"\n💡 TIP: Your branch '{current_branch}' has been pushed to GitHub.")
+        print("   To avoid 'branch behind main' issues in the future, consider:")
+        print("   1. Creating pull requests to merge changes to main")
+        print("   2. Deleting feature branches after they're merged")
+        print("   3. Regularly syncing feature branches with main")
+    
+    # Final check for branches that might be behind main
+    if not create_pr and is_not_main_branch:
+        print(f"\n💡 TIP: Your branch '{current_branch}' has been pushed to GitHub.")
+        print("   To avoid 'branch behind main' issues in the future, consider:")
+        print("   1. Creating pull requests to merge changes to main")
+        print("   2. Deleting feature branches after they're merged")
+        print("   3. Regularly syncing feature branches with main")
 
 if __name__ == "__main__":
     try:
