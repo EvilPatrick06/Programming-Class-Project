@@ -1,25 +1,23 @@
 
 RIPA
+
 Team name: CTRL UNO
+
 Team members: Jabriel Neal, Gavin Knotts, Joshua Casey. 
 
-Project option: create a replication of the card game “UNO”
+Project option: create a replication of the word game “Wordle”, and if time permitted “Uno”
 
-Description: create a simple replica of UNO in python and if time and skill permit a couple other games that the user will be able to select through and play.
+Description: Create a simple replica of “Wordle” in python and if time and skill permit a couple other games that the user will be able to select through and play.
 
-Communication plan: we have a dedicated workspace for this project. It will allow team members to access and edit the same program simultaneously (like a google doc).
-Milestone and deliverable schedule:
-Work breakdown structure:
-Flow chart:
-Create deck
-Create shuffle mechanic
-Create game, 
-	If player can place a card, have them choose which card to place, 
-	If no cards to place, player has to draw a card
-	If the deck gets to small, shuffle the cards
-Create bots to play against.
-Add simpler games for the user to choose through.
+Communication Plan: we have a dedicated workspace for this project. It will allow team members to access and edit the same program simultaneously (like a google doc), Using a mixture of GitHub and VSC. 
 
-Risk management plan: if UNO proves too difficult to complete, we can change gears and focus more on the simpler games to be included in the program. Also with our shared workspace, inclement weather will not be an issue.
+Milestone and deliverable schedule: Regular Wordle-2-3 weeks from now, Wordle w/ difficulty levles- 3-4 weeks from now, more games- 5-6 weeks from now, Interviews/testing 6-7 weeks frpm now 
 
+Work breakdown structure: Gavin Knotts- Input/OutPut, Jabriel Neal- Processing, and Joshua Casey- Graphics. 
+
+Flow chart: 
+
+![Game Flowchart](Documentation/GameFlowchart.png)
+
+Risk management plan: With our shared workspace, inclement weather, file coruption, or team member unavalability will all not be a problem.
 
