@@ -61,13 +61,14 @@ def check():
 
 # Main menu
 def main_menu():
-    while game < 0 and game > 2:
-            game = int(input(" what game you wanna play:\n1: wordel?\n2:uno "))
-            if game == 1
-                gen_word()
-                check()
-            if game == 2
-                print("sorry, under construction rn :'(")
+    game = int(input(" what game you wanna play:\n1: wordel?\n2:uno "))
+    if game == 1:
+            gen_word()
+            check()
+    if game == 2:
+            print("sorry, under construction rn :'(")
+
 
 main_menu()
+
 
