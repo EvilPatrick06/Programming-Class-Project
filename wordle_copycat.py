@@ -27,7 +27,7 @@ def gen_word():
 
     print (cor_word_check)
 
-# Check if letters match anywhere     (needs work)
+# Check if letters match anywhere 
 def check():
     global cor_word_check
     global guess_check
@@ -61,12 +61,13 @@ def check():
 
 # Main menu
 def main_menu():
-    game = int(input(" what game you wanna play:\n1: wordel?\n2:uno "))
     while game < 0 and game > 2:
-        if game == 1
-            gen_word()
-            check()
-        if game == 2
-            print("sorry, under construction rn :'(")
+            game = int(input(" what game you wanna play:\n1: wordel?\n2:uno "))
+            if game == 1
+                gen_word()
+                check()
+            if game == 2
+                print("sorry, under construction rn :'(")
 
 main_menu()
+
