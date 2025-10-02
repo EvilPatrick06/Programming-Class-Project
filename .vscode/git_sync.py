@@ -114,6 +114,15 @@ def main():
             print("   - Local commits will be synced")
             run_command_preview("git log --oneline origin/main..HEAD", "Local commits to push")
     
+    # Check if we should offer to create a pull request
+    current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+    is_not_main_branch = current_branch != "main" and current_branch != "master"
+    
+    if is_not_main_branch:
+        print(f"\n{'4️⃣' if has_changes else '2️⃣'}  Pull Request Option:")
+        print(f"   - After pushing, you can create a pull request from '{current_branch}' to 'main'")
+        print("   - This will allow code review before merging your changes")
+    
     # DECISION PHASE
     print("\n" + "🤔" * 20)
     print("DECISION TIME!")
@@ -124,6 +133,12 @@ def main():
     if proceed.lower() != 'y':
         print("❌ Sync cancelled. No changes were made.")
         sys.exit(0)
+    
+    # Ask about pull request creation if we're not on main branch
+    create_pr = False
+    if is_not_main_branch:
+        pr_response = get_user_input(f"\n🔄 After pushing, would you like to create a pull request from '{current_branch}' to 'main'? (y/n): ")
+        create_pr = pr_response.lower() == 'y'
     
     # Get commit message (only if there are changes to commit)
     commit_message = None
@@ -181,10 +196,56 @@ def main():
             print("❌ Failed to push to GitHub.")
             print("This might be due to remote changes. You may need to resolve conflicts manually.")
             sys.exit(1)
+        
+        step_counter += 1
+    
+    # Execute Step 4: Create Pull Request (if requested)
+    if create_pr:
+        print(f"\n{step_counter}️⃣  Creating Pull Request...")
+        
+        # Get PR title and body
+        pr_title = get_user_input("\n📝 Enter pull request title (or press Enter to use commit message): ", allow_empty=True)
+        if not pr_title and commit_message:
+            pr_title = commit_message
+        elif not pr_title:
+            pr_title = f"Changes from {current_branch}"
+        
+        # Use commit message as default PR description
+        if commit_message:
+            print(f"\n📝 Pull request description will be: '{commit_message}'")
+            use_commit_msg = get_user_input("Use this as PR description? (y/n, or press Enter for yes): ", allow_empty=True)
+            if use_commit_msg.lower() in ['', 'y', 'yes']:
+                pr_body = commit_message
+            else:
+                pr_body = get_user_input("📝 Enter custom pull request description: ")
+        else:
+            pr_body = get_user_input("📝 Enter pull request description (optional): ", allow_empty=True)
+        
+        # Create the pull request
+        pr_command = f'gh pr create --title "{pr_title}" --base main --head {current_branch}'
+        if pr_body:
+            pr_command += f' --body "{pr_body}"'
+        else:
+            pr_command += ' --body "Automated pull request created by git sync script."'
+        
+        pr_result = run_command_execute(pr_command, "Create pull request")
+        
+        if pr_result and pr_result.returncode == 0:
+            print("✅ Pull request created successfully!")
+            # Show the PR URL
+            pr_url_result = subprocess.run(f"gh pr view {current_branch} --json url -q .url", shell=True, capture_output=True, text=True)
+            if pr_url_result.returncode == 0 and pr_url_result.stdout.strip():
+                print(f"🔗 PR URL: {pr_url_result.stdout.strip()}")
+        else:
+            print("⚠️  Failed to create pull request, but your changes were pushed successfully.")
+            print("You can create the pull request manually on GitHub.")
     
     # SUCCESS!
     print("\n" + "🎉" * 30)
-    print("✅ SUCCESS! Your changes have been synced to GitHub!")
+    if create_pr:
+        print("✅ SUCCESS! Your changes have been synced to GitHub and pull request created!")
+    else:
+        print("✅ SUCCESS! Your changes have been synced to GitHub!")
     print("🎉" * 30)
     
     # Show final status
