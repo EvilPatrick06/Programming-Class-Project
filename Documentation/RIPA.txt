@@ -1,0 +1,25 @@
+
+RIPA
+Team name: CTRL UNO
+Team members: Jabriel Neal, Gavin Knotts, Joshua Casey. 
+
+Project option: create a replication of the card game “UNO”
+
+Description: create a simple replica of UNO in python and if time and skill permit a couple other games that the user will be able to select through and play.
+
+Communication plan: we have a dedicated workspace for this project. It will allow team members to access and edit the same program simultaneously (like a google doc).
+Milestone and deliverable schedule:
+Work breakdown structure:
+Flow chart:
+Create deck
+Create shuffle mechanic
+Create game, 
+	If player can place a card, have them choose which card to place, 
+	If no cards to place, player has to draw a card
+	If the deck gets to small, shuffle the cards
+Create bots to play against.
+Add simpler games for the user to choose through.
+
+Risk management plan: if UNO proves too difficult to complete, we can change gears and focus more on the simpler games to be included in the program. Also with our shared workspace, inclement weather will not be an issue.
+
+
