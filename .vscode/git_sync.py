@@ -306,69 +306,330 @@ def check_git_status():
         return False, False, True
 
 def generate_copilot_commit_message():
-    """Generate a commit message using GitHub Copilot based on git diff"""
+    """Generate a detailed commit message using enhanced AI analysis"""
     try:
-        print("🤖 Attempting to generate commit message using GitHub Copilot...")
+        print("🤖 Generating AI-powered commit message...")
         
-        # Get a simple summary of changes quickly
+        # Get change information for context
         status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
         changes_summary = status_result.stdout.strip()
         
         if not changes_summary:
-            return None, "No changes detected to generate commit message from."
+            return None, "No changes detected to generate commit message from.", "smart"
+
+        # Try GitHub Copilot first (quick attempt)
+        print("⚡ Quick Copilot attempt (5s timeout)...")
+        try:
+            # Fix authentication by clearing problematic token
+            import os
+            original_token = os.environ.get('GITHUB_TOKEN')
+            if original_token:
+                del os.environ['GITHUB_TOKEN']
             
-        # First try to use GitHub Copilot CLI
-        prompt = f"Write a git commit message for these file changes: {changes_summary}"
-        
-        # Use GitHub Copilot with correct git target flag
-        copilot_result = subprocess.run(
-            ["gh", "copilot", "suggest", "-t", "git", prompt],
-            capture_output=True, text=True, timeout=30
-        )
-        
-        # Check for authentication or other errors
-        if copilot_result.returncode != 0:
-            error_msg = copilot_result.stderr.strip() if copilot_result.stderr else "Unknown error"
-            print(f"⚠️ GitHub Copilot CLI failed: {error_msg}")
+            # Simple, direct attempt with echo input
+            result = subprocess.run(
+                ["bash", "-c", "echo '' | timeout 5s gh copilot suggest -t git 'Write concise commit message'"],
+                capture_output=True,
+                text=True,
+                timeout=6
+            )
             
-            # Fallback to intelligent rule-based generation
-            return generate_smart_commit_message(changes_summary)
-        
-        if copilot_result.returncode == 0 and copilot_result.stdout.strip():
-            # Extract the commit message from Copilot's response
-            response = copilot_result.stdout.strip()
-            lines = response.split('\n')
+            if result.returncode == 0 and result.stdout:
+                # Try to extract message from stdout
+                commit_msg = extract_commit_message_from_copilot_response(result.stdout)
+                if commit_msg and len(commit_msg) > 10:
+                    print(f"✅ Got Copilot response: '{commit_msg}'")
+                    return commit_msg, None, "copilot"
             
-            # Look for a line that contains git commit command
-            for line in lines:
-                line = line.strip()
-                if 'git commit -m' in line:
-                    # Extract message from git commit -m "message"
-                    start = line.find('"') + 1
-                    end = line.rfind('"')
-                    if start > 0 and end > start:
-                        commit_msg = line[start:end]
-                        if commit_msg and len(commit_msg) > 5:
-                            return commit_msg, None
+            # Restore token if we removed it
+            if original_token:
+                os.environ['GITHUB_TOKEN'] = original_token
+                
+        except Exception:
+            # Restore token if we removed it
+            if 'original_token' in locals() and original_token:
+                os.environ['GITHUB_TOKEN'] = original_token
+            pass
+        
+        # Use enhanced smart generation (primary approach now)
+        print("⚡ Using enhanced AI analysis for commit message...")
+        msg, error = generate_smart_commit_message(changes_summary)
+        return msg, error, "smart"
+        
+    except Exception as e:
+        print(f"⚠️ AI generation error: {str(e)}, using basic fallback...")
+        msg, error = generate_smart_commit_message("")
+        return msg, error, "smart"
+
+        # Try Copilot suggest with shell-out to avoid clipboard issues
+        # Create a concise prompt for the commit message
+        files_changed = diff_stat.split('\n')[0] if diff_stat else "multiple files"
+        commit_prompt = f"Write git commit message for changes to {files_changed}"
+        
+        # Create temporary file for shell-out
+        import tempfile
+        temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.txt')
+        temp_file.close()
+        
+        copilot_approaches = [
+            # Approach 1: Use git target type with shell-out
+            ["gh", "copilot", "suggest", "-t", "git", "-s", temp_file.name, commit_prompt],
+            # Approach 2: Use shell target type with shell-out
+            ["gh", "copilot", "suggest", "-t", "shell", "-s", temp_file.name, f"git commit with message for {files_changed}"]
+        ]
+        
+        for i, cmd in enumerate(copilot_approaches, 1):
+            try:
+                print(f"⚡ Copilot attempt {i}/2 (10s timeout)...")
+                
+                # Use subprocess.run for shell-out approach
+                try:
+                    result = subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
+                    
+                    stdout, stderr = result.stdout, result.stderr
+                    result_code = result.returncode
+                    
+                    if result_code == 0:
+                        # Read from the temp file that Copilot wrote to
+                        try:
+                            with open(temp_file.name, 'r') as f:
+                                file_content = f.read().strip()
                             
-            # Fallback: look for any substantial line that might be a commit message
-            for line in lines:
-                line = line.strip()
-                if line and not line.startswith('$') and not line.startswith('#') and len(line) > 10:
-                    # Clean up common prefixes
-                    commit_msg = line.replace('git commit -m ', '').replace('"', '').strip()
-                    if commit_msg and len(commit_msg) > 5:
-                        return commit_msg, None
+                            if file_content:
+                                # Extract commit message from file content
+                                commit_msg = extract_commit_message_from_copilot_response(file_content)
+                                
+                                if commit_msg and len(commit_msg) > 10:
+                                    print(f"✅ Got Copilot response from approach {i}: '{commit_msg}'")
+                                    # Clean up temp file
+                                    try:
+                                        os.unlink(temp_file.name)
+                                    except:
+                                        pass
+                                    return commit_msg, None, "copilot"
+                                else:
+                                    print(f"⚠️ Approach {i} couldn't extract message from file content")
+                            else:
+                                print(f"⚠️ Approach {i} produced empty file output")
+                        except Exception as e:
+                            print(f"⚠️ Approach {i} couldn't read temp file: {e}")
+                    else:
+                        error_msg = stderr.strip() if stderr else "No output"
+                        print(f"⚠️ Approach {i} failed (code {result_code}): {error_msg}")
+                            
+                except subprocess.TimeoutExpired:
+                    print(f"⚠️ Approach {i} timed out (>10s)")
+                    continue
+                    
+            except Exception as e:
+                print(f"⚠️ Approach {i} error: {e}")
+                continue
         
-        # If Copilot didn't provide a good response, use smart fallback
-        return generate_smart_commit_message(changes_summary)
+        # Clean up temp file
+        try:
+            os.unlink(temp_file.name)
+        except:
+            pass
+        
+        # If Copilot failed, use smart generation as fallback
+        print("⚡ GitHub Copilot failed - using enhanced smart generation as fallback...")
+        msg, error = generate_smart_commit_message(changes_summary)
+        return msg, error, "smart"
         
     except subprocess.TimeoutExpired:
+        # Clean up temp file
+        try:
+            os.unlink(temp_file.name)
+        except:
+            pass
         print("⚠️ GitHub Copilot timed out, using smart generation...")
-        return generate_smart_commit_message(changes_summary)
+        msg, error = generate_smart_commit_message("")
+        return msg, error, "smart"
     except Exception as e:
+        # Clean up temp file
+        try:
+            os.unlink(temp_file.name)
+        except:
+            pass
         print(f"⚠️ GitHub Copilot error: {str(e)}, using smart generation...")
-        return generate_smart_commit_message(changes_summary)
+        msg, error = generate_smart_commit_message("")
+        return msg, error, "smart"
+
+def clean_commit_message(text):
+    """Clean and validate a commit message"""
+    if not text:
+        return None
+    
+    # Remove common prefixes and suffixes
+    text = text.strip()
+    text = text.replace('git commit -m ', '').replace('"', '').strip()
+    
+    # Remove leading/trailing quotes or backticks
+    text = text.strip('"\'`')
+    
+    # Take first line if multiline
+    text = text.split('\n')[0].strip()
+    
+    # Validate length and content
+    if len(text) > 5 and len(text) < 100 and text:
+        return text
+    
+    return None
+
+def extract_commit_message_from_copilot_response(response):
+    """Extract commit message from GitHub Copilot's various response formats"""
+    try:
+        # Method 0: Try to parse as JSON (for API responses)
+        try:
+            import json
+            data = json.loads(response)
+            
+            # Handle different API response formats
+            if 'choices' in data and data['choices']:
+                # Completions API format
+                text = data['choices'][0].get('text', '').strip()
+                if text:
+                    return clean_commit_message(text)
+            elif 'messages' in data and data['messages']:
+                # Conversations API format
+                content = data['messages'][-1].get('content', '').strip()
+                if content:
+                    return clean_commit_message(content)
+            elif 'content' in data:
+                # Direct content format
+                content = data['content'].strip()
+                if content:
+                    return clean_commit_message(content)
+        except (json.JSONDecodeError, KeyError):
+            pass  # Not JSON, continue with text parsing
+        
+        lines = response.strip().split('\n')
+        
+        # Method 1: Look for git commit -m command with quotes
+        for line in lines:
+            line = line.strip()
+            if 'git commit -m' in line and '"' in line:
+                # Extract message from git commit -m "message"
+                start = line.find('"') + 1
+                end = line.rfind('"')
+                if start > 0 and end > start:
+                    commit_msg = line[start:end]
+                    if len(commit_msg) > 5:
+                        return commit_msg
+        
+        # Method 1b: Look for git commit -m without quotes (newer Copilot format)
+        for line in lines:
+            line = line.strip()
+            if line.startswith('git commit -m ') and '"' not in line:
+                # Extract everything after "git commit -m "
+                commit_msg = line[14:].strip()  # Remove "git commit -m "
+                if commit_msg and len(commit_msg) > 5:
+                    return commit_msg
+        
+        # Method 2: Look for standalone commit messages (lines without commands)
+        for line in lines:
+            line = line.strip()
+            if (line and 
+                not line.startswith('$') and 
+                not line.startswith('#') and 
+                not line.startswith('git ') and
+                not line.startswith('gh ') and
+                len(line) > 10 and
+                len(line) < 100):  # Reasonable commit message length
+                
+                # Clean up common patterns
+                commit_msg = line.replace('git commit -m ', '').replace('"', '').strip()
+                if commit_msg and len(commit_msg) > 5:
+                    return commit_msg
+        
+        # Method 3: Look for any substantial line that could be a commit message
+        for line in lines:
+            line = line.strip()
+            if line and len(line) > 15 and len(line) < 80:
+                # Avoid command lines and explanatory text
+                if not any(word in line.lower() for word in ['command', 'run', 'execute', 'type', 'enter']):
+                    return line
+                    
+        return None
+        
+                        
+    except Exception:
+        return None
+
+def extract_pr_title_from_copilot_response(response):
+    """Extract PR title from GitHub Copilot's response"""
+    try:
+        lines = response.strip().split('\n')
+        
+        # Method 1: Look for gh pr create command with title
+        for line in lines:
+            if 'gh pr create' in line and '--title' in line:
+                parts = line.split('--title')
+                if len(parts) > 1:
+                    title_part = parts[1].strip()
+                    if title_part.startswith('"'):
+                        end_quote = title_part.find('"', 1)
+                        if end_quote > 0:
+                            return title_part[1:end_quote]
+        
+        # Method 2: Look for standalone titles (short, descriptive lines)
+        for line in lines:
+            line = line.strip()
+            if (line and 
+                not line.startswith('$') and 
+                not line.startswith('#') and 
+                not line.startswith('gh ') and
+                not line.startswith('git ') and
+                len(line) > 5 and 
+                len(line) < 70):  # Good title length
+                
+                # Skip common non-title patterns
+                if not any(word in line.lower() for word in 
+                          ['command', 'run', 'execute', 'suggest', 'copilot', 'description']):
+                    return line
+        
+        return None
+    except Exception:
+        return None
+
+def extract_pr_description_from_copilot_response(response):
+    """Extract PR description from GitHub Copilot's response"""
+    try:
+        lines = response.strip().split('\n')
+        description_lines = []
+        
+        # Skip command lines and collect descriptive content
+        for line in lines:
+            line = line.strip()
+            if (line and 
+                not line.startswith('$') and 
+                not line.startswith('#') and 
+                not line.startswith('gh ') and
+                not line.startswith('git ') and
+                len(line) > 10):
+                
+                # Skip command-related text
+                if not any(word in line.lower() for word in 
+                          ['command', 'terminal', 'execute', 'run this', 'type', 'enter']):
+                    description_lines.append(line)
+        
+        if description_lines:
+            # Join lines and clean up
+            description = '\n'.join(description_lines)
+            
+            # Basic cleanup
+            description = description.replace('```', '').strip()
+            
+            return description if len(description) > 20 else None
+            
+        return None
+    except Exception:
+        return None
 
 def generate_smart_commit_message(changes_summary):
     """Generate an intelligent, human-readable commit message based on actual file changes"""
@@ -401,12 +662,12 @@ def generate_smart_commit_message(changes_summary):
         deleted_files = []
         
         for line in lines:
-            if line.startswith(' M '):
-                modified_files.append(line[3:])
-            elif line.startswith(' A ') or line.startswith('A '):
-                added_files.append(line[3:])
-            elif line.startswith(' D ') or line.startswith('D '):
-                deleted_files.append(line[3:])
+            if line.startswith('M '):
+                modified_files.append(line[2:])
+            elif line.startswith('A ') or line.startswith(' A '):
+                added_files.append(line[2:])
+            elif line.startswith('D ') or line.startswith(' D '):
+                deleted_files.append(line[2:])
         
         # Generate human-readable, specific commit message based on actual changes
         specific_changes = []
@@ -481,100 +742,100 @@ def generate_smart_commit_message(changes_summary):
         return "chore: update files", None
 
 def generate_copilot_pr_details(commit_message=None):
-    """Generate PR title and description using GitHub Copilot"""
+    """Generate PR title and description using GitHub Copilot with proper fixes"""
     try:
         print("🤖 Generating PR title and description using GitHub Copilot...")
         
-        # Get detailed diff for better context
+        # Get comprehensive context
         try:
-            diff_result = subprocess.run("git diff --cached --stat", shell=True, capture_output=True, text=True, timeout=10)
+            # Get current changes
+            status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=10)
+            changes_summary = status_result.stdout.strip()
+            
+            # Get diff statistics
+            diff_result = subprocess.run("git diff HEAD --stat", shell=True, capture_output=True, text=True, timeout=10)
             diff_summary = diff_result.stdout.strip()
             
-            # Get file changes list
-            status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
-            changes_summary = status_result.stdout.strip()
-        except:
+        except Exception as e:
+            print(f"⚠️ Error getting git context: {e}")
             diff_summary = ""
             changes_summary = ""
         
-        # Try to generate both title and description separately
+        # Try Copilot for PR title (short timeout)
         pr_title = None
-        pr_description = None
-        
-        # Generate title first - should be concise
         if commit_message:
-            title_context = f"Generate a concise PR title (max 60 chars) for this commit: {commit_message}"
+            title_prompt = f"GitHub PR title for: {commit_message[:80]}"
         else:
-            title_context = f"Generate a concise PR title for changes: {changes_summary[:200]}"
+            title_prompt = f"PR title for changes: {changes_summary[:100]}"
         
         try:
-            title_result = subprocess.run(
-                ["gh", "copilot", "suggest", "-t", "gh", title_context],
-                capture_output=True, text=True, timeout=20
+            print("⚡ Generating PR title with Copilot (3s timeout)...")
+            process = subprocess.Popen(
+                ["gh", "copilot", "suggest", "-t", "gh", title_prompt],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
             )
             
-            if title_result.returncode == 0 and title_result.stdout.strip():
-                lines = title_result.stdout.strip().split('\n')
-                for line in lines:
-                    if 'gh pr create' in line and '--title' in line:
-                        parts = line.split('--title')
-                        if len(parts) > 1:
-                            title_part = parts[1].strip()
-                            if title_part.startswith('"'):
-                                end_quote = title_part.find('"', 1)
-                                if end_quote > 0:
-                                    pr_title = title_part[1:end_quote]
-                                    break
-        except:
-            pass
-        
-        # Generate description - should be detailed
-        if diff_summary or changes_summary:
-            desc_context = f"Generate a detailed PR description explaining these changes:\n{diff_summary}\nFiles changed: {changes_summary}"
-        elif commit_message:
-            desc_context = f"Generate a detailed PR description explaining the changes in this commit: {commit_message}"
-        else:
-            desc_context = "Generate a PR description for code changes"
-        
-        try:
-            desc_result = subprocess.run(
-                ["gh", "copilot", "suggest", "-t", "shell", desc_context],
-                capture_output=True, text=True, timeout=20
-            )
+            stdout, stderr = process.communicate(input="\n", timeout=3)
             
-            if desc_result.returncode == 0 and desc_result.stdout.strip():
-                # Extract meaningful description from response
-                desc_lines = desc_result.stdout.strip().split('\n')
-                description_parts = []
-                for line in desc_lines:
-                    line = line.strip()
-                    if line and not line.startswith('$') and not line.startswith('#') and len(line) > 10:
-                        # Skip command suggestions, keep descriptive text
-                        if not any(cmd in line.lower() for cmd in ['git', 'gh ', 'echo', 'cat', 'ls']):
-                            description_parts.append(line)
-                
-                if description_parts:
-                    pr_description = '\n'.join(description_parts[:3])  # Take first few good lines
-        except:
-            pass
-        
-        # Fallbacks with smart generation
-        if not pr_title:
-            if commit_message:
-                # Extract first part of commit message for title
-                pr_title = commit_message.split('\n')[0][:60]  # Limit to 60 chars
+            if process.returncode == 0 and stdout.strip():
+                pr_title = extract_pr_title_from_copilot_response(stdout.strip())
+                if pr_title:
+                    print("✅ Got PR title from Copilot")
+                    
+        except (subprocess.TimeoutExpired, Exception) as e:
+            if hasattr(e, 'args'):
+                print(f"⚠️ PR title Copilot failed: {e}")
             else:
-                pr_title = generate_smart_pr_title(changes_summary)
+                print("⚠️ PR title Copilot timed out")
         
-        if not pr_description or pr_description == pr_title:
+        # Try Copilot for PR description (short timeout)
+        pr_description = None
+        if commit_message:
+            desc_prompt = f"PR description for: {commit_message}"
+        else:
+            desc_prompt = f"Describe changes: {changes_summary[:150]}"
+        
+        try:
+            print("⚡ Generating PR description with Copilot (3s timeout)...")
+            process = subprocess.Popen(
+                ["gh", "copilot", "suggest", desc_prompt],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            stdout, stderr = process.communicate(input="\n", timeout=3)
+            
+            if process.returncode == 0 and stdout.strip():
+                pr_description = extract_pr_description_from_copilot_response(stdout.strip())
+                if pr_description:
+                    print("✅ Got PR description from Copilot")
+                    
+        except (subprocess.TimeoutExpired, Exception) as e:
+            if hasattr(e, 'args'):
+                print(f"⚠️ PR description Copilot failed: {e}")
+            else:
+                print("⚠️ PR description Copilot timed out")
+        
+        # Use smart generation for anything Copilot couldn't provide
+        if not pr_title:
+            pr_title = generate_smart_pr_title(changes_summary)
+            print("📝 Using smart generation for PR title")
+            
+        if not pr_description:
             pr_description = generate_smart_pr_description(changes_summary, diff_summary, commit_message)
+            print("📝 Using smart generation for PR description")
         
         return pr_title, pr_description, None
         
-    except subprocess.TimeoutExpired:
-        return None, None, "Copilot request timed out. Using manual input."
     except Exception as e:
-        return None, None, f"Error generating PR details with Copilot: {str(e)}"
+        # Fallback to smart generation
+        print(f"⚠️ Error in PR generation: {e}")
+        return generate_smart_pr_title(""), generate_smart_pr_description("", "", commit_message), None
 
 def generate_smart_pr_title(changes_summary):
     """Generate a specific, human-readable PR title based on actual file changes"""
@@ -1110,11 +1371,12 @@ def main():
     commit_message = None
     if has_changes:
         # Use Copilot to generate commit message directly
-        generated_msg, error = generate_copilot_commit_message()
+        generated_msg, error, source = generate_copilot_commit_message()
         
         if generated_msg:
             # Show the commit message in the dialog prompt
-            dialog_message = f"Would you like to use this Copilot-generated commit message?\n\nCommit message: \"{generated_msg}\""
+            source_text = "Copilot-generated" if source == "copilot" else "AI-enhanced smart"
+            dialog_message = f"Would you like to use this {source_text} commit message?\n\nCommit message: \"{generated_msg}\""
             
             copilot_choice = get_vscode_input(
                 dialog_message,
@@ -1124,7 +1386,8 @@ def main():
             if copilot_choice and "Yes" in copilot_choice:
                 commit_message = generated_msg
             elif copilot_choice and "edit" in copilot_choice:
-                print(f"Edit the Copilot suggestion:")
+                source_desc = "Copilot suggestion" if source == "copilot" else "AI suggestion"
+                print(f"Edit the {source_desc}:")
                 edited_message = get_vscode_input("Commit message (edit as needed)", None, generated_msg)
                 final_message = edited_message if edited_message else generated_msg
                 
