@@ -143,12 +143,13 @@ def show_vscode_notification(message, message_type="info"):
 
 def show_vscode_dialog(title, message, options):
     """Show a prominent dialog-like interface in the terminal"""
-    # Create HTML file for potential viewing
+    # Create HTML file for potential viewing - use context manager for proper cleanup
     html_content = create_vscode_dialog_html(title, message, options)
     
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+    # Create temp file in current directory instead of system temp for easier cleanup
+    html_file = f".tmp_dialog_{int(time.time())}.html"
+    with open(html_file, 'w') as f:
         f.write(html_content)
-        html_file = f.name
     
     # Show in terminal with nice formatting
     print("\033[2J\033[H")  # Clear screen
@@ -198,7 +199,8 @@ def get_vscode_input(prompt, options=None):
                         if 0 <= idx < len(options):
                             # Clean up HTML file
                             try:
-                                os.unlink(html_file)
+                                if os.path.exists(html_file):
+                                    os.unlink(html_file)
                             except:
                                 pass
                             return options[idx]
@@ -206,7 +208,8 @@ def get_vscode_input(prompt, options=None):
                 except (EOFError, KeyboardInterrupt):
                     # Clean up HTML file
                     try:
-                        os.unlink(html_file)
+                        if os.path.exists(html_file):
+                            os.unlink(html_file)
                     except:
                         pass
                     return None
@@ -908,15 +911,45 @@ def main():
     # Show final status
     print("\nFinal status:")
     run_command_preview("git status", "Final git status")
+    
+    # Clean up any temporary files
+    cleanup_temp_files()
+
+def cleanup_temp_files():
+    """Clean up temporary HTML files created by the script"""
+    try:
+        # Clean up current directory temp files
+        for file in os.listdir('.'):
+            if file.startswith('.tmp_dialog_') and file.endswith('.html'):
+                try:
+                    os.unlink(file)
+                except:
+                    pass
+        
+        # Clean up system temp directory HTML files (from older versions)
+        import glob
+        temp_pattern = os.path.join(tempfile.gettempdir(), 'tmp*.html')
+        for html_file in glob.glob(temp_pattern):
+            try:
+                # Only delete files that are more than 1 hour old to be safe
+                if os.path.getmtime(html_file) < time.time() - 3600:
+                    os.unlink(html_file)
+            except:
+                pass
+    except Exception as e:
+        # Don't fail the script for cleanup issues
+        pass
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        cleanup_temp_files()
         show_vscode_notification("⚠️ Script interrupted by user. Exiting...", "warning")
         print("\n\n⚠️  Script interrupted by user. Exiting...")
         sys.exit(0)
     except Exception as e:
+        cleanup_temp_files()
         show_vscode_notification(f"❌ Unexpected error: {e}", "error")
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
