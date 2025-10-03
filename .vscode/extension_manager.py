@@ -72,7 +72,7 @@ def get_installed_extensions():
 
 def read_extensions_file():
     """Read the extensions.txt file and return list of required extensions"""
-    extensions_file = "/workspaces/Programming-Class-Project/.vscode/extensions.txt"
+    extensions_file = os.path.join(os.getcwd(), ".vscode/extensions.txt")
     
     if not os.path.exists(extensions_file):
         print(f"📄 Creating new extensions file: {extensions_file}")
@@ -100,7 +100,7 @@ def read_extensions_file():
 
 def write_extensions_file(extensions):
     """Write the list of extensions to extensions.txt"""
-    extensions_file = "/workspaces/Programming-Class-Project/.vscode/extensions.txt"
+    extensions_file = os.path.join(os.getcwd(), ".vscode/extensions.txt")
     
     try:
         # Create header comment
