@@ -545,12 +545,12 @@ def sync_repository():
     print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
     print("=" * 60)
     
-    # First, handle Ubuntu updates
+    # Always run Ubuntu updates (even if done in container setup - ensures latest)
     print("\n🐧 UBUNTU SYSTEM UPDATES")
     print("-" * 30)
     handle_ubuntu_updates()
     
-    # Second, handle VS Code extensions (prioritize so they're ready before repo sync)
+    # Always run full VS Code extension sync (even if done in container setup - ensures latest)
     print("\n🧩 VS CODE EXTENSIONS")
     print("-" * 25)
     handle_vscode_extensions()
@@ -908,6 +908,59 @@ def cleanup_temp_files():
         # Don't fail the script for cleanup issues
         pass
 
+def wait_for_container_setup():
+    """Wait for container setup to complete before proceeding"""
+    setup_complete_file = "/tmp/container-setup/SETUP-COMPLETE"
+    max_wait_time = 300  # 5 minutes maximum wait
+    check_interval = 5   # Check every 5 seconds
+    
+    if not os.path.exists("/tmp/container-setup"):
+        # No container setup directory, assume we can proceed
+        print("💡 No container setup in progress - proceeding with VS Code auto-sync")
+        return True
+    
+    if os.path.exists(setup_complete_file):
+        # Setup already complete
+        completion_time = ""
+        try:
+            with open("/tmp/container-setup/completion-time", "r") as f:
+                completion_time = f.read().strip()
+        except:
+            completion_time = "recently"
+        
+        print(f"✅ Container setup already completed at {completion_time}")
+        return True
+    
+    print("⏳ Waiting for container setup to complete...")
+    print("   🐧 Ubuntu updates, 📂 repository sync, and 🧩 extensions must finish first")
+    
+    elapsed = 0
+    while elapsed < max_wait_time:
+        if os.path.exists(setup_complete_file):
+            print("✅ Container setup completed! Proceeding with VS Code auto-sync...")
+            return True
+        
+        # Check current status
+        status_file = "/tmp/container-setup/status"
+        if os.path.exists(status_file):
+            try:
+                with open(status_file, "r") as f:
+                    current_status = f.read().strip()
+                print(f"   📊 Current setup status: {current_status}")
+            except:
+                pass
+        
+        time.sleep(check_interval)
+        elapsed += check_interval
+        
+        # Show progress dots
+        dots = (elapsed // check_interval) % 4
+        print(f"\r   ⏳ Waiting{'.' * dots:<3} ({elapsed}s elapsed)", end='', flush=True)
+    
+    print(f"\n⚠️  Container setup did not complete within {max_wait_time} seconds")
+    print("   Proceeding anyway - setup may still be running in background")
+    return False
+
 def main():
     """Main function"""
     try:
@@ -919,6 +972,14 @@ def main():
                 os.path.exists('/workspaces')):
             print("This script is designed for codespace environments.")
             return
+        
+        # Wait for container setup to complete before proceeding
+        container_setup_complete = wait_for_container_setup()
+        
+        if container_setup_complete:
+            print("🚀 Container setup complete - running VS Code auto-sync...")
+        else:
+            print("⚠️  Running VS Code auto-sync while container setup may still be in progress...")
         
         sync_repository()
         
