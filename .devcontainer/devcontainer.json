@@ -1,12 +1,12 @@
 {
     "name": "Programming Class Project",
-    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "image": "ubuntu:22.04",
     "postCreateCommand": [
         "bash",
-        ".devcontainer/auto-sync-branches.sh"
+        ".devcontainer/clone-main.sh"
     ],
     "postStartCommand": [
-        "bash", 
+        "bash",
         ".devcontainer/auto-sync-branches.sh"
     ],
     "customizations": {
