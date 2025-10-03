@@ -6,7 +6,8 @@
     "bash .devcontainer/clone-main.sh"
   ],
   "postStartCommand": [
-    "bash .devcontainer/auto-sync-branches.sh"
+    "bash .devcontainer/auto-sync-branches.sh",
+    "python3 .vscode/extension_manager.py"
   ],
   "customizations": {
     "vscode": {

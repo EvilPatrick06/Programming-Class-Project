@@ -162,22 +162,50 @@ def write_extensions_file(extensions):
         print(f"❌ Error writing extensions file: {e}")
 
 def install_extension(extension_id):
-    """Install a single VS Code extension"""
+    """Install a single VS Code extension with progress indicators"""
     try:
         print(f"📦 Installing: {extension_id}")
-        result = subprocess.run(["code", "--install-extension", extension_id, "--force"], 
-                              capture_output=True, text=True, timeout=120)
         
-        if result.returncode == 0:
-            print(f"✅ Installed: {extension_id}")
-            return True
-        else:
-            print(f"❌ Failed to install {extension_id}: {result.stderr}")
+        # Start the installation process
+        process = subprocess.Popen(
+            ["code", "--install-extension", extension_id, "--force"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        # Show progress while installing
+        import threading
+        import time
+        
+        def show_progress():
+            dots = 0
+            while process.poll() is None:
+                print(f"\r   📥 Downloading and installing{'.' * (dots % 4):<4}", end='', flush=True)
+                dots += 1
+                time.sleep(0.5)
+        
+        progress_thread = threading.Thread(target=show_progress)
+        progress_thread.daemon = True
+        progress_thread.start()
+        
+        # Wait for completion with timeout
+        try:
+            stdout, stderr = process.communicate(timeout=120)
+            print()  # New line after progress dots
+            
+            if process.returncode == 0:
+                print(f"✅ Installed: {extension_id}")
+                return True
+            else:
+                print(f"❌ Failed to install {extension_id}: {stderr.strip()}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            process.kill()
+            print(f"\n⏰ Timeout installing {extension_id}")
             return False
             
-    except subprocess.TimeoutExpired:
-        print(f"⏰ Timeout installing {extension_id}")
-        return False
     except Exception as e:
         print(f"❌ Error installing {extension_id}: {e}")
         return False
@@ -210,8 +238,9 @@ def update_all_extensions():
         print(f"🔄 Updating {len(extensions_to_update)} extensions...")
         
         success_count = 0
-        for ext_id in extensions_to_update:
+        for i, ext_id in enumerate(extensions_to_update, 1):
             try:
+                print(f"🔄 [{i}/{len(extensions_to_update)}] Updating: {ext_id}")
                 result = subprocess.run(["code", "--install-extension", ext_id, "--force"], 
                                       capture_output=True, text=True, timeout=60)
                 if result.returncode == 0:
@@ -275,11 +304,16 @@ def sync_extensions():
         for ext in sorted(missing_extensions):
             print(f"   - {ext}")
         
+        print(f"\n🚀 Starting installation of {len(missing_extensions)} extensions...")
+        print("=" * 60)
+        
         install_success = 0
-        for ext in sorted(missing_extensions):
+        for i, ext in enumerate(sorted(missing_extensions), 1):
+            print(f"\n📥 [{i}/{len(missing_extensions)}] Installing extension:")
             if install_extension(ext):
                 install_success += 1
         
+        print("=" * 60)
         print(f"✅ Successfully installed {install_success}/{len(missing_extensions)} extensions")
         
         if install_success > 0:
