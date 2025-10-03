@@ -292,6 +292,52 @@ def sync_repository():
     
     print(f"Current branch: {current_branch}")
     
+    # Auto-switch to Testing branch if we're on main and Testing exists
+    if current_branch == "main":
+        print("💡 Codespace prefers Testing branch for development work...")
+        
+        # Check if Testing branch exists locally
+        testing_exists_local = subprocess.run("git branch --list Testing", 
+                                            shell=True, capture_output=True, text=True)
+        
+        # Check if Testing branch exists on remote
+        testing_exists_remote = subprocess.run("git ls-remote --heads origin Testing", 
+                                             shell=True, capture_output=True, text=True)
+        
+        if testing_exists_local.stdout.strip():
+            # Testing branch exists locally, switch to it
+            print("🔄 Switching to existing Testing branch...")
+            switch_result = subprocess.run("git checkout Testing", shell=True, capture_output=True, text=True)
+            if switch_result.returncode == 0:
+                current_branch = "Testing"
+                show_vscode_notification("✅ Auto-switched to Testing branch for development!", "success")
+                print("✅ Switched to Testing branch!")
+                # Pull latest changes
+                subprocess.run("git pull origin Testing 2>/dev/null || true", shell=True)
+        elif testing_exists_remote.stdout.strip():
+            # Testing branch exists on remote, check it out
+            print("🔄 Checking out Testing branch from remote...")
+            checkout_result = subprocess.run("git checkout -b Testing origin/Testing", 
+                                           shell=True, capture_output=True, text=True)
+            if checkout_result.returncode == 0:
+                current_branch = "Testing"
+                show_vscode_notification("✅ Auto-switched to Testing branch from remote!", "success")
+                print("✅ Checked out Testing branch from remote!")
+        else:
+            # No Testing branch exists, offer to create it
+            create_testing = get_vscode_input(
+                "No Testing branch found. Create Testing branch for development work?",
+                ["Yes, create Testing branch", "No, stay on main"]
+            )
+            
+            if create_testing and "Yes" in create_testing:
+                print("🔄 Creating Testing branch...")
+                create_result = subprocess.run("git checkout -b Testing", shell=True, capture_output=True, text=True)
+                if create_result.returncode == 0:
+                    current_branch = "Testing"
+                    show_vscode_notification("✅ Created Testing branch for development!", "success")
+                    print("✅ Created Testing branch!")
+    
     # Check git status
     has_changes, has_unpushed = check_git_status()
     

@@ -1,0 +1,28 @@
+{
+    "name": "Programming Class Project",
+    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "postCreateCommand": [
+        "bash",
+        ".devcontainer/auto-sync-branches.sh"
+    ],
+    "postStartCommand": [
+        "bash", 
+        ".devcontainer/auto-sync-branches.sh"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "workbench.startupEditor": "none"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    }
+}

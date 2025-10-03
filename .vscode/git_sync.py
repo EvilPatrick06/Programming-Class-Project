@@ -339,6 +339,27 @@ def main():
     
     print(f"Current branch: {current_branch}")
     
+    # If we're on main and Testing branch exists, suggest switching
+    if current_branch == "main":
+        # Check if Testing branch exists
+        testing_exists = subprocess.run("git branch --list Testing", 
+                                       shell=True, capture_output=True, text=True)
+        if testing_exists.stdout.strip():
+            switch_to_testing = get_vscode_input(
+                "💡 You're on main branch, but Testing branch exists. Switch to Testing for development work?",
+                ["Yes, switch to Testing branch", "No, stay on main"]
+            )
+            
+            if switch_to_testing and "Yes" in switch_to_testing:
+                print("🔄 Switching to Testing branch...")
+                switch_result = subprocess.run("git checkout Testing", shell=True, capture_output=True, text=True)
+                if switch_result.returncode == 0:
+                    current_branch = "Testing"
+                    show_vscode_notification("✅ Switched to Testing branch for development!", "success")
+                    print("✅ Switched to Testing branch for development!")
+                else:
+                    print("⚠️ Failed to switch to Testing branch, continuing on main...")
+    
     # Check git status
     has_changes, has_unpushed, branch_needs_upstream = check_git_status()
     
@@ -464,13 +485,13 @@ def main():
             print("   - Local commits will be synced")
             run_command_preview("git log --oneline origin/main..HEAD", "Local commits to push")
     
-    # Check if we should offer to create a pull request  
-    is_not_main_branch = current_branch != "main" and current_branch != "master"
-    
-    if is_not_main_branch:
-        print(f"\n{'4️⃣' if has_changes else '2️⃣'}  Pull Request Option:")
-        print(f"   - After pushing, you can create a pull request from '{current_branch}' to 'main'")
-        print("   - This will allow code review before merging your changes")
+    # Show push and PR options available
+    print(f"\n{'4️⃣' if has_changes else '2️⃣'}  Push Options Available:")
+    print(f"   - Push to current branch ({current_branch})")
+    print("   - Push to main branch (production)")
+    print("   - Push to Testing branch (development)")
+    print("   - Create pull request with code review")
+    print("   - Create new feature branch")
     
     # DECISION PHASE
     print("\n" + "🤔" * 20)
@@ -487,25 +508,120 @@ def main():
         print("❌ Sync cancelled. No changes were made.")
         return
     
-    # Ask about pull request creation if we're not on main branch
+    # Ask about pull request creation and target branch
     create_pr = False
     merge_pr = False
-    if is_not_main_branch:
-        pr_response = get_vscode_input(
-            f"After pushing, would you like to create a pull request from '{current_branch}' to 'main'?",
-            ["Yes, create pull request", "No, just push"]
-        )
-        create_pr = pr_response and "Yes" in pr_response
+    target_branch = "main"  # default
+    
+    # Re-get current branch to make sure we have the correct one
+    try:
+        current_branch = subprocess.run("git branch --show-current", 
+                                      shell=True, capture_output=True, text=True).stdout.strip()
+    except:
+        pass
+    
+    print(f"🔍 Debug: Current branch is '{current_branch}'")
+    
+    # Universal push options - always available regardless of current branch
+    push_option = get_vscode_input(
+        f"You're on branch '{current_branch}'. Where would you like to push your changes?",
+        [
+            f"Push to current branch ({current_branch})",
+            "Push to main branch",
+            "Push to Testing branch", 
+            "Create pull request instead",
+            "Create new feature branch"
+        ]
+    )
+    
+    if f"current branch ({current_branch})" in push_option:
+        # Push to current branch - simple case
+        print(f"🔄 Will push to current branch: {current_branch}")
+        target_branch = current_branch
+        create_pr = False
         
-        if create_pr:
-            merge_response = get_vscode_input(
-                "Would you also like to merge the pull request immediately after creating it?",
-                ["Yes, merge immediately", "No, leave for review"]
-            )
-            merge_pr = merge_response and "Yes" in merge_response
+    elif "Push to main" in push_option:
+        # Push to main branch
+        if current_branch == "main":
+            print("🔄 Will push to main branch")
+            target_branch = "main"
+            create_pr = False
+        else:
+            print(f"🔄 Will push {current_branch} changes to main branch")
+            target_branch = "main"
+            create_pr = False
             
-            if merge_pr:
-                print("⚠️  Note: This will merge the PR without waiting for reviews. Use with caution!")
+    elif "Push to Testing" in push_option:
+        # Push to Testing branch
+        if current_branch == "Testing":
+            print("🔄 Will push to Testing branch")
+            target_branch = "Testing"
+            create_pr = False
+        else:
+            print(f"🔄 Will push {current_branch} changes to Testing branch")
+            target_branch = "Testing"
+            create_pr = False
+            
+    elif "Create pull request" in push_option:
+        # Create PR workflow
+        print(f"🔄 Will push {current_branch} and create pull request")
+        create_pr = True
+        
+        # Ask which branch to target for PR
+        target_branch_response = get_vscode_input(
+            f"Which branch should the pull request target?",
+            ["main (production)", "Testing (development)", "Other branch"]
+        )
+        
+        if "Testing" in target_branch_response:
+            target_branch = "Testing"
+        elif "Other" in target_branch_response:
+            custom_branch = get_vscode_input("Enter the target branch name")
+            target_branch = custom_branch if custom_branch else "main"
+        else:
+            target_branch = "main"
+        
+        print(f"📋 Will create PR: {current_branch} → {target_branch}")
+        
+        # Ask about immediate merge
+        merge_response = get_vscode_input(
+            f"Would you also like to merge the pull request to '{target_branch}' immediately?",
+            ["Yes, merge immediately", "No, leave for review"]
+        )
+        merge_pr = merge_response and "Yes" in merge_response
+        
+        if merge_pr:
+            print(f"⚠️  Note: This will merge the PR to '{target_branch}' without waiting for reviews. Use with caution!")
+            
+    elif "Create new feature branch" in push_option:
+        # Create new feature branch
+        feature_branch_name = get_vscode_input("Enter name for new feature branch")
+        if feature_branch_name:
+            print(f"🔄 Will create new branch: {feature_branch_name}")
+            # Create and switch to new branch
+            subprocess.run(f"git checkout -b {feature_branch_name}", shell=True)
+            current_branch = feature_branch_name
+            target_branch = current_branch
+            
+            # Ask if they want to create PR after pushing
+            pr_after_push = get_vscode_input(
+                f"After pushing '{feature_branch_name}', create pull request?",
+                ["Yes, create PR to main", "Yes, create PR to Testing", "No, just push branch"]
+            )
+            
+            if "PR to main" in pr_after_push:
+                create_pr = True
+                target_branch = "main"
+            elif "PR to Testing" in pr_after_push:
+                create_pr = True  
+                target_branch = "Testing"
+            else:
+                create_pr = False
+                target_branch = current_branch
+        else:
+            # Fallback to current branch
+            target_branch = current_branch
+            create_pr = False
     
     # Get commit message (only if there are changes to commit)
     commit_message = None
@@ -562,18 +678,45 @@ def main():
     if has_unpushed or branch_needs_upstream or has_changes:
         print(f"\n{step_counter}️⃣  Pushing to GitHub...")
         
-        # Use appropriate push command based on whether branch exists
-        if branch_needs_upstream:
-            current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
-            push_command = f"git push --set-upstream origin {current_branch}"
-            push_result = run_command_execute(push_command, "Push changes and set upstream")
-        else:
-            push_result = run_command_execute("git push", "Push changes to GitHub")
+        # Get the actual current branch (might have changed if we created a new branch)
+        actual_current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
         
+        # Handle different push scenarios
+        if actual_current_branch == target_branch:
+            # Simple case: pushing current branch to itself
+            if branch_needs_upstream:
+                push_command = f"git push --set-upstream origin {actual_current_branch}"
+                push_result = run_command_execute(push_command, f"Push {actual_current_branch} and set upstream")
+            else:
+                push_result = run_command_execute("git push", f"Push changes to {actual_current_branch}")
+                
+        else:
+            # Cross-branch push: pushing current branch content to different target
+            print(f"🔄 Cross-branch push: {actual_current_branch} → {target_branch}")
+            
+            # Check if target branch exists on remote
+            target_exists = subprocess.run(f"git ls-remote --heads origin {target_branch}", 
+                                         shell=True, capture_output=True, text=True)
+            
+            if target_exists.stdout.strip():
+                # Target branch exists, push to it
+                push_command = f"git push origin {actual_current_branch}:{target_branch}"
+                push_result = run_command_execute(push_command, f"Push {actual_current_branch} changes to {target_branch}")
+            else:
+                # Target branch doesn't exist, create it
+                push_command = f"git push origin {actual_current_branch}:{target_branch}"
+                push_result = run_command_execute(push_command, f"Create {target_branch} branch from {actual_current_branch}")
+        
+        # Check push result
         if push_result is None or push_result.returncode != 0:
             show_vscode_notification("❌ Failed to push to GitHub. This might be due to remote changes.", "error")
             print("This might be due to remote changes. You may need to resolve conflicts manually.")
             return
+        else:
+            if actual_current_branch == target_branch:
+                show_vscode_notification(f"✅ Successfully pushed to {target_branch}!", "success")
+            else:
+                show_vscode_notification(f"✅ Successfully pushed {actual_current_branch} changes to {target_branch}!", "success")
         
         step_counter += 1
     
@@ -592,17 +735,26 @@ def main():
         pr_body = commit_message if commit_message else "Automated pull request created by git sync script."
         
         # Create the pull request
-        pr_command = f'gh pr create --title "{pr_title}" --base main --head {current_branch} --body "{pr_body}"'
+        pr_command = f'gh pr create --title "{pr_title}" --base {target_branch} --head {current_branch} --body "{pr_body}"'
         
-        pr_result = run_command_execute(pr_command, "Create pull request")
+        pr_result = run_command_execute(pr_command, f"Create pull request: {current_branch} → {target_branch}")
         
         if pr_result and pr_result.returncode == 0:
-            show_vscode_notification("✅ Pull request created successfully!", "success")
-            print("✅ Pull request created successfully!")
+            show_vscode_notification(f"✅ Pull request created successfully! ({current_branch} → {target_branch})", "success")
+            print(f"✅ Pull request created successfully! ({current_branch} → {target_branch})")
+            
+            # Show PR URL if available
+            try:
+                pr_url_result = subprocess.run(f"gh pr view {current_branch} --json url -q .url", 
+                                             shell=True, capture_output=True, text=True)
+                if pr_url_result.returncode == 0 and pr_url_result.stdout.strip():
+                    print(f"🔗 PR URL: {pr_url_result.stdout.strip()}")
+            except:
+                pass
             
             # Merge the PR if requested
             if merge_pr:
-                print(f"\n{step_counter + 1}️⃣  Merging Pull Request...")
+                print(f"\n{step_counter + 1}️⃣  Merging Pull Request to {target_branch}...")
                 
                 merge_method = get_vscode_input(
                     "Choose merge method:",
@@ -621,21 +773,42 @@ def main():
                     merge_flag = "--merge"
                 
                 merge_command = f"gh pr merge {current_branch} {merge_flag}"
-                merge_result = run_command_execute(merge_command, f"Merge pull request using {merge_flag} method")
+                merge_result = run_command_execute(merge_command, f"Merge pull request to {target_branch}")
                 
                 if merge_result and merge_result.returncode == 0:
-                    show_vscode_notification("✅ Pull request merged successfully!", "success")
-                    print("✅ Pull request merged successfully!")
+                    show_vscode_notification(f"✅ Pull request merged to {target_branch} successfully!", "success")
+                    print(f"✅ Pull request merged to {target_branch} successfully!")
                     
-                    # Switch back to main and pull the merged changes
-                    print(f"\n{step_counter + 2}️⃣  Updating local main branch...")
-                    checkout_result = run_command_execute("git checkout main", "Switch to main branch")
+                    # Switch to target branch and pull the merged changes
+                    print(f"\n{step_counter + 2}️⃣  Updating local {target_branch} branch...")
+                    checkout_result = run_command_execute(f"git checkout {target_branch}", f"Switch to {target_branch} branch")
                     if checkout_result and checkout_result.returncode == 0:
-                        pull_result = run_command_execute("git pull", "Pull merged changes")
+                        pull_result = run_command_execute("git pull", f"Pull merged changes to {target_branch}")
                         if pull_result and pull_result.returncode == 0:
-                            show_vscode_notification("✅ Local main branch updated with merged changes!", "success")
+                            show_vscode_notification(f"✅ Local {target_branch} branch updated with merged changes!", "success")
+                            
+                            # Handle branch cleanup
+                            if current_branch != target_branch:
+                                cleanup_choice = get_vscode_input(
+                                    f"Delete the merged feature branch '{current_branch}'?",
+                                    ["Yes, delete it", "No, keep it"]
+                                )
+                                
+                                if cleanup_choice and "Yes" in cleanup_choice:
+                                    # Delete local branch
+                                    delete_local = run_command_execute(f"git branch -d {current_branch}", 
+                                                                     "Delete local feature branch")
+                                    # Delete remote branch
+                                    delete_remote = run_command_execute(f"git push origin --delete {current_branch}", 
+                                                                       "Delete remote feature branch")
+                                    if delete_local and delete_local.returncode == 0:
+                                        show_vscode_notification("✅ Feature branch cleaned up!", "success")
+                        else:
+                            show_vscode_notification(f"⚠️ Failed to pull merged changes to {target_branch}.", "warning")
+                    else:
+                        show_vscode_notification(f"⚠️ Failed to switch to {target_branch} branch.", "warning")
                 else:
-                    show_vscode_notification("⚠️ Failed to merge pull request. You can merge it manually on GitHub.", "warning")
+                    show_vscode_notification(f"⚠️ Failed to merge pull request to {target_branch}. You can merge it manually on GitHub.", "warning")
         else:
             show_vscode_notification("⚠️ Failed to create pull request, but your changes were pushed successfully.", "warning")
             print("You can create the pull request manually on GitHub.")

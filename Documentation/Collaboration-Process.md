@@ -31,21 +31,12 @@ Run `git_sync.py` and select the appropriate option based on your situation:
 
 Follow these steps when team members want to work together but the primary developer isn't available:
 
-### Step 1: Determine the Correct Branch
-
-1. Check if the testing branch is "ahead of main" (i.e., the latest changes were committed to Testing Branch only)
-   - If yes: Copy the link to the testing branch
-   - If no: Copy the link to the main branch
-
-### Step 2: Set Up Codespace
+### Step 1: Set Up Codespace
 
 1. Create or open a codespace under the Testing Branch
-2. Look where the most up to date commits were made
-3. Follow the prompts when codespace is opened to clone the repository
-  a. Testing Branch: Choose if the latest changes were committed to Testing Branch only
-  b. Main Branch: Choose if the latest changes were committed to Main Branch
+2. Follow the prompts when codespace is opened to clone the repository
 
-### Step 3: Configure Environment
+### Step 2: Configure Environment
 
 1. Have Copilot install and update all dependencies based on the "Extensions+Updates" file
 2. Launch Live Share
@@ -58,7 +49,7 @@ Follow these steps when team members want to work together but the primary devel
 
 ## Best Practices
 
-- Always ensure the testing branch remains intact
+- Always ensure the main branch remains intact
 - Communicate with team members before making changes to the main branch
 - Use descriptive commit messages
 - Test thoroughly before promoting code from testing to main branch
