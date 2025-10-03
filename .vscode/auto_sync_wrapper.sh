@@ -79,7 +79,7 @@ check_vscode_extensions() {
         # Look for very recent extension installation logs (last 1 minute)
         recent_logs=$(find "$HOME/.vscode-server/logs" -name "*.log" -mmin -1 2>/dev/null | head -3)
         if [ -n "$recent_logs" ]; then
-            # Check if any logs mention extension installation in the last 60 seconds
+            # Check if any logs mention extension installation in the last 30 seconds
             if echo "$recent_logs" | xargs grep -l "Installing extension\|Activating extension" 2>/dev/null | head -1 > /dev/null; then
                 return 1  # Extensions still being installed/activated
             fi
@@ -96,7 +96,7 @@ check_vscode_extensions() {
 
 # Function to wait for VS Code to be ready
 wait_for_vscode_ready() {
-    local max_wait=120  # 2 minutes - reduced since we're less strict
+    local max_wait=60  # 1 minute - reduced since we're less strict
     local waited=0
     
     echo "⏳ Waiting for VS Code to be ready (extensions will install naturally)..."
@@ -159,7 +159,7 @@ wait_for_vscode_ready
 
 # Now run the actual auto-sync script
 echo ""
-echo "=" * 60
+echo "=" * 30
 echo "🚀 Starting VS Code Auto-Sync..."
 
 # Set non-interactive mode for auto-sync during startup
@@ -167,5 +167,5 @@ export AUTO_SYNC_NON_INTERACTIVE=true
 
 python3 .vscode/auto_sync.py
 
-echo "=" * 60
+echo "=" * 30
 echo "✅ VS Code Auto-Sync Wrapper Complete!"
