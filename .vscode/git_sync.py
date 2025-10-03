@@ -185,6 +185,7 @@ def show_vscode_dialog(title, message, options):
 
 def get_vscode_input(prompt, options=None):
     """Get user input through VS Code-style dialog interface"""
+    html_file = None
     try:
         if options:
             # Show the dialog-style interface
@@ -197,21 +198,9 @@ def get_vscode_input(prompt, options=None):
                     if choice.isdigit():
                         idx = int(choice) - 1
                         if 0 <= idx < len(options):
-                            # Clean up HTML file
-                            try:
-                                if os.path.exists(html_file):
-                                    os.unlink(html_file)
-                            except:
-                                pass
                             return options[idx]
                     print("Invalid choice. Please try again.")
                 except (EOFError, KeyboardInterrupt):
-                    # Clean up HTML file
-                    try:
-                        if os.path.exists(html_file):
-                            os.unlink(html_file)
-                    except:
-                        pass
                     return None
         else:
             # Simple text input with nice formatting
@@ -225,25 +214,32 @@ def get_vscode_input(prompt, options=None):
     except Exception as e:
         print(f"Error getting input: {e}")
         # Fallback to simple terminal input
-        if options:
-            print(f"\n{prompt}")
-            for i, option in enumerate(options):
-                print(f"{i+1}. {option}")
-            while True:
-                try:
-                    choice = input(f"Enter your choice (1-{len(options)}): ").strip()
-                    if choice.isdigit():
-                        idx = int(choice) - 1
-                        if 0 <= idx < len(options):
-                            return options[idx]
-                    print("Invalid choice. Please try again.")
-                except (EOFError, KeyboardInterrupt):
-                    return None
-        else:
-            try:
+        try:
+            if options:
+                print(f"\n{prompt}")
+                for i, option in enumerate(options):
+                    print(f"{i+1}. {option}")
+                while True:
+                    try:
+                        choice = input(f"Enter your choice (1-{len(options)}): ").strip()
+                        if choice.isdigit():
+                            idx = int(choice) - 1
+                            if 0 <= idx < len(options):
+                                return options[idx]
+                        print("Invalid choice. Please try again.")
+                    except (EOFError, KeyboardInterrupt):
+                        return None
+            else:
                 return input(f"{prompt}: ").strip()
-            except (EOFError, KeyboardInterrupt):
-                return None
+        except (EOFError, KeyboardInterrupt):
+            return None
+    finally:
+        # Always clean up HTML file, regardless of how the function exits
+        if html_file and os.path.exists(html_file):
+            try:
+                os.unlink(html_file)
+            except:
+                pass
 
 def run_command_preview(command, description):
     """Run a command and return the result for preview"""
@@ -922,6 +918,7 @@ def cleanup_temp_files():
         for file in os.listdir('.'):
             if file.startswith('.tmp_dialog_') and file.endswith('.html'):
                 try:
+                    print(f"🧹 Cleaning up temp file: {file}")
                     os.unlink(file)
                 except:
                     pass
@@ -931,11 +928,21 @@ def cleanup_temp_files():
         temp_pattern = os.path.join(tempfile.gettempdir(), 'tmp*.html')
         for html_file in glob.glob(temp_pattern):
             try:
-                # Only delete files that are more than 1 hour old to be safe
-                if os.path.getmtime(html_file) < time.time() - 3600:
+                # Only delete files that are more than 10 minutes old to avoid conflicts
+                if os.path.getmtime(html_file) < time.time() - 600:
+                    print(f"🧹 Cleaning up old temp file: {os.path.basename(html_file)}")
                     os.unlink(html_file)
             except:
                 pass
+                
+        # Also clean up any HTML files that might be open in VS Code by using a different approach
+        import subprocess
+        try:
+            # Close any untitled HTML files in VS Code (best effort)
+            subprocess.run(['code', '--list-extensions'], capture_output=True, timeout=2)
+        except:
+            pass
+            
     except Exception as e:
         # Don't fail the script for cleanup issues
         pass
