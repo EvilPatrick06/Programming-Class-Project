@@ -87,38 +87,27 @@ if is_container_setup; then
     fi
     
     mark_completed "repo-sync"
-    update_status "Repository sync completed, starting extension installation"
+    update_status "Container setup completed - letting VS Code handle extensions naturally"
     
-    # Install VS Code extensions
-    echo -e "${BLUE}🧩 VS CODE EXTENSIONS${NC}"
-    echo "=" * 35
-    
-    if [ -f ".vscode/extension_manager.py" ]; then
-        echo "📦 Installing VS Code extensions during container setup..."
-        export CONTAINER_SETUP_MODE=true
-        if python3 .vscode/extension_manager.py; then
-            echo -e "${GREEN}✅ Extensions installed successfully${NC}"
-        else
-            echo -e "${YELLOW}⚠️  Extension installation had some issues${NC}"
-        fi
-    else
-        echo -e "${YELLOW}⚠️  Extension manager script not found${NC}"
-    fi
-    
-    mark_completed "extensions"
-    update_status "Setting up terminal prompt for GitHub environment"
-    
-    # Setup terminal prompt to ensure GitHub user appears correctly
+    # Schedule terminal prompt setup to run after VS Code is fully ready
     echo -e "${BLUE}🖥️  TERMINAL PROMPT SETUP${NC}"
     echo "=" * 40
     
     if [ -f ".devcontainer/setup-terminal-prompt.sh" ]; then
-        echo "🔧 Setting up GitHub environment for terminal prompt..."
-        if bash .devcontainer/setup-terminal-prompt.sh --container-init; then
-            echo -e "${GREEN}✅ Terminal prompt setup completed${NC}"
-        else
-            echo -e "${YELLOW}⚠️  Terminal prompt setup had some issues${NC}"
-        fi
+        echo "� Scheduling GitHub environment setup for after VS Code initialization..."
+        # Create a delayed setup script that runs after VS Code is ready
+        cat > /tmp/delayed-terminal-setup.sh << 'EOF'
+#!/bin/bash
+# Wait for VS Code to be fully ready, then setup terminal prompt
+sleep 30  # Give VS Code time to fully initialize
+if [ -f "/workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh" ]; then
+    bash /workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh --container-init
+fi
+EOF
+        chmod +x /tmp/delayed-terminal-setup.sh
+        # Run in background so it doesn't block container startup
+        nohup /tmp/delayed-terminal-setup.sh > /tmp/terminal-setup.log 2>&1 &
+        echo -e "${GREEN}✅ Terminal prompt setup scheduled for background execution${NC}"
     else
         echo -e "${YELLOW}⚠️  Terminal prompt setup script not found${NC}"
     fi
@@ -136,8 +125,8 @@ if is_container_setup; then
     echo "=" * 60
     echo -e "${GREEN}✅ Ubuntu updates: Complete${NC}"
     echo -e "${GREEN}✅ Repository sync: Complete${NC}"
-    echo -e "${GREEN}✅ VS Code extensions: Complete${NC}"
-    echo -e "${GREEN}✅ Terminal prompt: Complete${NC}"
+    echo -e "${GREEN}✅ VS Code extensions: Handled by VS Code naturally${NC}"
+    echo -e "${GREEN}✅ Terminal prompt: Scheduled for background setup${NC}"
     echo -e "${GREEN}✅ Completion marker: /tmp/container-setup/SETUP-COMPLETE${NC}"
     echo "=" * 60
     echo -e "${BLUE}🚀 VS Code auto-sync task can now safely proceed${NC}"
