@@ -18,11 +18,7 @@ Note: To push your chang    print("🚀 Codespace Auto-Sync Script")
     print("🔄 This script updates your codespace with:")
     print("   • Ubuntu version upgrades (when available)")
     print("   • Latest Ubuntu package updates & security patches")
-                      result = subprocess.run(["/bin/bash", os.path.join(os.getcwd(), ".vscode/sync-repo.sh"), branch_choice], 
-                                          capture_output=True, text=True)print("   • Latest code from GitHub repository")
-    print("   • VS Code extension synchronization")
-    print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
-    print("=" * 60)itHub, use git_sync.py instead
+GitHub, use git_sync.py instead
 """
 
 import subprocess
@@ -35,23 +31,7 @@ import textwrap
 import threading
 
 def create_vscode_dialog_html(title, message, options):
-    """Create an HTML file for VS    print("🚀 Codespace Auto-Sync Script")
-    print("=" * 60)
-    print("🔄 This script updates your codespace with:")
-    print("   • Ubuntu version upgrades (when available)")
-    print("   • Latest Ubuntu package updates & security patches")
-    print("   • Latest code from GitHub repository")
-    print("   • VS Code extension synchronization")
-    print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
-    print("=" * 60)
-    
-    # First, handle Ubuntu updates
-    print("\n🐧 UBUNTU SYSTEM UPDATES")
-    print("-" * 30)
-    handle_ubuntu_updates()
-    
-    print("\n📂 REPOSITORY SYNC")
-    print("-" * 20)mulation"""
+    """Create an HTML file for VS Code dialog simulation"""
     html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -557,7 +537,9 @@ def sync_repository():
     
     print("🚀 Codespace Auto-Sync Script")
     print("=" * 60)
-    print("� This script updates your codespace with:")
+    print("🔄 This script updates your codespace with:")
+    print("   • Ubuntu version upgrades (when available)")
+    print("   • Latest Ubuntu package updates & security patches")
     print("   • VS Code extension synchronization")
     print("   • Latest code from GitHub repository")
     print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
@@ -567,6 +549,11 @@ def sync_repository():
     print("\n🐧 UBUNTU SYSTEM UPDATES")
     print("-" * 30)
     handle_ubuntu_updates()
+    
+    # Second, handle VS Code extensions (prioritize so they're ready before repo sync)
+    print("\n🧩 VS CODE EXTENSIONS")
+    print("-" * 25)
+    handle_vscode_extensions()
     
     print("\n📂 REPOSITORY SYNC")
     print("-" * 20)
@@ -837,10 +824,54 @@ def sync_repository():
             show_vscode_notification("✅ Keeping your changes. Use git_sync.py when ready to push.", "info")
             print("✅ Keeping your changes. Use git_sync.py when you're ready to push to GitHub.")
     
-    # Finally, handle VS Code extensions (after repo sync to get latest extension info)
-    print("\n🧩 VS CODE EXTENSIONS")
-    print("-" * 25)
-    handle_vscode_extensions()
+    # Final extension sync - check for any new extension requirements after repo operations
+    print("\n🔄 FINAL EXTENSION CHECK")
+    print("-" * 30)
+    print("💡 Checking for any updated extension requirements...")
+    handle_vscode_extensions_final()
+
+def handle_vscode_extensions_final():
+    """Handle final VS Code extension synchronization after repository operations"""
+    try:
+        print("🔍 Final check for extension updates after repository sync...")
+        
+        # Run the extension manager script with less verbose output for final check
+        result = subprocess.run([sys.executable, os.path.join(os.getcwd(), ".vscode/extension_manager.py")], 
+                              capture_output=True, text=True, timeout=300)
+        
+        if result.returncode == 0:
+            # Parse output to see if anything was actually installed/updated
+            output_lines = result.stdout.split('\n')
+            installed_count = 0
+            updated_count = 0
+            
+            for line in output_lines:
+                if 'Successfully installed' in line and 'extensions' in line:
+                    # Extract number from "Successfully installed X/Y extensions"
+                    parts = line.split('/')
+                    if len(parts) > 1 and parts[0].split()[-1].isdigit():
+                        installed_count = int(parts[0].split()[-1])
+                elif 'Successfully updated' in line and 'extensions' in line:
+                    # Extract number from "Successfully updated X/Y extensions"  
+                    parts = line.split('/')
+                    if len(parts) > 1 and parts[0].split()[-1].isdigit():
+                        updated_count = int(parts[0].split()[-1])
+            
+            if installed_count > 0 or updated_count > 0:
+                show_vscode_notification(f"✅ Final sync: {installed_count} new extensions installed, {updated_count} updated!", "success")
+                print(f"✅ Final extension sync: {installed_count} installed, {updated_count} updated")
+            else:
+                print("✅ All extensions already up to date after repository sync")
+                
+        else:
+            print("⚠️  Final extension check completed with warnings")
+            if result.stderr:
+                print(f"   Warning details: {result.stderr[:100]}...")
+        
+    except subprocess.TimeoutExpired:
+        print("⏰ Final extension check timed out")
+    except Exception as e:
+        print(f"❌ Error in final extension check: {e}")
 
 def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
