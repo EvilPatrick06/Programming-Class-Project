@@ -787,6 +787,27 @@ def main():
                         if pull_result and pull_result.returncode == 0:
                             show_vscode_notification(f"✅ Local {target_branch} branch updated with merged changes!", "success")
                             
+                            # If merged to main, also sync Testing branch to keep it up to date
+                            if target_branch == "main":
+                                print(f"\n{step_counter + 3}️⃣  Syncing Testing branch with main to avoid falling behind...")
+                                testing_checkout = run_command_execute("git checkout Testing", "Switch to Testing branch")
+                                if testing_checkout and testing_checkout.returncode == 0:
+                                    testing_merge = run_command_execute("git merge main", "Merge main into Testing to keep it current")
+                                    if testing_merge and testing_merge.returncode == 0:
+                                        testing_push = run_command_execute("git push origin Testing", "Push updated Testing branch")
+                                        if testing_push and testing_push.returncode == 0:
+                                            show_vscode_notification("✅ Testing branch synced with main successfully!", "success")
+                                            print("✅ Testing branch is now up to date with main!")
+                                        else:
+                                            show_vscode_notification("⚠️ Failed to push updated Testing branch", "warning")
+                                    else:
+                                        show_vscode_notification("⚠️ Failed to merge main into Testing branch", "warning")
+                                else:
+                                    show_vscode_notification("⚠️ Failed to checkout Testing branch for sync", "warning")
+                                
+                                # Switch back to target branch
+                                run_command_execute(f"git checkout {target_branch}", f"Switch back to {target_branch}")
+                            
                             # Handle branch cleanup
                             if current_branch != target_branch:
                                 cleanup_choice = get_vscode_input(
