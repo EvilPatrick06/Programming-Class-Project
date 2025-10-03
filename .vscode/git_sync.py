@@ -174,12 +174,8 @@ def show_vscode_dialog(title, message, options):
     print("└" + "─" * 78 + "┘")
     print()
     
-    # Try to open HTML in VS Code's simple browser as a bonus
-    try:
-        subprocess.run(["code", "--command", "simpleBrowser.show", f"file://{html_file}"], 
-                      capture_output=True, timeout=2)
-    except:
-        pass  # Ignore if it fails
+    # Note: We don't open in VS Code browser to avoid leftover tabs with weird URLs
+    # The terminal-based dialog is sufficient and cleaner
     
     return html_file
 
@@ -935,13 +931,7 @@ def cleanup_temp_files():
             except:
                 pass
                 
-        # Also clean up any HTML files that might be open in VS Code by using a different approach
-        import subprocess
-        try:
-            # Close any untitled HTML files in VS Code (best effort)
-            subprocess.run(['code', '--list-extensions'], capture_output=True, timeout=2)
-        except:
-            pass
+        # Note: We no longer open files in VS Code browser to avoid tab issues
             
     except Exception as e:
         # Don't fail the script for cleanup issues
