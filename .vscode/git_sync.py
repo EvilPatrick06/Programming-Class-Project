@@ -541,13 +541,15 @@ def main():
         create_pr = False
         sync_testing = False
         merge_pr = False
+        pr_target = None
         
     elif "Push to main" in push_option:
         # Push to main branch via pull request (like the original script)
         print(f"🔄 Will push {current_branch} and create pull request to main")
-        target_branch = "main"
+        target_branch = current_branch  # Push to current branch first, then PR to main
         create_pr = True
         sync_testing = True
+        pr_target = "main"  # Target for the PR
         
         # Ask about immediate merge (like the original script did)
         merge_response = get_vscode_input(
@@ -570,18 +572,21 @@ def main():
             create_pr = False
             sync_testing = False
             merge_pr = False
+            pr_target = None
         else:
             print(f"🔄 Will push {current_branch} changes to Testing branch")
             target_branch = "Testing"
             create_pr = False
             sync_testing = False
             merge_pr = False
+            pr_target = None
             
     elif "Create pull request" in push_option:
         # Create PR workflow
         print(f"🔄 Will push {current_branch} and create pull request")
         create_pr = True
         sync_testing = False
+        pr_target = None
         
         # Ask which branch to target for PR
         target_branch_response = get_vscode_input(
@@ -789,14 +794,15 @@ def main():
         # Use commit message as default PR description
         pr_body = commit_message if commit_message else "Automated pull request created by git sync script."
         
-        # Create the pull request
-        pr_command = f'gh pr create --title "{pr_title}" --base {target_branch} --head {current_branch} --body "{pr_body}"'
+        # Create the pull request - use pr_target if it exists, otherwise target_branch
+        pr_base = pr_target if 'pr_target' in locals() else target_branch
+        pr_command = f'gh pr create --title "{pr_title}" --base {pr_base} --head {current_branch} --body "{pr_body}"'
         
-        pr_result = run_command_execute(pr_command, f"Create pull request: {current_branch} → {target_branch}")
+        pr_result = run_command_execute(pr_command, f"Create pull request: {current_branch} → {pr_base}")
         
         if pr_result and pr_result.returncode == 0:
-            show_vscode_notification(f"✅ Pull request created successfully! ({current_branch} → {target_branch})", "success")
-            print(f"✅ Pull request created successfully! ({current_branch} → {target_branch})")
+            show_vscode_notification(f"✅ Pull request created successfully! ({current_branch} → {pr_base})", "success")
+            print(f"✅ Pull request created successfully! ({current_branch} → {pr_base})")
             
             # Show PR URL if available
             try:
@@ -828,22 +834,22 @@ def main():
                     merge_flag = "--merge"
                 
                 merge_command = f"gh pr merge {current_branch} {merge_flag}"
-                merge_result = run_command_execute(merge_command, f"Merge pull request to {target_branch}")
+                merge_result = run_command_execute(merge_command, f"Merge pull request to {pr_base}")
                 
                 if merge_result and merge_result.returncode == 0:
-                    show_vscode_notification(f"✅ Pull request merged to {target_branch} successfully!", "success")
-                    print(f"✅ Pull request merged to {target_branch} successfully!")
+                    show_vscode_notification(f"✅ Pull request merged to {pr_base} successfully!", "success")
+                    print(f"✅ Pull request merged to {pr_base} successfully!")
                     
                     # Switch to target branch and pull the merged changes
-                    print(f"\n{step_counter + 2}️⃣  Updating local {target_branch} branch...")
-                    checkout_result = run_command_execute(f"git checkout {target_branch}", f"Switch to {target_branch} branch")
+                    print(f"\n{step_counter + 2}️⃣  Updating local {pr_base} branch...")
+                    checkout_result = run_command_execute(f"git checkout {pr_base}", f"Switch to {pr_base} branch")
                     if checkout_result and checkout_result.returncode == 0:
-                        pull_result = run_command_execute("git pull", f"Pull merged changes to {target_branch}")
+                        pull_result = run_command_execute("git pull", f"Pull merged changes to {pr_base}")
                         if pull_result and pull_result.returncode == 0:
-                            show_vscode_notification(f"✅ Local {target_branch} branch updated with merged changes!", "success")
+                            show_vscode_notification(f"✅ Local {pr_base} branch updated with merged changes!", "success")
                             
                             # If merged to main, also sync Testing branch to keep it up to date
-                            if target_branch == "main":
+                            if pr_base == "main":
                                 print(f"\n{step_counter + 3}️⃣  Syncing Testing branch with main to avoid falling behind...")
                                 testing_checkout = run_command_execute("git checkout Testing", "Switch to Testing branch")
                                 if testing_checkout and testing_checkout.returncode == 0:
