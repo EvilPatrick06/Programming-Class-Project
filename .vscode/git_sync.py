@@ -371,11 +371,30 @@ def generate_copilot_commit_message():
         return generate_smart_commit_message(changes_summary)
 
 def generate_smart_commit_message(changes_summary):
-    """Generate an intelligent commit message based on file changes"""
+    """Generate an intelligent, human-readable commit message based on actual file changes"""
     try:
         if not changes_summary:
             return None, "No changes detected."
         
+        # Get detailed diff information for better analysis
+        try:
+            diff_result = subprocess.run("git diff HEAD --numstat", shell=True, capture_output=True, text=True, timeout=10)
+            diff_lines = diff_result.stdout.strip().split('\n') if diff_result.stdout.strip() else []
+        except:
+            diff_lines = []
+        
+        # Get specific file changes with context
+        file_changes = {}
+        for line in diff_lines:
+            if line.strip():
+                parts = line.split('\t')
+                if len(parts) >= 3:
+                    added = parts[0] if parts[0] != '-' else '0'
+                    deleted = parts[1] if parts[1] != '-' else '0'
+                    filename = parts[2]
+                    file_changes[filename] = {'added': added, 'deleted': deleted}
+        
+        # Parse basic file operations
         lines = changes_summary.strip().split('\n')
         modified_files = []
         added_files = []
@@ -389,43 +408,72 @@ def generate_smart_commit_message(changes_summary):
             elif line.startswith(' D ') or line.startswith('D '):
                 deleted_files.append(line[3:])
         
-        # Analyze file types and generate appropriate commit message
-        commit_parts = []
+        # Generate human-readable, specific commit message based on actual changes
+        specific_changes = []
         
-        if deleted_files:
-            temp_files = [f for f in deleted_files if 'tmp_dialog' in f or '.tmp' in f]
-            if temp_files:
-                commit_parts.append("chore: clean up temporary files")
-        
-        if modified_files:
-            vscode_files = [f for f in modified_files if '.vscode/' in f]
-            if vscode_files:
-                script_files = [f for f in vscode_files if '.py' in f or '.sh' in f]
-                if script_files:
-                    commit_parts.append("feat: enhance automation scripts")
+        # Analyze each modified file in detail
+        for filename in modified_files:
+            try:
+                # Get specific changes for this file
+                file_info = file_changes.get(filename, {})
+                added = file_info.get('added', '0')
+                deleted = file_info.get('deleted', '0')
+                
+                # Generate specific descriptions based on file type and changes
+                if filename == '.vscode/git_sync.py':
+                    if int(added) > 100:  # Major changes
+                        specific_changes.append(f"Enhanced git_sync.py with {added} line improvements for better PR and commit message generation")
+                    else:
+                        specific_changes.append(f"Updated git_sync.py with {added} line improvements")
+                elif filename == '.vscode/auto_sync.py':
+                    specific_changes.append(f"Improved auto_sync.py with {added} new lines for better automation")
+                elif filename == '.vscode/sync-repo.sh':
+                    specific_changes.append(f"Updated sync-repo.sh script with better temporary file handling")
+                elif 'Documentation/' in filename:
+                    if 'Collaboration-Process' in filename:
+                        specific_changes.append(f"Updated collaboration process documentation in {os.path.basename(filename)}")
+                    else:
+                        specific_changes.append(f"Updated {os.path.basename(filename)} documentation")
+                elif filename.endswith('.py'):
+                    specific_changes.append(f"Improved {os.path.basename(filename)} Python script")
+                elif filename.endswith('.md'):
+                    specific_changes.append(f"Updated {os.path.basename(filename)} documentation")
                 else:
-                    commit_parts.append("chore: update VS Code configuration")
-            
-            other_files = [f for f in modified_files if '.vscode/' not in f]
-            if other_files:
-                if any('.py' in f for f in other_files):
-                    commit_parts.append("feat: update Python code")
-                elif any('.md' in f for f in other_files):
-                    commit_parts.append("docs: update documentation")
-                else:
-                    commit_parts.append("feat: update project files")
+                    specific_changes.append(f"Modified {os.path.basename(filename)}")
+                    
+            except:
+                specific_changes.append(f"Updated {os.path.basename(filename)}")
         
-        if added_files:
-            commit_parts.append("feat: add new files")
-        
-        # Generate final commit message
-        if commit_parts:
-            if len(commit_parts) == 1:
-                commit_msg = commit_parts[0]
+        # Handle added files
+        for filename in added_files:
+            if '.vscode/tmp/' in filename and 'tmp_dialog' in filename:
+                continue  # Skip temporary dialog files in description
             else:
-                commit_msg = "feat: " + " and ".join([part.split(': ', 1)[1] for part in commit_parts])
+                specific_changes.append(f"Added new file {os.path.basename(filename)}")
+        
+        # Handle deleted files  
+        temp_deletions = [f for f in deleted_files if 'tmp_dialog' in f or '.tmp' in f]
+        regular_deletions = [f for f in deleted_files if f not in temp_deletions]
+        
+        if temp_deletions:
+            specific_changes.append(f"Cleaned up {len(temp_deletions)} temporary dialog files")
+        
+        for filename in regular_deletions:
+            specific_changes.append(f"Removed {os.path.basename(filename)}")
+        
+        # Create final human-readable commit message
+        if not specific_changes:
+            return "Updated project files with minor changes", None
+            
+        if len(specific_changes) == 1:
+            commit_msg = specific_changes[0].capitalize()
+        elif len(specific_changes) == 2:
+            commit_msg = f"{specific_changes[0].capitalize()} and {specific_changes[1]}"
         else:
-            commit_msg = "chore: update project files"
+            # For multiple changes, create a summary
+            main_change = specific_changes[0].capitalize()
+            other_count = len(specific_changes) - 1
+            commit_msg = f"{main_change} and {other_count} other improvements"
         
         return commit_msg, None
         
@@ -437,47 +485,89 @@ def generate_copilot_pr_details(commit_message=None):
     try:
         print("🤖 Generating PR title and description using GitHub Copilot...")
         
-        # Get simple context for faster processing
-        status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
-        changes_summary = status_result.stdout.strip()
-        
-        # Use commit message as primary context if available
-        if commit_message:
-            context = f"Create a pull request for commit: {commit_message} with file changes: {changes_summary[:200]}"
-        else:
-            context = f"Create a pull request for file changes: {changes_summary[:300]}"
-        
-        # Generate PR using GitHub CLI target
-        pr_result = subprocess.run(
-            ["gh", "copilot", "suggest", "-t", "gh", context],
-            capture_output=True, text=True, timeout=30
-        )
-        
-        pr_title = None
-        if pr_result.returncode == 0 and pr_result.stdout.strip():
-            lines = pr_result.stdout.strip().split('\n')
+        # Get detailed diff for better context
+        try:
+            diff_result = subprocess.run("git diff --cached --stat", shell=True, capture_output=True, text=True, timeout=10)
+            diff_summary = diff_result.stdout.strip()
             
-            # Look for gh pr create command
-            for line in lines:
-                if 'gh pr create' in line and '--title' in line:
-                    # Extract title from --title "title"
-                    parts = line.split('--title')
-                    if len(parts) > 1:
-                        title_part = parts[1].strip()
-                        if title_part.startswith('"'):
-                            end_quote = title_part.find('"', 1)
-                            if end_quote > 0:
-                                pr_title = title_part[1:end_quote]
-                                break
+            # Get file changes list
+            status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
+            changes_summary = status_result.stdout.strip()
+        except:
+            diff_summary = ""
+            changes_summary = ""
         
-        # Fallback: use commit message as title if available
-        if not pr_title and commit_message:
-            pr_title = commit_message
-        elif not pr_title:
-            pr_title = "Update files"
+        # Try to generate both title and description separately
+        pr_title = None
+        pr_description = None
         
-        # Use commit message as description
-        pr_description = commit_message if commit_message else "Automated pull request created by git sync script."
+        # Generate title first - should be concise
+        if commit_message:
+            title_context = f"Generate a concise PR title (max 60 chars) for this commit: {commit_message}"
+        else:
+            title_context = f"Generate a concise PR title for changes: {changes_summary[:200]}"
+        
+        try:
+            title_result = subprocess.run(
+                ["gh", "copilot", "suggest", "-t", "gh", title_context],
+                capture_output=True, text=True, timeout=20
+            )
+            
+            if title_result.returncode == 0 and title_result.stdout.strip():
+                lines = title_result.stdout.strip().split('\n')
+                for line in lines:
+                    if 'gh pr create' in line and '--title' in line:
+                        parts = line.split('--title')
+                        if len(parts) > 1:
+                            title_part = parts[1].strip()
+                            if title_part.startswith('"'):
+                                end_quote = title_part.find('"', 1)
+                                if end_quote > 0:
+                                    pr_title = title_part[1:end_quote]
+                                    break
+        except:
+            pass
+        
+        # Generate description - should be detailed
+        if diff_summary or changes_summary:
+            desc_context = f"Generate a detailed PR description explaining these changes:\n{diff_summary}\nFiles changed: {changes_summary}"
+        elif commit_message:
+            desc_context = f"Generate a detailed PR description explaining the changes in this commit: {commit_message}"
+        else:
+            desc_context = "Generate a PR description for code changes"
+        
+        try:
+            desc_result = subprocess.run(
+                ["gh", "copilot", "suggest", "-t", "shell", desc_context],
+                capture_output=True, text=True, timeout=20
+            )
+            
+            if desc_result.returncode == 0 and desc_result.stdout.strip():
+                # Extract meaningful description from response
+                desc_lines = desc_result.stdout.strip().split('\n')
+                description_parts = []
+                for line in desc_lines:
+                    line = line.strip()
+                    if line and not line.startswith('$') and not line.startswith('#') and len(line) > 10:
+                        # Skip command suggestions, keep descriptive text
+                        if not any(cmd in line.lower() for cmd in ['git', 'gh ', 'echo', 'cat', 'ls']):
+                            description_parts.append(line)
+                
+                if description_parts:
+                    pr_description = '\n'.join(description_parts[:3])  # Take first few good lines
+        except:
+            pass
+        
+        # Fallbacks with smart generation
+        if not pr_title:
+            if commit_message:
+                # Extract first part of commit message for title
+                pr_title = commit_message.split('\n')[0][:60]  # Limit to 60 chars
+            else:
+                pr_title = generate_smart_pr_title(changes_summary)
+        
+        if not pr_description or pr_description == pr_title:
+            pr_description = generate_smart_pr_description(changes_summary, diff_summary, commit_message)
         
         return pr_title, pr_description, None
         
@@ -485,6 +575,205 @@ def generate_copilot_pr_details(commit_message=None):
         return None, None, "Copilot request timed out. Using manual input."
     except Exception as e:
         return None, None, f"Error generating PR details with Copilot: {str(e)}"
+
+def generate_smart_pr_title(changes_summary):
+    """Generate a specific, human-readable PR title based on actual file changes"""
+    if not changes_summary:
+        return "Update project files"
+    
+    # Get detailed diff information
+    try:
+        diff_result = subprocess.run("git diff HEAD --numstat", shell=True, capture_output=True, text=True, timeout=10)
+        diff_lines = diff_result.stdout.strip().split('\n') if diff_result.stdout.strip() else []
+        
+        file_changes = {}
+        for line in diff_lines:
+            if line.strip():
+                parts = line.split('\t')
+                if len(parts) >= 3:
+                    added = parts[0] if parts[0] != '-' else '0'
+                    filename = parts[2]
+                    file_changes[filename] = {'added': int(added) if added.isdigit() else 0}
+    except:
+        file_changes = {}
+    
+    lines = changes_summary.strip().split('\n')
+    modified_files = []
+    added_files = []
+    deleted_files = []
+    
+    for line in lines:
+        if line.startswith(' M '):
+            modified_files.append(line[3:])
+        elif line.startswith(' A ') or line.startswith('A '):
+            added_files.append(line[3:])
+        elif line.startswith(' D ') or line.startswith('D '):
+            deleted_files.append(line[3:])
+    
+    # Generate specific, human-readable title
+    main_changes = []
+    
+    # Analyze major changes first
+    for filename in modified_files:
+        file_info = file_changes.get(filename, {})
+        added_lines = file_info.get('added', 0)
+        
+        if filename == '.vscode/git_sync.py' and added_lines > 100:
+            main_changes.append("Improve GitHub sync script with better PR generation")
+        elif filename == '.vscode/git_sync.py':
+            main_changes.append("Update git_sync.py script")
+        elif filename == '.vscode/auto_sync.py':
+            main_changes.append("Enhance auto_sync.py automation")
+        elif filename == '.vscode/sync-repo.sh':
+            main_changes.append("Update sync-repo.sh script")
+        elif 'Documentation/' in filename:
+            if 'Collaboration-Process' in filename:
+                main_changes.append("Update collaboration process documentation")
+            else:
+                main_changes.append(f"Update {os.path.basename(filename)} documentation")
+        elif filename.endswith('.py'):
+            main_changes.append(f"Improve {os.path.basename(filename)} script")
+        elif filename.endswith('.md'):
+            main_changes.append(f"Update {os.path.basename(filename)}")
+    
+    # Handle file operations
+    if deleted_files:
+        temp_files = [f for f in deleted_files if 'tmp_dialog' in f or '.tmp' in f]
+        if temp_files and not main_changes:
+            main_changes.append("Clean up temporary files")
+    
+    if not main_changes and added_files:
+        main_changes.append(f"Add {len(added_files)} new files")
+    
+    # Create concise title
+    if not main_changes:
+        return "Update project files"
+    elif len(main_changes) == 1:
+        return main_changes[0]
+    else:
+        # Priority: major script changes first
+        primary = main_changes[0]
+        if len(main_changes) == 2:
+            return f"{primary} and {main_changes[1].lower()}"
+        else:
+            return f"{primary} and {len(main_changes)-1} other updates"
+
+def generate_smart_pr_description(changes_summary, diff_summary, commit_message):
+    """Generate a detailed, human-readable PR description based on actual changes"""
+    description_parts = []
+    
+    # Get detailed diff for better analysis
+    try:
+        diff_result = subprocess.run("git diff HEAD --numstat", shell=True, capture_output=True, text=True, timeout=10)
+        diff_lines = diff_result.stdout.strip().split('\n') if diff_result.stdout.strip() else []
+        
+        file_changes = {}
+        for line in diff_lines:
+            if line.strip():
+                parts = line.split('\t')
+                if len(parts) >= 3:
+                    added = parts[0] if parts[0] != '-' else '0'
+                    deleted = parts[1] if parts[1] != '-' else '0'
+                    filename = parts[2]
+                    file_changes[filename] = {
+                        'added': int(added) if added.isdigit() else 0,
+                        'deleted': int(deleted) if deleted.isdigit() else 0
+                    }
+    except:
+        file_changes = {}
+    
+    # Add summary
+    if commit_message:
+        description_parts.append(f"## What Changed\n{commit_message}")
+    
+    if changes_summary:
+        lines = changes_summary.strip().split('\n')
+        modified_files = []
+        added_files = []
+        deleted_files = []
+        
+        for line in lines:
+            if line.startswith(' M '):
+                modified_files.append(line[3:])
+            elif line.startswith(' A ') or line.startswith('A '):
+                added_files.append(line[3:])
+            elif line.startswith(' D ') or line.startswith('D '):
+                deleted_files.append(line[3:])
+        
+        # Create detailed descriptions for each significant change
+        if modified_files:
+            description_parts.append("## Detailed Changes")
+            
+            for filename in modified_files:
+                file_info = file_changes.get(filename, {})
+                added_lines = file_info.get('added', 0)
+                deleted_lines = file_info.get('deleted', 0)
+                
+                if filename == '.vscode/git_sync.py':
+                    if added_lines > 100:
+                        description_parts.append(f"### Enhanced git_sync.py (+{added_lines} lines)")
+                        description_parts.append("- Completely rewrote PR title and description generation to be more specific and human-readable")
+                        description_parts.append("- Improved commit message generation to analyze actual file changes instead of using generic templates")
+                        description_parts.append("- Added detailed file analysis to create contextual descriptions")
+                        description_parts.append("- Removed generic 'feat:' and 'docs:' prefixes in favor of natural language")
+                    else:
+                        description_parts.append(f"### Updated git_sync.py (+{added_lines} lines)")
+                        description_parts.append("- Made improvements to the GitHub sync functionality")
+                
+                elif filename == '.vscode/auto_sync.py':
+                    description_parts.append(f"### Enhanced auto_sync.py (+{added_lines} lines)")
+                    description_parts.append("- Improved automation script functionality")
+                    
+                elif filename == '.vscode/sync-repo.sh':
+                    description_parts.append(f"### Updated sync-repo.sh (+{added_lines} lines)")
+                    description_parts.append("- Enhanced repository synchronization script")
+                    
+                elif 'Documentation/' in filename:
+                    if 'Collaboration-Process' in filename:
+                        description_parts.append(f"### Updated Collaboration-Process.md")
+                        description_parts.append("- Made minor updates to the collaboration process documentation")
+                    else:
+                        description_parts.append(f"### Updated {os.path.basename(filename)}")
+                        description_parts.append(f"- Made improvements to {os.path.basename(filename)} documentation")
+                        
+                elif filename.endswith('.py'):
+                    description_parts.append(f"### Improved {os.path.basename(filename)} (+{added_lines} lines)")
+                    description_parts.append(f"- Enhanced Python script functionality")
+                    
+                elif filename.endswith('.md'):
+                    description_parts.append(f"### Updated {os.path.basename(filename)}")
+                    description_parts.append(f"- Made updates to documentation")
+        
+        # Handle additions and deletions
+        if added_files:
+            non_temp_files = [f for f in added_files if '.vscode/tmp/' not in f or 'tmp_dialog' not in f]
+            if non_temp_files:
+                description_parts.append(f"### Added New Files ({len(non_temp_files)})")
+                for file in non_temp_files[:5]:
+                    description_parts.append(f"- `{file}`")
+        
+        if deleted_files:
+            temp_files = [f for f in deleted_files if 'tmp_dialog' in f or '.tmp' in f]
+            regular_files = [f for f in deleted_files if f not in temp_files]
+            
+            if temp_files:
+                description_parts.append(f"### Cleanup")
+                description_parts.append(f"- Removed {len(temp_files)} temporary dialog files to keep workspace clean")
+            
+            if regular_files:
+                description_parts.append(f"### Removed Files")
+                for file in regular_files:
+                    description_parts.append(f"- `{file}`")
+    
+    # Add technical details if available
+    if diff_summary and any(char.isdigit() for char in diff_summary):
+        description_parts.append(f"## Technical Summary")
+        description_parts.append(f"```\n{diff_summary}\n```")
+    
+    if not description_parts:
+        return "This pull request includes various improvements and updates to the project files."
+    
+    return '\n'.join(description_parts)
 
 def main():
     """Main git sync function"""

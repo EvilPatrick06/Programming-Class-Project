@@ -38,7 +38,7 @@ Follow these steps when team members want to work together but the primary devel
 
 ### Step 2: Configure Environment
 
-1. Have Copilot install and update all dependencies based on the "Extensions+Updates" file
+1. Follow the prompts in terminal to set up the development environment
 2. Launch Live Share
 3. Share the Live Share link with team members
 
