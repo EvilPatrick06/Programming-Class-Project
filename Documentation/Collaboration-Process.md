@@ -34,7 +34,7 @@ Follow these steps when team members want to work together but the primary devel
 ### Step 1: Set Up Codespace
 
 1. Create or open a codespace under the Testing Branch
-2. Follow the prompts when codespace is opened to clone the repository
+2. Follow the prompts in terminal when codespace is opened to update the vm, VSC extensions, and clone the repository
 
 ### Step 2: Configure Environment
 

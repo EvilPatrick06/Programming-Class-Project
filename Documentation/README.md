@@ -43,6 +43,64 @@ Wordy is a word-guessing game inspired by Wordle, but with several twists:
 
 ---
 
+## Development Environment
+
+This project includes an automated setup system for codespace environments:
+
+### Auto-Sync Script (`auto_sync.py`)
+
+When your codespace opens, the auto-sync script automatically:
+
+1. **Ubuntu Version Upgrades**: Checks for and offers to install new Ubuntu releases (like LTS upgrades)
+2. **System Updates**: Checks for and installs Ubuntu package updates and security patches
+3. **Repository Sync**: Updates your codespace with the latest code from GitHub (including extension configs)
+4. **VS Code Extension Sync**: Installs missing extensions and updates all extensions to latest versions
+5. **Branch Management**: Automatically switches to the Testing branch for development work
+6. **User-Friendly Interface**: Provides VS Code-style dialogs for all interactions
+
+### Extension Management System
+
+The codespace includes an advanced extension management system:
+
+#### **Automatic Extension Sync**
+
+- **Extension Tracking**: All installed extensions are automatically tracked in `.vscode/extensions.txt`
+- **Cross-Codespace Sync**: Extensions sync across different codespaces automatically
+- **Smart Installation**: Missing extensions are detected and installed on startup
+- **Auto-Updates**: All extensions are updated to their latest versions
+
+#### **How It Works**
+
+1. **Install Extensions Normally**: Just install any extension through VS Code's extension marketplace
+2. **Automatic Tracking**: The system automatically adds new extensions to the tracking file
+3. **Push Changes**: When you push changes to GitHub, the extensions list is included
+4. **New Codespace Sync**: Opening a new codespace automatically installs all tracked extensions
+
+#### **Extension File Format**
+
+Extensions are organized by category in `.vscode/extensions.txt`:
+
+```txt
+# Python Development
+ms-python.python
+ms-python.vscode-pylance
+
+# Git and Version Control  
+eamodio.gitlens
+github.copilot
+```
+
+The script runs automatically on codespace startup and can also be triggered manually through the VS Code Tasks menu.
+
+### Manual Sync Options
+
+- **Auto Update Codespace on Startup**: Runs automatically when codespace opens
+- **Manual Codespace Update**: Run the sync script manually anytime
+- **Sync VS Code Extensions**: Manually sync extensions across codespaces
+- **Push Changes to GitHub**: Use `git_sync.py` to push your changes back to GitHub
+
+---
+
 ## How to Play
 
 1. Make sure you have Python installed.

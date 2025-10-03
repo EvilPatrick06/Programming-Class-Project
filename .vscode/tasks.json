@@ -21,7 +21,7 @@
             "runOptions": {
                 "runOn": "folderOpen"
             },
-            "detail": "Automatically updates codespace from GitHub when opened"
+            "detail": "Automatically updates Ubuntu system, syncs VS Code extensions, and syncs codespace from GitHub when opened"
         },
         {
             "label": "Manual Codespace Update",
@@ -40,7 +40,26 @@
                 "clear": true
             },
             "problemMatcher": [],
-            "detail": "Manually update codespace from GitHub with VS Code dialogs"
+            "detail": "Manually update Ubuntu system, sync VS Code extensions, and sync codespace from GitHub with VS Code dialogs"
+        },
+        {
+            "label": "Sync VS Code Extensions",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                ".vscode/extension_manager.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Synchronize VS Code extensions across codespaces"
         },
         {
             "label": "Push Changes to GitHub", 
