@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPO_URL="https://github.com/EvilPatrick06/Programming-Class-Project.git"
-TEMP_DIR="/tmp/repo-sync"
+TEMP_DIR=".vscode/tmp/repo-sync"
 
 # Check if branch parameter is provided
 if [ -z "$1" ]; then
@@ -17,6 +17,9 @@ if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "Testing" ]; then
     echo "Error: Branch must be either 'main' or 'Testing'"
     exit 1
 fi
+
+# Ensure temp directory parent exists
+mkdir -p "$(dirname "$TEMP_DIR")"
 
 # Clone the repository to a temporary directory with specific branch
 git clone -b "$BRANCH" "$REPO_URL" "$TEMP_DIR"
