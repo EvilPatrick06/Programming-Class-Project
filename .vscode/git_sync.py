@@ -14,88 +14,42 @@ import os
 import time
 import tempfile
 import textwrap
+import json
+import readline
+
+# Configure readline for better editing experience
+readline.parse_and_bind("tab: complete")
+readline.parse_and_bind("set editing-mode emacs")  # Enable emacs-style editing (arrow keys, Ctrl+A, Ctrl+E, etc.)
+readline.parse_and_bind("set completion-ignore-case on")
 
 def create_vscode_dialog_html(title, message, options):
     """Create an HTML file for VS Code dialog simulation"""
-    html_content = f"""
-<!DOCTYPE html>
+    # Create options HTML
+    options_html = "".join([f'<button class="option {"secondary" if i > 0 else ""}" onclick="selectOption({i})">{opt}</button>' for i, opt in enumerate(options)])
+    
+    html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <title>{title}</title>
     <style>
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #1e1e1e;
-            color: #cccccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }}
-        .dialog {{
-            background: #2d2d30;
-            border: 1px solid #3e3e42;
-            border-radius: 6px;
-            padding: 24px;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }}
-        .title {{
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: #ffffff;
-        }}
-        .message {{
-            margin-bottom: 24px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }}
-        .options {{
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }}
-        .option {{
-            background: #0e639c;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }}
-        .option:hover {{
-            background: #1177bb;
-        }}
-        .option.secondary {{
-            background: #5a5a5a;
-        }}
-        .option.secondary:hover {{
-            background: #6a6a6a;
-        }}
-        .instructions {{
-            margin-top: 16px;
-            font-size: 12px;
-            color: #999999;
-            text-align: center;
-        }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #1e1e1e; color: #cccccc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }}
+        .dialog {{ background: #2d2d30; border: 1px solid #3e3e42; border-radius: 6px; padding: 24px; max-width: 500px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }}
+        .title {{ font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ffffff; }}
+        .message {{ margin-bottom: 24px; line-height: 1.5; white-space: pre-wrap; }}
+        .options {{ display: flex; flex-direction: column; gap: 8px; }}
+        .option {{ background: #0e639c; color: white; border: none; padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.2s; }}
+        .option:hover {{ background: #1177bb; }}
+        .option.secondary {{ background: #5a5a5a; }}
+        .option.secondary:hover {{ background: #6a6a6a; }}
+        .instructions {{ margin-top: 16px; font-size: 12px; color: #999999; text-align: center; }}
     </style>
 </head>
 <body>
     <div class="dialog">
         <div class="title">{title}</div>
         <div class="message">{message}</div>
-        <div class="options">
-            {"".join([f'<button class="option {'secondary' if i > 0 else ''}" onclick="selectOption({i})">{opt}</button>' for i, opt in enumerate(options)])}
-        </div>
-        <div class="instructions">
-            Click an option above or respond in the terminal with the number (1-{len(options)})
-        </div>
+        <div class="options">{options_html}</div>
+        <div class="instructions">Click an option above or respond in the terminal with the number (1-{len(options)})</div>
     </div>
     <script>
         function selectOption(index) {{
@@ -108,8 +62,7 @@ def create_vscode_dialog_html(title, message, options):
         }}
     </script>
 </body>
-</html>
-"""
+</html>"""
     return html_content
 
 def show_vscode_notification(message, message_type="info"):
@@ -146,8 +99,9 @@ def show_vscode_dialog(title, message, options):
     # Create HTML file for potential viewing - use context manager for proper cleanup
     html_content = create_vscode_dialog_html(title, message, options)
     
-    # Create temp file in current directory instead of system temp for easier cleanup
-    html_file = f".tmp_dialog_{int(time.time())}.html"
+    # Create temp file in .vscode/tmp directory for better organization
+    os.makedirs('.vscode/tmp', exist_ok=True)
+    html_file = f".vscode/tmp/.tmp_dialog_{int(time.time())}.html"
     with open(html_file, 'w') as f:
         f.write(html_content)
     
@@ -179,7 +133,7 @@ def show_vscode_dialog(title, message, options):
     
     return html_file
 
-def get_vscode_input(prompt, options=None):
+def get_vscode_input(prompt, options=None, default_value=None):
     """Get user input through VS Code-style dialog interface"""
     html_file = None
     try:
@@ -202,10 +156,42 @@ def get_vscode_input(prompt, options=None):
             # Simple text input with nice formatting
             print("\n" + "="*60)
             print(f"📝 {prompt}")
+            if default_value:
+                print(f"(Use arrow keys to edit, Enter to confirm, Ctrl+C to cancel)")
             print("="*60)
             try:
-                return input("> ").strip()
+                if default_value:
+                    # Pre-fill the input with the default value for editing
+                    def prefill_input():
+                        try:
+                            readline.insert_text(default_value)
+                            readline.redisplay()
+                        except:
+                            pass  # Fallback gracefully if readline fails
+                    
+                    try:
+                        # Set up readline to pre-fill the input
+                        readline.set_pre_input_hook(prefill_input)
+                        user_input = input("> ").strip()
+                        # Clear the pre-input hook
+                        readline.set_pre_input_hook(None)
+                        
+                        return user_input if user_input else default_value
+                    except:
+                        # Fallback to simple input if readline fails
+                        readline.set_pre_input_hook(None)
+                        print(f"Default: {default_value}")
+                        user_input = input("> ").strip()
+                        return user_input if user_input else default_value
+                else:
+                    user_input = input("> ").strip()
+                    return user_input
             except (EOFError, KeyboardInterrupt):
+                # Make sure to clear the pre-input hook on interrupt
+                try:
+                    readline.set_pre_input_hook(None)
+                except:
+                    pass
                 return None
     except Exception as e:
         print(f"Error getting input: {e}")
@@ -226,7 +212,18 @@ def get_vscode_input(prompt, options=None):
                     except (EOFError, KeyboardInterrupt):
                         return None
             else:
-                return input(f"{prompt}: ").strip()
+                if default_value:
+                    # Pre-fill the input with the default value for editing
+                    def prefill_input():
+                        readline.insert_text(default_value)
+                        readline.redisplay()
+                    
+                    readline.set_pre_input_hook(prefill_input)
+                    user_input = input(f"{prompt}: ").strip()
+                    readline.set_pre_input_hook(None)
+                    return user_input if user_input else default_value
+                else:
+                    return input(f"{prompt}: ").strip()
         except (EOFError, KeyboardInterrupt):
             return None
     finally:
@@ -307,6 +304,187 @@ def check_git_status():
         return has_changes, has_unpushed, branch_needs_upstream
     except Exception:
         return False, False, True
+
+def generate_copilot_commit_message():
+    """Generate a commit message using GitHub Copilot based on git diff"""
+    try:
+        print("🤖 Attempting to generate commit message using GitHub Copilot...")
+        
+        # Get a simple summary of changes quickly
+        status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
+        changes_summary = status_result.stdout.strip()
+        
+        if not changes_summary:
+            return None, "No changes detected to generate commit message from."
+            
+        # First try to use GitHub Copilot CLI
+        prompt = f"Write a git commit message for these file changes: {changes_summary}"
+        
+        # Use GitHub Copilot with correct git target flag
+        copilot_result = subprocess.run(
+            ["gh", "copilot", "suggest", "-t", "git", prompt],
+            capture_output=True, text=True, timeout=30
+        )
+        
+        # Check for authentication or other errors
+        if copilot_result.returncode != 0:
+            error_msg = copilot_result.stderr.strip() if copilot_result.stderr else "Unknown error"
+            print(f"⚠️ GitHub Copilot CLI failed: {error_msg}")
+            
+            # Fallback to intelligent rule-based generation
+            return generate_smart_commit_message(changes_summary)
+        
+        if copilot_result.returncode == 0 and copilot_result.stdout.strip():
+            # Extract the commit message from Copilot's response
+            response = copilot_result.stdout.strip()
+            lines = response.split('\n')
+            
+            # Look for a line that contains git commit command
+            for line in lines:
+                line = line.strip()
+                if 'git commit -m' in line:
+                    # Extract message from git commit -m "message"
+                    start = line.find('"') + 1
+                    end = line.rfind('"')
+                    if start > 0 and end > start:
+                        commit_msg = line[start:end]
+                        if commit_msg and len(commit_msg) > 5:
+                            return commit_msg, None
+                            
+            # Fallback: look for any substantial line that might be a commit message
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('$') and not line.startswith('#') and len(line) > 10:
+                    # Clean up common prefixes
+                    commit_msg = line.replace('git commit -m ', '').replace('"', '').strip()
+                    if commit_msg and len(commit_msg) > 5:
+                        return commit_msg, None
+        
+        # If Copilot didn't provide a good response, use smart fallback
+        return generate_smart_commit_message(changes_summary)
+        
+    except subprocess.TimeoutExpired:
+        print("⚠️ GitHub Copilot timed out, using smart generation...")
+        return generate_smart_commit_message(changes_summary)
+    except Exception as e:
+        print(f"⚠️ GitHub Copilot error: {str(e)}, using smart generation...")
+        return generate_smart_commit_message(changes_summary)
+
+def generate_smart_commit_message(changes_summary):
+    """Generate an intelligent commit message based on file changes"""
+    try:
+        if not changes_summary:
+            return None, "No changes detected."
+        
+        lines = changes_summary.strip().split('\n')
+        modified_files = []
+        added_files = []
+        deleted_files = []
+        
+        for line in lines:
+            if line.startswith(' M '):
+                modified_files.append(line[3:])
+            elif line.startswith(' A ') or line.startswith('A '):
+                added_files.append(line[3:])
+            elif line.startswith(' D ') or line.startswith('D '):
+                deleted_files.append(line[3:])
+        
+        # Analyze file types and generate appropriate commit message
+        commit_parts = []
+        
+        if deleted_files:
+            temp_files = [f for f in deleted_files if 'tmp_dialog' in f or '.tmp' in f]
+            if temp_files:
+                commit_parts.append("chore: clean up temporary files")
+        
+        if modified_files:
+            vscode_files = [f for f in modified_files if '.vscode/' in f]
+            if vscode_files:
+                script_files = [f for f in vscode_files if '.py' in f or '.sh' in f]
+                if script_files:
+                    commit_parts.append("feat: enhance automation scripts")
+                else:
+                    commit_parts.append("chore: update VS Code configuration")
+            
+            other_files = [f for f in modified_files if '.vscode/' not in f]
+            if other_files:
+                if any('.py' in f for f in other_files):
+                    commit_parts.append("feat: update Python code")
+                elif any('.md' in f for f in other_files):
+                    commit_parts.append("docs: update documentation")
+                else:
+                    commit_parts.append("feat: update project files")
+        
+        if added_files:
+            commit_parts.append("feat: add new files")
+        
+        # Generate final commit message
+        if commit_parts:
+            if len(commit_parts) == 1:
+                commit_msg = commit_parts[0]
+            else:
+                commit_msg = "feat: " + " and ".join([part.split(': ', 1)[1] for part in commit_parts])
+        else:
+            commit_msg = "chore: update project files"
+        
+        return commit_msg, None
+        
+    except Exception as e:
+        return "chore: update files", None
+
+def generate_copilot_pr_details(commit_message=None):
+    """Generate PR title and description using GitHub Copilot"""
+    try:
+        print("🤖 Generating PR title and description using GitHub Copilot...")
+        
+        # Get simple context for faster processing
+        status_result = subprocess.run("git status --porcelain", shell=True, capture_output=True, text=True, timeout=5)
+        changes_summary = status_result.stdout.strip()
+        
+        # Use commit message as primary context if available
+        if commit_message:
+            context = f"Create a pull request for commit: {commit_message} with file changes: {changes_summary[:200]}"
+        else:
+            context = f"Create a pull request for file changes: {changes_summary[:300]}"
+        
+        # Generate PR using GitHub CLI target
+        pr_result = subprocess.run(
+            ["gh", "copilot", "suggest", "-t", "gh", context],
+            capture_output=True, text=True, timeout=30
+        )
+        
+        pr_title = None
+        if pr_result.returncode == 0 and pr_result.stdout.strip():
+            lines = pr_result.stdout.strip().split('\n')
+            
+            # Look for gh pr create command
+            for line in lines:
+                if 'gh pr create' in line and '--title' in line:
+                    # Extract title from --title "title"
+                    parts = line.split('--title')
+                    if len(parts) > 1:
+                        title_part = parts[1].strip()
+                        if title_part.startswith('"'):
+                            end_quote = title_part.find('"', 1)
+                            if end_quote > 0:
+                                pr_title = title_part[1:end_quote]
+                                break
+        
+        # Fallback: use commit message as title if available
+        if not pr_title and commit_message:
+            pr_title = commit_message
+        elif not pr_title:
+            pr_title = "Update files"
+        
+        # Use commit message as description
+        pr_description = commit_message if commit_message else "Automated pull request created by git sync script."
+        
+        return pr_title, pr_description, None
+        
+    except subprocess.TimeoutExpired:
+        return None, None, "Copilot request timed out. Using manual input."
+    except Exception as e:
+        return None, None, f"Error generating PR details with Copilot: {str(e)}"
 
 def main():
     """Main git sync function"""
@@ -642,16 +820,116 @@ def main():
     # Get commit message (only if there are changes to commit)
     commit_message = None
     if has_changes:
-        commit_message = get_vscode_input("Enter your commit message")
+        # Use Copilot to generate commit message directly
+        generated_msg, error = generate_copilot_commit_message()
+        
+        if generated_msg:
+            # Show the commit message in the dialog prompt
+            dialog_message = f"Would you like to use this Copilot-generated commit message?\n\nCommit message: \"{generated_msg}\""
+            
+            copilot_choice = get_vscode_input(
+                dialog_message,
+                ["Yes, use this message", "No, let me edit it", "No, write manually instead"]
+            )
+            
+            if copilot_choice and "Yes" in copilot_choice:
+                commit_message = generated_msg
+            elif copilot_choice and "edit" in copilot_choice:
+                print(f"Edit the Copilot suggestion:")
+                edited_message = get_vscode_input("Commit message (edit as needed)", None, generated_msg)
+                final_message = edited_message if edited_message else generated_msg
+                
+                # Show confirmation dialog with the edited message
+                confirm_edit = get_vscode_input(
+                    f"Is this commit message correct?\n\nCommit message: \"{final_message}\"",
+                    ["Yes, use this message", "No, let me edit it again", "No, write manually instead"]
+                )
+                
+                if confirm_edit and "Yes" in confirm_edit:
+                    commit_message = final_message
+                elif confirm_edit and "edit it again" in confirm_edit:
+                    # Allow editing again
+                    re_edited_message = get_vscode_input("Commit message (edit again)", None, final_message)
+                    commit_message = re_edited_message if re_edited_message else final_message
+                else:
+                    # Manual entry with confirmation
+                    manual_message = get_vscode_input("Enter your commit message manually")
+                    
+                    if manual_message:
+                        # Show confirmation dialog with the manual message
+                        confirm_manual = get_vscode_input(
+                            f"Is this commit message correct?\n\nCommit message: \"{manual_message}\"",
+                            ["Yes, use this message", "No, let me edit it", "Use the auto-generated one instead"]
+                        )
+                        
+                        if confirm_manual and "Yes" in confirm_manual:
+                            commit_message = manual_message
+                        elif confirm_manual and "edit" in confirm_manual:
+                            # Allow editing the manual message
+                            edited_manual = get_vscode_input("Commit message (edit as needed)", None, manual_message)
+                            commit_message = edited_manual if edited_manual else manual_message
+                        elif confirm_manual and "auto-generated" in confirm_manual:
+                            # Use the original Copilot suggestion
+                            commit_message = generated_msg
+                        else:
+                            commit_message = manual_message
+                    else:
+                        # If no manual message entered, use Copilot suggestion
+                        commit_message = generated_msg
+            else:
+                # Manual entry with confirmation
+                manual_message = get_vscode_input("Enter your commit message manually")
+                
+                if manual_message:
+                    # Show confirmation dialog with the manual message
+                    confirm_manual = get_vscode_input(
+                        f"Is this commit message correct?\n\nCommit message: \"{manual_message}\"",
+                        ["Yes, use this message", "No, let me edit it", "Use the auto-generated one instead"]
+                    )
+                    
+                    if confirm_manual and "Yes" in confirm_manual:
+                        commit_message = manual_message
+                    elif confirm_manual and "edit" in confirm_manual:
+                        # Allow editing the manual message
+                        edited_manual = get_vscode_input("Commit message (edit as needed)", None, manual_message)
+                        commit_message = edited_manual if edited_manual else manual_message
+                    elif confirm_manual and "auto-generated" in confirm_manual:
+                        # Use the original Copilot suggestion
+                        commit_message = generated_msg
+                    else:
+                        commit_message = manual_message
+                else:
+                    # If no manual message entered, use Copilot suggestion
+                    commit_message = generated_msg
+        else:
+            show_vscode_notification(f"⚠️ Copilot generation failed: {error}", "warning")
+            print(f"⚠️ Copilot generation failed: {error}")
+            # Fall back to manual entry with confirmation
+            manual_message = get_vscode_input("Enter your commit message manually")
+            
+            if manual_message:
+                # Show confirmation dialog with the manual message
+                confirm_manual = get_vscode_input(
+                    f"Is this commit message correct?\n\nCommit message: \"{manual_message}\"",
+                    ["Yes, use this message", "No, let me edit it"]
+                )
+                
+                if confirm_manual and "Yes" in confirm_manual:
+                    commit_message = manual_message
+                else:
+                    # Allow editing the manual message
+                    edited_manual = get_vscode_input("Commit message (edit as needed)", None, manual_message)
+                    commit_message = edited_manual if edited_manual else manual_message
+            else:
+                commit_message = "Update files"  # Default fallback
         
         if not commit_message:
             show_vscode_notification("❌ Commit message is required. Cancelling sync.", "error")
             return
         
         # Confirm commit message
-        print(f"\nCommit message: '{commit_message}'")
         confirm_message = get_vscode_input(
-            "Is this commit message correct?",
+            f"Is this commit message correct?\n\nCommit message: \"{commit_message}\"",
             ["Yes, use this message", "No, let me change it"]
         )
         
@@ -779,15 +1057,120 @@ def main():
     if create_pr:
         print(f"\n{step_counter}️⃣  Creating Pull Request...")
         
-        # Get PR title and body
-        pr_title = get_vscode_input("Enter pull request title (or press Enter to use commit message)")
+        # Use Copilot to generate PR details directly
+        generated_title, generated_body, error = generate_copilot_pr_details(commit_message)
+        
+        pr_title = None
+        pr_body = None
+        
+        if generated_title and generated_body:
+            # Show the PR details in the dialog prompt
+            dialog_message = f"Would you like to use these Copilot-generated PR details?\n\nTitle: \"{generated_title}\"\n\nDescription: \"{generated_body[:200]}{'...' if len(generated_body) > 200 else ''}\""
+            
+            copilot_pr_choice = get_vscode_input(
+                dialog_message,
+                ["Yes, use both title and description", "Yes, but let me edit them", "No, write manually"]
+            )
+            
+            if copilot_pr_choice and "use both" in copilot_pr_choice:
+                pr_title = generated_title
+                pr_body = generated_body
+            elif copilot_pr_choice and "edit" in copilot_pr_choice:
+                # Allow editing of generated content
+                print(f"Edit the Copilot-generated title:")
+                edited_title = get_vscode_input("PR title (edit as needed)", None, generated_title)
+                final_title = edited_title if edited_title else generated_title
+                
+                print(f"Edit the Copilot-generated description:")
+                edited_body = get_vscode_input("PR description (edit as needed)", None, generated_body)
+                final_body = edited_body if edited_body else generated_body
+                
+                # Show confirmation dialog with the edited PR details
+                confirm_edit = get_vscode_input(
+                    f"Are these PR details correct?\n\nTitle: \"{final_title}\"\n\nDescription: \"{final_body[:200]}{'...' if len(final_body) > 200 else ''}\"",
+                    ["Yes, use these details", "No, let me edit them again", "No, write manually instead"]
+                )
+                
+                if confirm_edit and "Yes" in confirm_edit:
+                    pr_title = final_title
+                    pr_body = final_body
+                elif confirm_edit and "edit them again" in confirm_edit:
+                    # Allow editing again
+                    print(f"Edit the title again:")
+                    re_edited_title = get_vscode_input("PR title (edit again)", None, final_title)
+                    pr_title = re_edited_title if re_edited_title else final_title
+                    
+                    print(f"Edit the description again:")
+                    re_edited_body = get_vscode_input("PR description (edit again)", None, final_body)
+                    pr_body = re_edited_body if re_edited_body else final_body
+                else:
+                    # Manual entry with confirmation
+                    manual_title = get_vscode_input("Enter pull request title (or press Enter to use commit message)")
+                    manual_body = get_vscode_input("Enter pull request description (optional)")
+                    
+                    final_manual_title = manual_title if manual_title else (commit_message if commit_message else f"Changes from {current_branch}")
+                    final_manual_body = manual_body if manual_body else (commit_message if commit_message else "Automated pull request created by git sync script.")
+                    
+                    # Show confirmation dialog
+                    confirm_manual_pr = get_vscode_input(
+                        f"Are these PR details correct?\n\nTitle: \"{final_manual_title}\"\n\nDescription: \"{final_manual_body[:200]}{'...' if len(final_manual_body) > 200 else ''}\"",
+                        ["Yes, use these details", "No, let me edit them", "Use the auto-generated ones instead"]
+                    )
+                    
+                    if confirm_manual_pr and "Yes" in confirm_manual_pr:
+                        pr_title = final_manual_title
+                        pr_body = final_manual_body
+                    elif confirm_manual_pr and "edit" in confirm_manual_pr:
+                        # Allow editing
+                        edited_title = get_vscode_input("PR title (edit as needed)", None, final_manual_title)
+                        edited_body = get_vscode_input("PR description (edit as needed)", None, final_manual_body)
+                        pr_title = edited_title if edited_title else final_manual_title
+                        pr_body = edited_body if edited_body else final_manual_body
+                    elif confirm_manual_pr and "auto-generated" in confirm_manual_pr:
+                        # Use the original Copilot suggestions
+                        pr_title = generated_title
+                        pr_body = generated_body
+                    else:
+                        pr_title = final_manual_title
+                        pr_body = final_manual_body
+            else:
+                # Fall back to manual entry
+                pr_title = get_vscode_input("Enter pull request title (or press Enter to use commit message)")
+                pr_body = get_vscode_input("Enter pull request description (optional)")
+        else:
+            show_vscode_notification(f"⚠️ Copilot PR generation failed: {error}", "warning")
+            print(f"⚠️ Copilot PR generation failed: {error}")
+            # Fall back to manual entry with confirmation
+            manual_title = get_vscode_input("Enter pull request title (or press Enter to use commit message)")
+            manual_body = get_vscode_input("Enter pull request description (optional)")
+            
+            final_manual_title = manual_title if manual_title else (commit_message if commit_message else f"Changes from {current_branch}")
+            final_manual_body = manual_body if manual_body else (commit_message if commit_message else "Automated pull request created by git sync script.")
+            
+            # Show confirmation dialog
+            confirm_manual_pr = get_vscode_input(
+                f"Are these PR details correct?\n\nTitle: \"{final_manual_title}\"\n\nDescription: \"{final_manual_body[:200]}{'...' if len(final_manual_body) > 200 else ''}\"",
+                ["Yes, use these details", "No, let me edit them"]
+            )
+            
+            if confirm_manual_pr and "Yes" in confirm_manual_pr:
+                pr_title = final_manual_title
+                pr_body = final_manual_body
+            else:
+                # Allow editing
+                edited_title = get_vscode_input("PR title (edit as needed)", None, final_manual_title)
+                edited_body = get_vscode_input("PR description (edit as needed)", None, final_manual_body)
+                pr_title = edited_title if edited_title else final_manual_title
+                pr_body = edited_body if edited_body else final_manual_body
+        
+        # Set defaults if nothing was provided
         if not pr_title and commit_message:
             pr_title = commit_message
         elif not pr_title:
             pr_title = f"Changes from {current_branch}"
         
-        # Use commit message as default PR description
-        pr_body = commit_message if commit_message else "Automated pull request created by git sync script."
+        if not pr_body:
+            pr_body = commit_message if commit_message else "Automated pull request created by git sync script."
         
         # Create the pull request - use pr_target if it exists, otherwise target_branch
         pr_base = pr_target if 'pr_target' in locals() else target_branch
@@ -910,11 +1293,22 @@ def main():
 def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
     try:
-        # Clean up current directory temp files
+        # Clean up .vscode/tmp directory temp files
+        tmp_dir = '.vscode/tmp'
+        if os.path.exists(tmp_dir):
+            for file in os.listdir(tmp_dir):
+                if file.startswith('.tmp_dialog_') and file.endswith('.html'):
+                    try:
+                        print(f"🧹 Cleaning up temp file: {file}")
+                        os.unlink(os.path.join(tmp_dir, file))
+                    except:
+                        pass
+        
+        # Clean up old temp files in current directory (for backward compatibility)
         for file in os.listdir('.'):
             if file.startswith('.tmp_dialog_') and file.endswith('.html'):
                 try:
-                    print(f"🧹 Cleaning up temp file: {file}")
+                    print(f"🧹 Cleaning up old temp file: {file}")
                     os.unlink(file)
                 except:
                     pass

@@ -183,8 +183,9 @@ def show_vscode_dialog(title, message, options):
     # Create HTML file for potential viewing
     html_content = create_vscode_dialog_html(title, message, options)
     
-    # Create temp file in current directory instead of system temp for easier cleanup
-    html_file = f".tmp_dialog_{int(time.time())}.html"
+    # Create temp file in .vscode/tmp directory for better organization
+    os.makedirs('.vscode/tmp', exist_ok=True)
+    html_file = f".vscode/tmp/.tmp_dialog_{int(time.time())}.html"
     with open(html_file, 'w') as f:
         f.write(html_content)
     
@@ -842,7 +843,17 @@ def sync_repository():
 def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
     try:
-        # Clean up current directory temp files
+        # Clean up .vscode/tmp directory temp files
+        tmp_dir = '.vscode/tmp'
+        if os.path.exists(tmp_dir):
+            for file in os.listdir(tmp_dir):
+                if file.startswith('.tmp_dialog_') and file.endswith('.html'):
+                    try:
+                        os.unlink(os.path.join(tmp_dir, file))
+                    except:
+                        pass
+        
+        # Clean up old temp files in current directory (for backward compatibility)
         for file in os.listdir('.'):
             if file.startswith('.tmp_dialog_') and file.endswith('.html'):
                 try:
