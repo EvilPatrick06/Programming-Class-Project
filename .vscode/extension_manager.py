@@ -352,8 +352,15 @@ def main():
             print("This script is designed for codespace environments.")
             return
         
-        # Add a small delay to ensure VS Code is fully loaded
-        time.sleep(3)
+        # Check if running in container setup mode
+        container_setup_mode = os.environ.get('CONTAINER_SETUP_MODE', 'false').lower() == 'true'
+        
+        if container_setup_mode:
+            print("🔧 Running in container setup mode - minimal delays, essential extensions only")
+            time.sleep(1)  # Minimal delay in container setup
+        else:
+            print("🖥️  Running in VS Code mode - full extension sync")
+            time.sleep(3)  # Normal delay for VS Code context
         
         sync_extensions()
         
