@@ -6,22 +6,23 @@
             "type": "shell",
             "command": "bash",
             "args": [
-                ".vscode/auto_sync_wrapper.sh"
+                "-c",
+                "sleep 60 && bash .vscode/auto_sync_wrapper.sh"
             ],
             "group": "build",
             "presentation": {
                 "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "new",
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
                 "showReuseMessage": false,
-                "clear": true
+                "clear": false
             },
             "problemMatcher": [],
             "runOptions": {
                 "runOn": "folderOpen"
             },
-            "detail": "Waits for container setup to complete, then runs Ubuntu updates, extension sync, and repository operations"
+            "detail": "Waits 60s for VS Code to initialize, then waits for container setup and extensions before running auto-sync (runs quietly in background)"
         },
         {
             "label": "Manual Codespace Update",
@@ -79,6 +80,44 @@
             },
             "problemMatcher": [],
             "detail": "Push your local changes to GitHub with comprehensive sync options"
+        },
+        {
+            "label": "Check VS Code Readiness",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".vscode/check_vscode_ready.sh"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Check if VS Code and extensions are ready for auto-sync operations"
+        },
+        {
+            "label": "Manual Auto Sync (Visible)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                ".vscode/auto_sync_wrapper.sh"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Run the auto-sync wrapper manually with full visibility (doesn't wait for startup delay)"
         }
     ]
 }
