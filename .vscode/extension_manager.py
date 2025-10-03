@@ -56,6 +56,9 @@ def get_installed_extensions():
             extensions = []
             for ext in result.stdout.split('\n'):
                 ext = ext.strip()
+                # Skip VS Code output headers that might get mixed in
+                if ext.startswith("Extensions installed on Codespaces:"):
+                    continue
                 # Filter out invalid or system messages
                 if ext and re.match(r'^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$', ext):
                     extensions.append(ext)
@@ -87,10 +90,13 @@ def read_extensions_file():
             line = line.strip()
             # Skip empty lines and comments
             if line and not line.startswith('#'):
+                # Skip VS Code output headers that might get mixed in
+                if line.startswith("Extensions installed on Codespaces:"):
+                    continue
                 # Validate extension format (publisher.extension-name)
                 if re.match(r'^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$', line):
                     extensions.append(line)
-                elif line != "Extensions installed on Codespaces: ominous chainsaw:":
+                else:
                     print(f"⚠️  Invalid extension format: {line}")
         
         return extensions
