@@ -4,9 +4,9 @@
         {
             "label": "Auto Update Codespace on Startup",
             "type": "shell",
-            "command": "python3",
+            "command": "bash",
             "args": [
-                ".vscode/auto_sync.py"
+                ".vscode/auto_sync_wrapper.sh"
             ],
             "group": "build",
             "presentation": {
@@ -21,7 +21,7 @@
             "runOptions": {
                 "runOn": "folderOpen"
             },
-            "detail": "Automatically updates Ubuntu system, syncs VS Code extensions, and syncs codespace from GitHub when opened"
+            "detail": "Waits for container setup to complete, then runs Ubuntu updates, extension sync, and repository operations"
         },
         {
             "label": "Manual Codespace Update",

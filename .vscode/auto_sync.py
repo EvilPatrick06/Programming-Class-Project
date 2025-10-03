@@ -201,6 +201,22 @@ def show_vscode_dialog(title, message, options):
 
 def get_vscode_input(prompt, options=None):
     """Get user input through VS Code-style dialog interface"""
+    # Check if running in non-interactive mode (during startup)
+    if os.environ.get('AUTO_SYNC_NON_INTERACTIVE', '').lower() == 'true':
+        if options:
+            # Return safe default option for startup
+            if "Keep my changes" in str(options):
+                for opt in options:
+                    if "Keep my changes" in opt or "skip" in opt.lower():
+                        print(f"🤖 Non-interactive mode: Selected '{opt}'")
+                        return opt
+            # Default to first option if no safe option found
+            print(f"🤖 Non-interactive mode: Selected '{options[0]}'")
+            return options[0]
+        else:
+            print(f"🤖 Non-interactive mode: Skipping input for '{prompt}'")
+            return ""
+    
     html_file = None
     try:
         if options:
