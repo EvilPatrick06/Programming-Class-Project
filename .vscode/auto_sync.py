@@ -150,9 +150,10 @@ def show_vscode_dialog(title, message, options):
     # Create HTML file for potential viewing
     html_content = create_vscode_dialog_html(title, message, options)
     
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+    # Create temp file in current directory instead of system temp for easier cleanup
+    html_file = f".tmp_dialog_{int(time.time())}.html"
+    with open(html_file, 'w') as f:
         f.write(html_content)
-        html_file = f.name
     
     # Show in terminal with nice formatting
     print("\033[2J\033[H")  # Clear screen
@@ -177,17 +178,14 @@ def show_vscode_dialog(title, message, options):
     print("└" + "─" * 78 + "┘")
     print()
     
-    # Try to open HTML in VS Code's simple browser as a bonus
-    try:
-        subprocess.run(["code", "--command", "simpleBrowser.show", f"file://{html_file}"], 
-                      capture_output=True, timeout=2)
-    except:
-        pass  # Ignore if it fails
+    # Note: We don't open in VS Code browser to avoid leftover tabs with weird URLs
+    # The terminal-based dialog is sufficient and cleaner
     
     return html_file
 
 def get_vscode_input(prompt, options=None):
     """Get user input through VS Code-style dialog interface"""
+    html_file = None
     try:
         if options:
             # Show the dialog-style interface
@@ -200,19 +198,9 @@ def get_vscode_input(prompt, options=None):
                     if choice.isdigit():
                         idx = int(choice) - 1
                         if 0 <= idx < len(options):
-                            # Clean up HTML file
-                            try:
-                                os.unlink(html_file)
-                            except:
-                                pass
                             return options[idx]
                     print("Invalid choice. Please try again.")
                 except (EOFError, KeyboardInterrupt):
-                    # Clean up HTML file
-                    try:
-                        os.unlink(html_file)
-                    except:
-                        pass
                     return None
         else:
             # Simple text input with nice formatting
@@ -226,25 +214,32 @@ def get_vscode_input(prompt, options=None):
     except Exception as e:
         print(f"Error getting input: {e}")
         # Fallback to simple terminal input
-        if options:
-            print(f"\n{prompt}")
-            for i, option in enumerate(options):
-                print(f"{i+1}. {option}")
-            while True:
-                try:
-                    choice = input(f"Enter your choice (1-{len(options)}): ").strip()
-                    if choice.isdigit():
-                        idx = int(choice) - 1
-                        if 0 <= idx < len(options):
-                            return options[idx]
-                    print("Invalid choice. Please try again.")
-                except (EOFError, KeyboardInterrupt):
-                    return None
-        else:
-            try:
+        try:
+            if options:
+                print(f"\n{prompt}")
+                for i, option in enumerate(options):
+                    print(f"{i+1}. {option}")
+                while True:
+                    try:
+                        choice = input(f"Enter your choice (1-{len(options)}): ").strip()
+                        if choice.isdigit():
+                            idx = int(choice) - 1
+                            if 0 <= idx < len(options):
+                                return options[idx]
+                        print("Invalid choice. Please try again.")
+                    except (EOFError, KeyboardInterrupt):
+                        return None
+            else:
                 return input(f"{prompt}: ").strip()
-            except (EOFError, KeyboardInterrupt):
-                return None
+        except (EOFError, KeyboardInterrupt):
+            return None
+    finally:
+        # Always clean up HTML file, regardless of how the function exits
+        if html_file and os.path.exists(html_file):
+            try:
+                os.unlink(html_file)
+            except:
+                pass
 
 def check_git_status():
     """Check if there are any uncommitted changes or unpushed commits"""
@@ -544,6 +539,31 @@ def sync_repository():
             show_vscode_notification("✅ Keeping your changes. Use git_sync.py when ready to push.", "info")
             print("✅ Keeping your changes. Use git_sync.py when you're ready to push to GitHub.")
 
+def cleanup_temp_files():
+    """Clean up temporary HTML files created by the script"""
+    try:
+        # Clean up current directory temp files
+        for file in os.listdir('.'):
+            if file.startswith('.tmp_dialog_') and file.endswith('.html'):
+                try:
+                    os.unlink(file)
+                except:
+                    pass
+        
+        # Clean up system temp directory HTML files (from older versions)
+        import glob
+        temp_pattern = os.path.join(tempfile.gettempdir(), 'tmp*.html')
+        for html_file in glob.glob(temp_pattern):
+            try:
+                # Only delete files that are more than 10 minutes old to avoid conflicts
+                if os.path.getmtime(html_file) < time.time() - 600:
+                    os.unlink(html_file)
+            except:
+                pass
+    except Exception as e:
+        # Don't fail the script for cleanup issues
+        pass
+
 def main():
     """Main function"""
     try:
@@ -564,6 +584,9 @@ def main():
     except Exception as e:
         show_vscode_notification(f"❌ Error during auto-sync: {e}", "error")
         print(f"❌ Error during auto-sync: {e}")
+    finally:
+        # Always clean up temporary files
+        cleanup_temp_files()
 
 if __name__ == "__main__":
     main()
