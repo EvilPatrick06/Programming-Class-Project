@@ -11,8 +11,10 @@ sleep 45  # Give VS Code and extensions time to fully initialize
 if [ -f "/workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh" ]; then
     bash /workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh --container-init
 fi
-EOFomplete Container Setup..."
-echo "=" * 60
+EOF
+
+echo "🚀 Complete Container Setup..."
+echo "=" * 30
 
 # Colors for output
 RED='\033[0;31m'
@@ -115,7 +117,7 @@ fi
 EOF
         chmod +x /tmp/delayed-extension-install.sh
         # Run in background so it doesn't block container startup
-        nohup /tmp/delayed-extension-install.sh &
+        /tmp/delayed-extension-install.sh &
         echo -e "${GREEN}✅ Automatic extension installation scheduled${NC}"
         echo -e "${BLUE}📋 Extensions will be installed automatically in background${NC}"
         echo -e "${BLUE}📝 Check log: /tmp/extension-installer.log${NC}"
@@ -143,7 +145,7 @@ fi
 EOF
         chmod +x /tmp/delayed-terminal-setup.sh
         # Run in background so it doesn't block container startup
-        nohup /tmp/delayed-terminal-setup.sh > /tmp/terminal-setup.log 2>&1 &
+        /tmp/delayed-terminal-setup.sh &
         echo -e "${GREEN}✅ Terminal prompt setup scheduled for background execution${NC}"
     else
         echo -e "${YELLOW}⚠️  Terminal prompt setup script not found${NC}"
@@ -159,13 +161,13 @@ EOF
     
     echo ""
     echo -e "${GREEN}🎉 CONTAINER SETUP COMPLETE!${NC}"
-    echo "=" * 60
+    echo "=" * 30
     echo -e "${GREEN}✅ Ubuntu updates: Complete${NC}"
     echo -e "${GREEN}✅ Repository sync: Complete${NC}"
     echo -e "${GREEN}✅ VS Code extensions: Force installation scheduled${NC}"
     echo -e "${GREEN}✅ Terminal prompt: Scheduled for background setup${NC}"
     echo -e "${GREEN}✅ Completion marker: /tmp/container-setup/SETUP-COMPLETE${NC}"
-    echo "=" * 60
+    echo "=" * 30
     echo -e "${BLUE}🚀 VS Code auto-sync task can now safely proceed${NC}"
     echo -e "${BLUE}📁 Setup status directory: /tmp/container-setup/${NC}"
     echo ""
