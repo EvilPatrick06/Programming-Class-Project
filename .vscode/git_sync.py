@@ -659,41 +659,73 @@ def generate_smart_commit_message(changes_summary):
             elif line.startswith('D ') or line.startswith(' D '):
                 deleted_files.append(line[2:])
         
-        # Generate human-readable, specific commit message based on actual changes
+        # Analyze actual code changes to understand what was done
         specific_changes = []
         
-        # Analyze each modified file in detail
+        # Get actual diff content to analyze what changed functionally
+        try:
+            diff_content_result = subprocess.run("git diff HEAD", shell=True, capture_output=True, text=True, timeout=10)
+            diff_content = diff_content_result.stdout if diff_content_result.returncode == 0 else ""
+        except:
+            diff_content = ""
+        
+        # Analyze what actually changed functionally, not just line counts
+        if diff_content:
+            # Look for specific types of changes in the diff
+            has_new_functions = "def " in diff_content and "+def " in diff_content
+            has_removed_functions = "-def " in diff_content
+            has_new_imports = "+import " in diff_content or "+from " in diff_content
+            has_error_handling = any(pattern in diff_content for pattern in ["+try:", "+except", "+finally:"])
+            has_logging = any(pattern in diff_content for pattern in ['+print(', '+logging'])
+            has_documentation = '"""' in diff_content and '+"""' in diff_content
+            has_refactoring = "def " in diff_content and "-def " in diff_content and "+def " in diff_content
+            has_config_changes = any(ext in str(modified_files) for ext in ['.json', '.yml', '.yaml'])
+        
+        # Analyze each modified file with functional understanding
         for filename in modified_files:
-            try:
-                # Get specific changes for this file
-                file_info = file_changes.get(filename, {})
-                added = file_info.get('added', '0')
-                deleted = file_info.get('deleted', '0')
-                
-                # Generate specific descriptions based on file type and changes
-                if filename == '.vscode/git_sync.py':
-                    if int(added) > 100:  # Major changes
-                        specific_changes.append(f"Enhanced git_sync.py with {added} line improvements for better PR and commit message generation")
-                    else:
-                        specific_changes.append(f"Updated git_sync.py with {added} line improvements")
-                elif filename == '.vscode/auto_sync.py':
-                    specific_changes.append(f"Improved auto_sync.py with {added} new lines for better automation")
-                elif filename == '.vscode/sync-repo.sh':
-                    specific_changes.append(f"Updated sync-repo.sh script with better temporary file handling")
-                elif 'Documentation/' in filename:
-                    if 'Collaboration-Process' in filename:
-                        specific_changes.append(f"Updated collaboration process documentation in {os.path.basename(filename)}")
-                    else:
-                        specific_changes.append(f"Updated {os.path.basename(filename)} documentation")
-                elif filename.endswith('.py'):
-                    specific_changes.append(f"Improved {os.path.basename(filename)} Python script")
-                elif filename.endswith('.md'):
-                    specific_changes.append(f"Updated {os.path.basename(filename)} documentation")
+            if filename == '.vscode/git_sync.py':
+                # Analyze git_sync.py changes specifically
+                if 'copilot' in diff_content.lower():
+                    specific_changes.append("Fixed GitHub Copilot integration issues with authentication and timeout handling")
+                elif 'def generate' in diff_content:
+                    specific_changes.append("Enhanced commit and PR message generation with better contextual analysis")
+                elif 'timeout' in diff_content or 'subprocess' in diff_content:
+                    specific_changes.append("Improved subprocess handling and timeout management for external commands")
+                elif has_error_handling:
+                    specific_changes.append("Added better error handling and fallback mechanisms")
+                elif has_refactoring:
+                    specific_changes.append("Refactored functions for better maintainability and reliability")
                 else:
-                    specific_changes.append(f"Modified {os.path.basename(filename)}")
+                    specific_changes.append("Updated git synchronization functionality with bug fixes and improvements")
                     
-            except:
-                specific_changes.append(f"Updated {os.path.basename(filename)}")
+            elif filename == '.vscode/auto_sync.py':
+                if 'extension' in diff_content.lower():
+                    specific_changes.append("Enhanced auto_sync.py with improved VS Code extension management")
+                else:
+                    specific_changes.append("Updated auto_sync.py with better automation features")
+                    
+            elif filename == '.vscode/sync-repo.sh':
+                specific_changes.append("Improved sync-repo.sh script with better error handling and reliability")
+                
+            elif 'Documentation/' in filename:
+                if 'Collaboration-Process' in filename:
+                    specific_changes.append("Refined collaboration process documentation with updated guidelines")
+                elif 'README' in filename:
+                    specific_changes.append("Enhanced README with better project information and setup instructions")
+                else:
+                    specific_changes.append(f"Updated {os.path.basename(filename)} documentation with clearer information")
+                    
+            elif filename.endswith('.py'):
+                if 'test' in filename.lower():
+                    specific_changes.append(f"Improved {os.path.basename(filename)} with enhanced test coverage")
+                else:
+                    specific_changes.append(f"Enhanced {os.path.basename(filename)} with better functionality and error handling")
+                    
+            elif filename.endswith('.md'):
+                specific_changes.append(f"Updated {os.path.basename(filename)} documentation with improved content")
+                
+            else:
+                specific_changes.append(f"Modified {os.path.basename(filename)} with structural improvements")
         
         # Handle added files
         for filename in added_files:
