@@ -52,28 +52,18 @@ check_vscode_extensions() {
     fi
     
     # Wait for essential extensions to be active
-    # Check if we can list extensions (indicates VS Code is responsive)
-    if ! timeout 10 code --list-extensions > /dev/null 2>&1; then
-        return 1  # VS Code not responding to extension queries
-    fi
-    
-    # Check for critical extension processes
-    local python_ext_ready=false
-    local pylance_ext_ready=false
-    
-    # Check if Python extension is installed and working
-    if code --list-extensions | grep -q "ms-python.python"; then
-        python_ext_ready=true
-    fi
-    
-    # Check if Pylance extension is installed and working  
-    if code --list-extensions | grep -q "ms-python.vscode-pylance"; then
-        pylance_ext_ready=true
-    fi
-    
-    # Both critical extensions should be present
-    if [ "$python_ext_ready" = false ] || [ "$pylance_ext_ready" = false ]; then
-        return 1  # Critical extensions not ready
+    # Check if VS Code is responsive (but don't be too strict about extensions)
+    if command -v code > /dev/null 2>&1; then
+        # Try to check if code command works, but don't timeout aggressively
+        if timeout 5 code --version > /dev/null 2>&1; then
+            # VS Code is working, that's enough for auto-sync to proceed
+            # Extensions will install naturally - don't block on them
+            echo "VS Code is responsive - proceeding"
+        else
+            return 1  # VS Code not responding
+        fi
+    else
+        return 1  # Code command not available
     fi
     
     # Check for VS Code server processes that indicate extension installation
@@ -106,24 +96,24 @@ check_vscode_extensions() {
 
 # Function to wait for VS Code to be ready
 wait_for_vscode_ready() {
-    local max_wait=300  # 5 minutes for extensions (increased from 3)
+    local max_wait=120  # 2 minutes - reduced since we're less strict
     local waited=0
     
-    echo "⏳ Waiting for VS Code extensions to finish installing..."
+    echo "⏳ Waiting for VS Code to be ready (extensions will install naturally)..."
     
     while [ $waited -lt $max_wait ]; do
         if check_vscode_extensions; then
-            echo "✅ VS Code extensions appear to be ready"
+            echo "✅ VS Code appears to be ready"
             return 0
         else
-            echo "📦 VS Code extensions still installing... (${waited}s / ${max_wait}s)"
-            sleep 15  # Check every 15 seconds instead of 10
-            waited=$((waited + 15))
+            echo "� VS Code still initializing... (${waited}s / ${max_wait}s)"
+            sleep 10  # Check every 10 seconds
+            waited=$((waited + 10))
         fi
     done
     
-    echo "⚠️  VS Code extensions did not finish within ${max_wait} seconds"
-    echo "   Proceeding anyway - extensions may still be installing in background"
+    echo "⚠️  VS Code did not respond within ${max_wait} seconds"
+    echo "   Proceeding anyway - VS Code and extensions will continue loading"
     return 1
 }
 
