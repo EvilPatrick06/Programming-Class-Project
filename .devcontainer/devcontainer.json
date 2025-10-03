@@ -1,6 +1,6 @@
 {
     "name": "Programming Class Project",
-    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "image": "ubuntu:22.04",
     "postCreateCommand": [
         "bash",
         ".devcontainer/clone-main.sh"
