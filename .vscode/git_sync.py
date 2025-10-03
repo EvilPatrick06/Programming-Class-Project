@@ -306,6 +306,119 @@ def check_git_status():
     except Exception:
         return False, False, True
 
+def sync_with_remote():
+    """Fetch and sync with remote to prevent divergent branches"""
+    try:
+        print("🔄 Checking for remote changes to prevent conflicts...")
+        
+        # Fetch latest changes from remote
+        fetch_result = subprocess.run("git fetch origin", shell=True, capture_output=True, text=True, timeout=30)
+        if fetch_result.returncode != 0:
+            return False, f"Failed to fetch from remote: {fetch_result.stderr}"
+        
+        # Get current branch
+        current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+        
+        # Check if current branch exists on remote
+        remote_branch_exists = subprocess.run(f"git show-ref --verify --quiet refs/remotes/origin/{current_branch}", 
+                                            shell=True, capture_output=True, text=True)
+        
+        if remote_branch_exists.returncode != 0:
+            # Branch doesn't exist on remote, safe to push
+            print(f"✅ Branch '{current_branch}' is new, no conflicts possible")
+            return True, None
+        
+        # Check if branches have diverged
+        diverged_check = subprocess.run(f"git rev-list --count HEAD...origin/{current_branch}", 
+                                      shell=True, capture_output=True, text=True)
+        
+        if diverged_check.returncode != 0:
+            return False, f"Failed to check branch divergence: {diverged_check.stderr}"
+        
+        counts = diverged_check.stdout.strip().split('\t') if '\t' in diverged_check.stdout else diverged_check.stdout.strip().split()
+        
+        if len(counts) >= 2:
+            local_ahead = int(counts[0]) if counts[0].isdigit() else 0
+            remote_ahead = int(counts[1]) if counts[1].isdigit() else 0
+        else:
+            # Fallback method
+            local_ahead_result = subprocess.run(f"git rev-list --count origin/{current_branch}..HEAD", 
+                                              shell=True, capture_output=True, text=True)
+            remote_ahead_result = subprocess.run(f"git rev-list --count HEAD..origin/{current_branch}", 
+                                               shell=True, capture_output=True, text=True)
+            
+            local_ahead = int(local_ahead_result.stdout.strip()) if local_ahead_result.stdout.strip().isdigit() else 0
+            remote_ahead = int(remote_ahead_result.stdout.strip()) if remote_ahead_result.stdout.strip().isdigit() else 0
+        
+        if local_ahead == 0 and remote_ahead == 0:
+            print("✅ Branches are in sync")
+            return True, None
+        elif local_ahead > 0 and remote_ahead == 0:
+            print(f"✅ Local branch is {local_ahead} commit(s) ahead, safe to push")
+            return True, None
+        elif local_ahead == 0 and remote_ahead > 0:
+            print(f"⚠️ Remote branch is {remote_ahead} commit(s) ahead, pulling changes...")
+            
+            # Pull the remote changes
+            pull_result = subprocess.run("git pull origin " + current_branch, shell=True, capture_output=True, text=True)
+            if pull_result.returncode == 0:
+                print("✅ Successfully pulled remote changes")
+                return True, None
+            else:
+                return False, f"Failed to pull remote changes: {pull_result.stderr}"
+        else:
+            # Branches have diverged
+            print(f"⚠️ Branches have diverged: local +{local_ahead}, remote +{remote_ahead}")
+            
+            # Ask user how to handle divergence
+            resolution = get_vscode_input(
+                f"Your branch and remote have diverged:\n- Local has {local_ahead} new commits\n- Remote has {remote_ahead} new commits\n\nHow would you like to resolve this?",
+                [
+                    "Pull and merge remote changes (recommended)",
+                    "Pull and rebase local changes on top",
+                    "Force push (overwrites remote - USE WITH CAUTION)",
+                    "Cancel and resolve manually"
+                ]
+            )
+            
+            if not resolution or "Cancel" in resolution:
+                return False, "User chose to resolve manually"
+            elif "Pull and merge" in resolution:
+                # Configure merge strategy and pull
+                subprocess.run("git config pull.rebase false", shell=True, capture_output=True)
+                pull_result = subprocess.run(f"git pull origin {current_branch}", shell=True, capture_output=True, text=True)
+                if pull_result.returncode == 0:
+                    print("✅ Successfully merged remote changes")
+                    return True, None
+                else:
+                    return False, f"Failed to merge remote changes: {pull_result.stderr}"
+            elif "Pull and rebase" in resolution:
+                # Configure rebase strategy and pull
+                subprocess.run("git config pull.rebase true", shell=True, capture_output=True)
+                pull_result = subprocess.run(f"git pull origin {current_branch}", shell=True, capture_output=True, text=True)
+                if pull_result.returncode == 0:
+                    print("✅ Successfully rebased on remote changes")
+                    return True, None
+                else:
+                    return False, f"Failed to rebase on remote changes: {pull_result.stderr}"
+            elif "Force push" in resolution:
+                print("⚠️ WARNING: Force push selected - this will overwrite remote changes!")
+                confirm = get_vscode_input(
+                    "Are you absolutely sure you want to force push? This will overwrite remote commits!",
+                    ["Yes, I understand the risks", "No, let me choose a different option"]
+                )
+                if "Yes" in confirm:
+                    return True, "force_push"
+                else:
+                    return False, "User cancelled force push"
+            
+        return True, None
+        
+    except subprocess.TimeoutExpired:
+        return False, "Timeout while fetching from remote"
+    except Exception as e:
+        return False, f"Error during remote sync: {str(e)}"
+
 def generate_copilot_commit_message():
     """Generate a detailed commit message using enhanced AI analysis"""
     try:
@@ -1056,6 +1169,34 @@ def generate_smart_pr_description(changes_summary, diff_summary, commit_message)
     
     return '\n'.join(description_parts)
 
+def setup_git_config():
+    """Set up git configuration for consistent behavior"""
+    try:
+        # Configure pull strategy to merge by default (safer than rebase for most users)
+        subprocess.run("git config pull.rebase false", shell=True, capture_output=True)
+        
+        # Configure push strategy to simple (matches current branch)
+        subprocess.run("git config push.default simple", shell=True, capture_output=True)
+        
+        # Configure merge strategy to avoid unnecessary merge commits on fast-forward
+        subprocess.run("git config merge.ff only", shell=True, capture_output=True)
+        
+        # But allow merge commits when branches have actually diverged
+        subprocess.run("git config pull.ff only", shell=True, capture_output=True)
+        
+        # Actually, let's be more permissive for pulls to handle divergent branches
+        subprocess.run("git config pull.ff true", shell=True, capture_output=True)
+        
+        # Configure rerere (reuse recorded resolution) to help with recurring conflicts
+        subprocess.run("git config rerere.enabled true", shell=True, capture_output=True)
+        
+        print("⚙️ Git configuration optimized for sync operations")
+        return True
+        
+    except Exception as e:
+        print(f"⚠️ Warning: Could not configure git settings: {e}")
+        return False
+
 def main():
     """Main git sync function"""
     
@@ -1072,6 +1213,9 @@ def main():
     if not os.path.exists('.git'):
         show_vscode_notification("❌ Not in a git repository!", "error")
         return
+    
+    # Set up git configuration for optimal sync behavior
+    setup_git_config()
     
     # Get current branch name
     try:
@@ -1108,9 +1252,53 @@ def main():
     
     # If nothing to do
     if not has_changes and not has_unpushed and not branch_needs_upstream:
-        show_vscode_notification("✅ Everything is already up to date! No changes to sync.", "success")
-        print("✅ Everything is already up to date! No changes to sync.")
+        # Check if user wants to see backups or do maintenance
+        backups = list_backups()
+        if backups:
+            maintenance_choice = get_vscode_input(
+                f"✅ Everything is up to date! Found {len(backups)} backup(s). What would you like to do?",
+                ["Exit (nothing to sync)", "View available backups", "Clean up old backups"]
+            )
+            
+            if "View available backups" in maintenance_choice:
+                print(f"\n📦 Available backups ({len(backups)} found):")
+                print("=" * 60)
+                for i, backup in enumerate(backups[:10]):  # Show last 10
+                    print(f"{i+1:2}. {backup.get('tag', 'Unknown')} - {backup.get('created', 'Unknown date')}")
+                    print(f"    Branch: {backup.get('branch', 'Unknown')} | Commit: {backup.get('commit', 'Unknown')}")
+                
+                if len(backups) > 10:
+                    print(f"    ... and {len(backups) - 10} more")
+                
+                print("\n💡 To restore a backup:")
+                print("   git reset --hard <backup-tag-name>")
+                print("   Example: git reset --hard backup-Testing-a1b2c3d4-1696359600")
+                
+            elif "Clean up old backups" in maintenance_choice:
+                cleanup_old_backups()
+                show_vscode_notification("🧹 Old backups cleaned up!", "success")
+        else:
+            show_vscode_notification("✅ Everything is already up to date! No changes to sync.", "success")
+            print("✅ Everything is already up to date! No changes to sync.")
         return
+    
+    # Sync with remote to prevent conflicts (only if we have changes to push)
+    if has_changes or has_unpushed:
+        sync_success, sync_error = sync_with_remote()
+        if not sync_success:
+            if sync_error == "force_push":
+                # User chose force push, we'll handle this later
+                force_push_mode = True
+                print("⚠️ Force push mode enabled - will overwrite remote changes")
+            else:
+                show_vscode_notification(f"❌ Failed to sync with remote: {sync_error}", "error")
+                print(f"❌ Failed to sync with remote: {sync_error}")
+                return
+        else:
+            force_push_mode = False
+            print("✅ Successfully synced with remote")
+    else:
+        force_push_mode = False
     
     # Check if current branch is behind main (only if not on main branch)
     is_behind_main = False
@@ -1517,6 +1705,18 @@ def main():
     print("EXECUTING COMMANDS...")
     print("⚡" * 20)
     
+    # Create backup before making changes (especially if force push is enabled)
+    backup_tag = None
+    backup_info = None
+    if force_push_mode or has_changes:
+        print("📦 Creating backup before making changes...")
+        backup_tag, backup_info = create_backup()
+        if backup_tag:
+            print(f"✅ Backup created: {backup_tag}")
+            print("💡 If something goes wrong, you can restore with: git reset --hard " + backup_tag)
+        else:
+            print("⚠️ Could not create backup, but continuing...")
+    
     step_counter = 1
     
     # Execute Step 1: Add files (only if there are changes)
@@ -1551,10 +1751,18 @@ def main():
         if actual_current_branch == target_branch:
             # Simple case: pushing current branch to itself
             if branch_needs_upstream:
-                push_command = f"git push --set-upstream origin {actual_current_branch}"
-                push_result = run_command_execute(push_command, f"Push {actual_current_branch} and set upstream")
+                if force_push_mode:
+                    push_command = f"git push --force --set-upstream origin {actual_current_branch}"
+                    push_result = run_command_execute(push_command, f"Force push {actual_current_branch} and set upstream (overwriting remote)")
+                else:
+                    push_command = f"git push --set-upstream origin {actual_current_branch}"
+                    push_result = run_command_execute(push_command, f"Push {actual_current_branch} and set upstream")
             else:
-                push_result = run_command_execute("git push", f"Push changes to {actual_current_branch}")
+                if force_push_mode:
+                    push_command = f"git push --force origin {actual_current_branch}"
+                    push_result = run_command_execute(push_command, f"Force push changes to {actual_current_branch} (overwriting remote)")
+                else:
+                    push_result = run_command_execute("git push", f"Push changes to {actual_current_branch}")
                 
         else:
             # Cross-branch push: pushing current branch content to different target
@@ -1566,23 +1774,42 @@ def main():
             
             if target_exists.stdout.strip():
                 # Target branch exists, push to it
-                push_command = f"git push origin {actual_current_branch}:{target_branch}"
-                push_result = run_command_execute(push_command, f"Push {actual_current_branch} changes to {target_branch}")
+                if force_push_mode:
+                    push_command = f"git push --force origin {actual_current_branch}:{target_branch}"
+                    push_result = run_command_execute(push_command, f"Force push {actual_current_branch} changes to {target_branch} (overwriting remote)")
+                else:
+                    push_command = f"git push origin {actual_current_branch}:{target_branch}"
+                    push_result = run_command_execute(push_command, f"Push {actual_current_branch} changes to {target_branch}")
             else:
-                # Target branch doesn't exist, create it
+                # Target branch doesn't exist, create it (force not needed for new branches)
                 push_command = f"git push origin {actual_current_branch}:{target_branch}"
                 push_result = run_command_execute(push_command, f"Create {target_branch} branch from {actual_current_branch}")
         
         # Check push result
         if push_result is None or push_result.returncode != 0:
-            show_vscode_notification("❌ Failed to push to GitHub. This might be due to remote changes.", "error")
-            print("This might be due to remote changes. You may need to resolve conflicts manually.")
+            # Enhanced error handling - try to identify the issue
+            if "rejected" in push_result.stderr and "non-fast-forward" in push_result.stderr:
+                show_vscode_notification("❌ Push rejected: Remote has newer changes. Try running the script again - it will detect and merge them automatically.", "error")
+                print("❌ Push rejected: Remote has newer changes.")
+                print("💡 Solution: Run this script again - it will automatically detect and merge remote changes.")
+            elif "authentication" in push_result.stderr.lower() or "permission" in push_result.stderr.lower():
+                show_vscode_notification("❌ Authentication error. Check your GitHub credentials.", "error")
+                print("❌ Authentication error. Check your GitHub credentials.")
+            else:
+                show_vscode_notification("❌ Failed to push to GitHub. Check the error message above.", "error")
+                print("❌ Failed to push to GitHub. Check the error message above.")
             return
         else:
             if actual_current_branch == target_branch:
-                show_vscode_notification(f"✅ Successfully pushed to {target_branch}!", "success")
+                if force_push_mode:
+                    show_vscode_notification(f"✅ Successfully force-pushed to {target_branch}! (Remote changes were overwritten)", "success")
+                else:
+                    show_vscode_notification(f"✅ Successfully pushed to {target_branch}!", "success")
             else:
-                show_vscode_notification(f"✅ Successfully pushed {actual_current_branch} changes to {target_branch}!", "success")
+                if force_push_mode:
+                    show_vscode_notification(f"✅ Successfully force-pushed {actual_current_branch} changes to {target_branch}! (Remote changes were overwritten)", "success")
+                else:
+                    show_vscode_notification(f"✅ Successfully pushed {actual_current_branch} changes to {target_branch}!", "success")
         
         # Execute Testing sync if requested (when pushing to main)
         if sync_testing and target_branch == "main":
@@ -1900,6 +2127,130 @@ def main():
     # Clean up any temporary files
     cleanup_temp_files()
 
+def create_backup():
+    """Create a backup of current state before potentially destructive operations"""
+    try:
+        # Create backup directory if it doesn't exist
+        backup_dir = os.path.join(os.getcwd(), '.vscode/backups')
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        # Get current branch and commit
+        current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+        current_commit = subprocess.run("git rev-parse HEAD", shell=True, capture_output=True, text=True).stdout.strip()[:8]
+        
+        # Create backup tag
+        timestamp = int(time.time())
+        backup_tag = f"backup-{current_branch}-{current_commit}-{timestamp}"
+        
+        # Create tag for backup
+        tag_result = subprocess.run(f"git tag {backup_tag}", shell=True, capture_output=True, text=True)
+        if tag_result.returncode == 0:
+            print(f"📦 Created backup tag: {backup_tag}")
+            
+            # Save backup info to file
+            backup_info = {
+                "timestamp": timestamp,
+                "branch": current_branch,
+                "commit": current_commit,
+                "tag": backup_tag,
+                "created": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            backup_file = os.path.join(backup_dir, f"{backup_tag}.json")
+            with open(backup_file, 'w') as f:
+                json.dump(backup_info, f, indent=2)
+            
+            return backup_tag, backup_info
+        else:
+            print(f"⚠️ Failed to create backup tag: {tag_result.stderr}")
+            return None, None
+            
+    except Exception as e:
+        print(f"⚠️ Failed to create backup: {e}")
+        return None, None
+
+def list_backups():
+    """List available backups"""
+    try:
+        backup_dir = os.path.join(os.getcwd(), '.vscode/backups')
+        if not os.path.exists(backup_dir):
+            return []
+        
+        backups = []
+        for file in os.listdir(backup_dir):
+            if file.endswith('.json') and file.startswith('backup-'):
+                try:
+                    with open(os.path.join(backup_dir, file), 'r') as f:
+                        backup_info = json.load(f)
+                        backups.append(backup_info)
+                except:
+                    pass
+        
+        # Sort by timestamp (newest first)
+        backups.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+        return backups
+        
+    except Exception as e:
+        print(f"⚠️ Error listing backups: {e}")
+        return []
+
+def restore_backup(backup_tag):
+    """Restore from a backup tag"""
+    try:
+        # Check if tag exists
+        tag_check = subprocess.run(f"git tag -l {backup_tag}", shell=True, capture_output=True, text=True)
+        if not tag_check.stdout.strip():
+            return False, f"Backup tag {backup_tag} not found"
+        
+        # Get current branch
+        current_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+        
+        # Reset to backup point
+        reset_result = subprocess.run(f"git reset --hard {backup_tag}", shell=True, capture_output=True, text=True)
+        if reset_result.returncode == 0:
+            print(f"✅ Restored to backup: {backup_tag}")
+            return True, None
+        else:
+            return False, f"Failed to restore: {reset_result.stderr}"
+            
+    except Exception as e:
+        return False, f"Error during restore: {str(e)}"
+
+def cleanup_old_backups():
+    """Clean up backups older than 30 days"""
+    try:
+        backup_dir = os.path.join(os.getcwd(), '.vscode/backups')
+        if not os.path.exists(backup_dir):
+            return
+        
+        current_time = time.time()
+        month_ago = current_time - (30 * 24 * 60 * 60)  # 30 days
+        
+        for file in os.listdir(backup_dir):
+            if file.endswith('.json') and file.startswith('backup-'):
+                file_path = os.path.join(backup_dir, file)
+                try:
+                    with open(file_path, 'r') as f:
+                        backup_info = json.load(f)
+                    
+                    if backup_info.get('timestamp', 0) < month_ago:
+                        # Remove backup file
+                        os.unlink(file_path)
+                        
+                        # Remove corresponding git tag
+                        tag_name = backup_info.get('tag')
+                        if tag_name:
+                            subprocess.run(f"git tag -d {tag_name}", shell=True, capture_output=True, text=True)
+                        
+                        print(f"🧹 Cleaned up old backup: {file}")
+                        
+                except Exception:
+                    pass
+                    
+    except Exception as e:
+        # Don't fail for cleanup issues
+        pass
+
 def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
     try:
@@ -1935,6 +2286,9 @@ def cleanup_temp_files():
             except:
                 pass
                 
+        # Also clean up old backups
+        cleanup_old_backups()
+        
         # Note: We no longer open files in VS Code browser to avoid tab issues
             
     except Exception as e:
