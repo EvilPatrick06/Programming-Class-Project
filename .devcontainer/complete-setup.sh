@@ -2,7 +2,16 @@
 # Complete Container Setup Script
 # Handles Ubuntu updates, extensions, and creates completion flag
 
-echo "🚀 Starting Complete Container Setup..."
+echo "🚀         echo "📅 Scheduling GitHub environment setup for after extension installation..."
+        # Create a delayed setup script that runs after extensions are installed
+        cat > /tmp/delayed-terminal-setup.sh << 'EOF'
+#!/bin/bash
+# Wait for extensions to be installed, then setup terminal prompt
+sleep 45  # Give VS Code and extensions time to fully initialize
+if [ -f "/workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh" ]; then
+    bash /workspaces/Programming-Class-Project/.devcontainer/setup-terminal-prompt.sh --container-init
+fi
+EOFomplete Container Setup..."
 echo "=" * 60
 
 # Colors for output
@@ -87,7 +96,35 @@ if is_container_setup; then
     fi
     
     mark_completed "repo-sync"
-    update_status "Container setup completed - letting VS Code handle extensions naturally"
+    update_status "Ensuring VS Code extensions are installed"
+    
+    # Force VS Code extension installation
+    echo -e "${BLUE}🧩 VS CODE EXTENSION INSTALLATION${NC}"
+    echo "=" * 45
+    
+    if [ -f ".devcontainer/auto-install-extensions.sh" ]; then
+        echo "🔧 Starting automatic VS Code extension installation..."
+        # Create a delayed extension installation script with better timing
+        cat > /tmp/delayed-extension-install.sh << 'EOF'
+#!/bin/bash
+# Wait for VS Code to be ready, then auto-install extensions
+sleep 20  # Give VS Code server time to fully start
+if [ -f "/workspaces/Programming-Class-Project/.devcontainer/auto-install-extensions.sh" ]; then
+    bash /workspaces/Programming-Class-Project/.devcontainer/auto-install-extensions.sh
+fi
+EOF
+        chmod +x /tmp/delayed-extension-install.sh
+        # Run in background so it doesn't block container startup
+        nohup /tmp/delayed-extension-install.sh &
+        echo -e "${GREEN}✅ Automatic extension installation scheduled${NC}"
+        echo -e "${BLUE}📋 Extensions will be installed automatically in background${NC}"
+        echo -e "${BLUE}📝 Check log: /tmp/extension-installer.log${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Auto extension installer not found${NC}"
+    fi
+    
+    mark_completed "extensions"
+    update_status "Setting up terminal prompt after extension installation"
     
     # Schedule terminal prompt setup to run after VS Code is fully ready
     echo -e "${BLUE}🖥️  TERMINAL PROMPT SETUP${NC}"
@@ -125,7 +162,7 @@ EOF
     echo "=" * 60
     echo -e "${GREEN}✅ Ubuntu updates: Complete${NC}"
     echo -e "${GREEN}✅ Repository sync: Complete${NC}"
-    echo -e "${GREEN}✅ VS Code extensions: Handled by VS Code naturally${NC}"
+    echo -e "${GREEN}✅ VS Code extensions: Force installation scheduled${NC}"
     echo -e "${GREEN}✅ Terminal prompt: Scheduled for background setup${NC}"
     echo -e "${GREEN}✅ Completion marker: /tmp/container-setup/SETUP-COMPLETE${NC}"
     echo "=" * 60
