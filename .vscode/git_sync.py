@@ -488,8 +488,8 @@ def main():
     # Show push and PR options available
     print(f"\n{'4️⃣' if has_changes else '2️⃣'}  Push Options Available:")
     print(f"   - Push to current branch ({current_branch})")
-    print("   - Push to main branch (production)")
-    print("   - Push to Testing branch (development)")
+    print("   - Push to Testing branch (Development)")
+    print("   - Push to main branch (Production)")
     print("   - Create pull request with code review")
     print("   - Create new feature branch")
     
@@ -527,8 +527,8 @@ def main():
         f"You're on branch '{current_branch}'. Where would you like to push your changes?",
         [
             f"Push to current branch ({current_branch})",
-            "Push to main branch",
-            "Push to Testing branch", 
+            "Push to Testing branch (Development)",
+            "Push to main branch (Production)", 
             "Create pull request instead",
             "Create new feature branch"
         ]
@@ -539,17 +539,20 @@ def main():
         print(f"🔄 Will push to current branch: {current_branch}")
         target_branch = current_branch
         create_pr = False
+        sync_testing = False
         
     elif "Push to main" in push_option:
-        # Push to main branch
+        # Push to main branch (and also sync Testing to keep it up-to-date)
         if current_branch == "main":
-            print("🔄 Will push to main branch")
+            print("🔄 Will push to main branch and sync Testing")
             target_branch = "main"
             create_pr = False
+            sync_testing = True
         else:
-            print(f"🔄 Will push {current_branch} changes to main branch")
+            print(f"🔄 Will push {current_branch} changes to main branch and sync Testing")
             target_branch = "main"
             create_pr = False
+            sync_testing = True
             
     elif "Push to Testing" in push_option:
         # Push to Testing branch
@@ -557,15 +560,18 @@ def main():
             print("🔄 Will push to Testing branch")
             target_branch = "Testing"
             create_pr = False
+            sync_testing = False
         else:
             print(f"🔄 Will push {current_branch} changes to Testing branch")
             target_branch = "Testing"
             create_pr = False
+            sync_testing = False
             
     elif "Create pull request" in push_option:
         # Create PR workflow
         print(f"🔄 Will push {current_branch} and create pull request")
         create_pr = True
+        sync_testing = False
         
         # Ask which branch to target for PR
         target_branch_response = get_vscode_input(
@@ -717,6 +723,45 @@ def main():
                 show_vscode_notification(f"✅ Successfully pushed to {target_branch}!", "success")
             else:
                 show_vscode_notification(f"✅ Successfully pushed {actual_current_branch} changes to {target_branch}!", "success")
+        
+        # Execute Testing sync if requested (when pushing to main)
+        if sync_testing and target_branch == "main":
+            print(f"\n{step_counter + 1}️⃣  Syncing Testing branch with main to keep it up-to-date...")
+            
+            # Save current branch to return to it later
+            original_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+            
+            # Switch to main branch first to get the latest changes
+            main_checkout = run_command_execute("git checkout main", "Switch to main branch")
+            if main_checkout and main_checkout.returncode == 0:
+                main_pull = run_command_execute("git pull", "Update local main with remote changes")
+                if main_pull and main_pull.returncode == 0:
+                    
+                    # Switch to Testing branch and merge main
+                    testing_checkout = run_command_execute("git checkout Testing", "Switch to Testing branch")
+                    if testing_checkout and testing_checkout.returncode == 0:
+                        testing_merge = run_command_execute("git merge main", "Merge main into Testing to keep it current")
+                        if testing_merge and testing_merge.returncode == 0:
+                            testing_push = run_command_execute("git push origin Testing", "Push updated Testing branch")
+                            if testing_push and testing_push.returncode == 0:
+                                show_vscode_notification("✅ Testing branch synced with main successfully!", "success")
+                                print("✅ Testing branch is now up to date with main!")
+                            else:
+                                show_vscode_notification("⚠️ Failed to push updated Testing branch", "warning")
+                        else:
+                            show_vscode_notification("⚠️ Failed to merge main into Testing branch", "warning")
+                    else:
+                        show_vscode_notification("⚠️ Failed to checkout Testing branch for sync", "warning")
+                else:
+                    show_vscode_notification("⚠️ Failed to update local main branch", "warning")
+            else:
+                show_vscode_notification("⚠️ Failed to checkout main branch for sync", "warning")
+            
+            # Return to original branch
+            if original_branch and original_branch != "Testing":
+                run_command_execute(f"git checkout {original_branch}", f"Return to {original_branch} branch")
+            elif original_branch != "Testing":
+                run_command_execute("git checkout Testing", "Switch to Testing branch")
         
         step_counter += 1
     
