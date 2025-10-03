@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Auto Update Codespace on Startup",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                ".vscode/auto_sync.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "detail": "Automatically updates codespace from GitHub when opened"
+        },
+        {
+            "label": "Manual Codespace Update",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                ".vscode/auto_sync.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Manually update codespace from GitHub with VS Code dialogs"
+        },
+        {
+            "label": "Push Changes to GitHub", 
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                ".vscode/git_sync.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Push your local changes to GitHub with comprehensive sync options"
+        }
+    ]
+}

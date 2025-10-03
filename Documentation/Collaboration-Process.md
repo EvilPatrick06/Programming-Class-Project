@@ -40,11 +40,10 @@ Follow these steps when team members want to work together but the primary devel
 ### Step 2: Set Up Codespace
 
 1. Create or open a codespace under the Testing Branch
-2. Use GitHub Copilot chat with this prompt:
-
-   ```text
-   "Completely overwrite current codespace with the following link to my main repo branch: [Insert the link here]"
-   ```
+2. Look where the most up to date commits were made
+3. Follow the prompts when codespace is opened to clone the repository
+  a. Testing Branch: Choose if the latest changes were committed to Testing Branch only
+  b. Main Branch: Choose if the latest changes were committed to Main Branch
 
 ### Step 3: Configure Environment
 

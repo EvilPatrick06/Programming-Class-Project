@@ -1,4 +1,14 @@
 {
+    "python.defaultInterpreterPath": "/usr/bin/python3",
     "python-envs.defaultEnvManager": "ms-python.python:system",
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.hg/store/**": true
+    },
+    "extensions.autoUpdate": false,
+    "workbench.startupEditor": "none",
+    "terminal.integrated.defaultProfile.linux": "bash"
 }
