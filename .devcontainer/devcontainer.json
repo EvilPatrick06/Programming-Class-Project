@@ -3,10 +3,10 @@
     "image": "mcr.microsoft.com/devcontainers/universal:2",
     "postCreateCommand": [
         "bash",
-        ".devcontainer/auto-sync-branches.sh"
+        ".devcontainer/clone-main.sh"
     ],
     "postStartCommand": [
-        "bash", 
+        "bash",
         ".devcontainer/auto-sync-branches.sh"
     ],
     "customizations": {
