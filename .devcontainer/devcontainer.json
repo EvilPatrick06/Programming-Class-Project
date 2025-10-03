@@ -1,6 +1,6 @@
 {
     "name": "Programming Class Project",
-    "image": "ubuntu:22.04",
+    "image": "alpine:latest"
     "postCreateCommand": [
         "bash",
         ".devcontainer/clone-main.sh"
