@@ -100,8 +100,9 @@ def show_vscode_dialog(title, message, options):
     html_content = create_vscode_dialog_html(title, message, options)
     
     # Create temp file in .vscode/tmp directory for better organization
-    os.makedirs('.vscode/tmp', exist_ok=True)
-    html_file = f".vscode/tmp/.tmp_dialog_{int(time.time())}.html"
+    vscode_tmp_dir = os.path.join(os.getcwd(), '.vscode/tmp')
+    os.makedirs(vscode_tmp_dir, exist_ok=True)
+    html_file = os.path.join(vscode_tmp_dir, f".tmp_dialog_{int(time.time())}.html")
     with open(html_file, 'w') as f:
         f.write(html_content)
     
@@ -1865,7 +1866,7 @@ def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
     try:
         # Clean up .vscode/tmp directory temp files
-        tmp_dir = '.vscode/tmp'
+        tmp_dir = os.path.join(os.getcwd(), '.vscode/tmp')
         if os.path.exists(tmp_dir):
             for file in os.listdir(tmp_dir):
                 if file.startswith('.tmp_dialog_') and file.endswith('.html'):

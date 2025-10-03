@@ -18,7 +18,8 @@ Note: To push your chang    print("🚀 Codespace Auto-Sync Script")
     print("🔄 This script updates your codespace with:")
     print("   • Ubuntu version upgrades (when available)")
     print("   • Latest Ubuntu package updates & security patches")
-    print("   • Latest code from GitHub repository")
+                      result = subprocess.run(["/bin/bash", os.path.join(os.getcwd(), ".vscode/sync-repo.sh"), branch_choice], 
+                                          capture_output=True, text=True)print("   • Latest code from GitHub repository")
     print("   • VS Code extension synchronization")
     print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
     print("=" * 60)itHub, use git_sync.py instead
@@ -184,8 +185,9 @@ def show_vscode_dialog(title, message, options):
     html_content = create_vscode_dialog_html(title, message, options)
     
     # Create temp file in .vscode/tmp directory for better organization
-    os.makedirs('.vscode/tmp', exist_ok=True)
-    html_file = f".vscode/tmp/.tmp_dialog_{int(time.time())}.html"
+    vscode_tmp_dir = os.path.join(os.getcwd(), '.vscode/tmp')
+    os.makedirs(vscode_tmp_dir, exist_ok=True)
+    html_file = os.path.join(vscode_tmp_dir, f".tmp_dialog_{int(time.time())}.html")
     with open(html_file, 'w') as f:
         f.write(html_content)
     
@@ -522,7 +524,7 @@ def handle_vscode_extensions():
         show_vscode_notification("🧩 Syncing VS Code extensions...", "info")
         
         # Run the extension manager script
-        result = subprocess.run([sys.executable, ".vscode/extension_manager.py"], 
+        result = subprocess.run([sys.executable, os.path.join(os.getcwd(), ".vscode/extension_manager.py")], 
                               capture_output=True, text=True, timeout=300)
         
         if result.returncode == 0:
@@ -654,7 +656,7 @@ def sync_repository():
         if "main branch" in action:
             print("🔄 Syncing fresh from GitHub main branch...")
             print("⚠️  This will replace ALL local files with the latest from main!")
-            result = subprocess.run(["/bin/bash", ".vscode/sync-repo.sh", "main"], 
+            result = subprocess.run(["/bin/bash", os.path.join(os.getcwd(), ".vscode/sync-repo.sh"), "main"], 
                                   capture_output=True, text=True)
             if result.returncode == 0:
                 show_vscode_notification("✅ Successfully synced from main branch!", "success")
@@ -673,7 +675,7 @@ def sync_repository():
         elif "Testing branch" in action:
             print("🔄 Syncing fresh from GitHub Testing branch...")
             print("⚠️  This will replace ALL local files with the latest from Testing!")
-            result = subprocess.run(["/bin/bash", ".vscode/sync-repo.sh", "Testing"], 
+            result = subprocess.run(["/bin/bash", os.path.join(os.getcwd(), ".vscode/sync-repo.sh"), "Testing"], 
                                   capture_output=True, text=True)
             if result.returncode == 0:
                 show_vscode_notification("✅ Successfully synced from Testing branch!", "success")
@@ -801,7 +803,7 @@ def sync_repository():
             elif next_action and "Push my changes" in next_action:
                 print("🚀 Opening git_sync.py script to help you push your changes...")
                 show_vscode_notification("💡 Running git_sync.py to help you push your changes to GitHub", "info")
-                subprocess.run([sys.executable, ".vscode/git_sync.py"], capture_output=False)
+                subprocess.run([sys.executable, os.path.join(os.getcwd(), ".vscode/git_sync.py")], capture_output=False)
         
         elif "Discard my changes" in action:
             confirm = get_vscode_input(
@@ -819,7 +821,7 @@ def sync_repository():
                     print(f"🔄 Discarding all changes and syncing fresh from {branch_choice}...")
                     subprocess.run("git reset --hard HEAD", shell=True)
                     subprocess.run("git clean -fd", shell=True)
-                    result = subprocess.run(["/bin/bash", ".vscode/sync-repo.sh", branch_choice], 
+                    result = subprocess.run(["/bin/bash", os.path.join(os.getcwd(), ".vscode/sync-repo.sh"), branch_choice], 
                                           capture_output=True, text=True)
                     if result.returncode == 0:
                         show_vscode_notification(f"✅ Synced fresh from {branch_choice} branch!", "success")
@@ -829,7 +831,7 @@ def sync_repository():
         elif "git_sync.py script" in action:
             print("🚀 Opening git_sync.py script to help you push your changes...")
             show_vscode_notification("💡 Running git_sync.py to help you push your changes to GitHub", "info")
-            subprocess.run([sys.executable, ".vscode/git_sync.py"], capture_output=False)
+            subprocess.run([sys.executable, os.path.join(os.getcwd(), ".vscode/git_sync.py")], capture_output=False)
         
         else:
             show_vscode_notification("✅ Keeping your changes. Use git_sync.py when ready to push.", "info")
@@ -844,7 +846,7 @@ def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
     try:
         # Clean up .vscode/tmp directory temp files
-        tmp_dir = '.vscode/tmp'
+        tmp_dir = os.path.join(os.getcwd(), '.vscode/tmp')
         if os.path.exists(tmp_dir):
             for file in os.listdir(tmp_dir):
                 if file.startswith('.tmp_dialog_') and file.endswith('.html'):
