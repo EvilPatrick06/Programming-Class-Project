@@ -16,16 +16,12 @@ ms-python.vscode-python-envs
 tushortz.python-extended-snippets
 
 # Git and Version Control
-GitHub.github-vscode-theme
 eamodio.gitlens
 github.codespaces
 github.copilot
 github.copilot-chat
 github.github-vscode-theme
 github.vscode-pull-request-github
-
-# Remote Development
-ms-vscode-remote.remote-containers
 
 # Markdown
 davidanson.vscode-markdownlint
@@ -34,7 +30,6 @@ yzhang.markdown-all-in-one
 # General Development
 batisteo.vscode-django
 ms-kubernetes-tools.vscode-kubernetes-tools
-ms-vscode.vscode-json
 redhat.vscode-yaml
 visualstudioexptteam.intellicode-api-usage-examples
 visualstudioexptteam.vscodeintellicode
