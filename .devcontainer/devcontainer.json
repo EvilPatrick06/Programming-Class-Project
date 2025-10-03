@@ -2,12 +2,11 @@
     "name": "Programming Class Project",
     "image": "ubuntu:22.04",
     "postCreateCommand": [
-        "bash",
-        ".devcontainer/clone-main.sh"
+        "apt-get update && apt-get install -y python3 python3-pip",
+        "bash .devcontainer/clone-main.sh"
     ],
     "postStartCommand": [
-        "bash",
-        ".devcontainer/auto-sync-branches.sh"
+        "bash .devcontainer/auto-sync-branches.sh"
     ],
     "customizations": {
         "vscode": {
