@@ -2,26 +2,15 @@
 """
 Codespace Auto-Sync Script
 Updates your codespace with:
-1. Ubuntu version upgrades (when available)
-2. Latest Ubuntu system packages and security updates
-3. VS Code extension synchronization across codespaces
-4. Latest code FROM GitHub (main or Testing branch)
+1. Latest Ubuntu system packages and security updates
+2. Latest code FROM GitHub (main or Testing branch)
 
 Shows VS Code dialogs and notifications instead of terminal prompts
 
 Purpose: 
-- Check for and install Ubuntu package updates and version upgrades
-- Sync VS Code extensions across codespaces
+- Check for and install Ubuntu package updates
 - Pull/sync FROM GitHub TO your codespace
-Note: To push your chang    print("🚀 Codespace Auto-Sync Script")
-    print("=" * 60)
-    print("🔄 This script updates your codespace with:")
-    print("   • Ubuntu version upgrades (when available)")
-    print("   • Latest Ubuntu package updates & security patches")
-    print("   • Latest code from GitHub repository")
-    print("   • VS Code extension synchronization")
-    print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
-    print("=" * 60)itHub, use git_sync.py instead
+Note: To push your changes TO GitHub, use git_sync.py instead
 """
 
 import subprocess
@@ -29,28 +18,19 @@ import sys
 import os
 import json
 import time
-import tempfile
-import textwrap
-import threading
-
-def create_vscode_dialog_html(title, message, options):
-    """Create an HTML file for VS    print("🚀 Codespace Auto-Sync Script")
+import     print("🚀 Codespace Auto-Sync Script")
     print("=" * 60)
     print("🔄 This script updates your codespace with:")
     print("   • Ubuntu version upgrades (when available)")
     print("   • Latest Ubuntu package updates & security patches")
     print("   • Latest code from GitHub repository")
-    print("   • VS Code extension synchronization")
     print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
-    print("=" * 60)
-    
-    # First, handle Ubuntu updates
-    print("\n🐧 UBUNTU SYSTEM UPDATES")
-    print("-" * 30)
-    handle_ubuntu_updates()
-    
-    print("\n📂 REPOSITORY SYNC")
-    print("-" * 20)mulation"""
+    print("=" * 60)e
+import textwrap
+import threading
+
+def create_vscode_dialog_html(title, message, options):
+    """Create an HTML file for VS Code dialog simulation"""
     html_content = f"""
 <!DOCTYPE html>
 <html>
@@ -514,48 +494,16 @@ def handle_ubuntu_updates():
         show_vscode_notification(f"❌ Error handling Ubuntu updates: {e}", "error")
         print(f"❌ Error handling Ubuntu updates: {e}")
 
-def handle_vscode_extensions():
-    """Handle VS Code extension synchronization"""
-    try:
-        print("🧩 Synchronizing VS Code extensions...")
-        show_vscode_notification("🧩 Syncing VS Code extensions...", "info")
-        
-        # Run the extension manager script
-        result = subprocess.run([sys.executable, ".vscode/extension_manager.py"], 
-                              capture_output=True, text=True, timeout=300)
-        
-        if result.returncode == 0:
-            print("✅ VS Code extensions synchronized successfully!")
-            show_vscode_notification("✅ VS Code extensions synchronized!", "success")
-            
-            # Show a summary of the output
-            output_lines = result.stdout.split('\n')
-            for line in output_lines:
-                if 'Successfully installed' in line or 'Total extensions' in line or 'extensions tracked' in line:
-                    print(f"   {line.strip()}")
-        else:
-            print("⚠️  VS Code extension sync completed with warnings")
-            show_vscode_notification("⚠️  Extension sync had some issues", "warning")
-            if result.stderr:
-                print(f"   Error details: {result.stderr[:200]}...")
-        
-    except subprocess.TimeoutExpired:
-        print("⏰ VS Code extension sync timed out")
-        show_vscode_notification("⏰ Extension sync timed out", "warning")
-    except Exception as e:
-        print(f"❌ Error syncing VS Code extensions: {e}")
-        show_vscode_notification(f"❌ Extension sync error: {e}", "error")
-
 def sync_repository():
     """Main sync function with VS Code dialogs - focuses on syncing FROM GitHub"""
     
     # Show welcome message
-    show_vscode_notification("🚀 Codespace Auto-Sync Started! Updating system, extensions, and code...", "info")
+    show_vscode_notification("🚀 Codespace Auto-Sync Started! Checking for updates...", "info")
     
     print("🚀 Codespace Auto-Sync Script")
     print("=" * 60)
     print("� This script updates your codespace with:")
-    print("   • VS Code extension synchronization")
+    print("   • Latest Ubuntu package updates")
     print("   • Latest code from GitHub repository")
     print("📤 To push your changes TO GitHub, use the git_sync.py script instead")
     print("=" * 60)
@@ -833,11 +781,6 @@ def sync_repository():
         else:
             show_vscode_notification("✅ Keeping your changes. Use git_sync.py when ready to push.", "info")
             print("✅ Keeping your changes. Use git_sync.py when you're ready to push to GitHub.")
-    
-    # Finally, handle VS Code extensions (after repo sync to get latest extension info)
-    print("\n🧩 VS CODE EXTENSIONS")
-    print("-" * 25)
-    handle_vscode_extensions()
 
 def cleanup_temp_files():
     """Clean up temporary HTML files created by the script"""
