@@ -442,20 +442,10 @@ def generate_copilot_commit_message():
         return msg, error, "smart"
         
     except subprocess.TimeoutExpired:
-        # Clean up temp file
-        try:
-            os.unlink(temp_file.name)
-        except:
-            pass
         print("⚠️ GitHub Copilot timed out, using smart generation...")
         msg, error = generate_smart_commit_message("")
         return msg, error, "smart"
     except Exception as e:
-        # Clean up temp file
-        try:
-            os.unlink(temp_file.name)
-        except:
-            pass
         print(f"⚠️ GitHub Copilot error: {str(e)}, using smart generation...")
         msg, error = generate_smart_commit_message("")
         return msg, error, "smart"
@@ -838,44 +828,31 @@ def generate_copilot_pr_details(commit_message=None):
         return generate_smart_pr_title(""), generate_smart_pr_description("", "", commit_message), None
 
 def generate_smart_pr_title(changes_summary):
-    """Generate a specific, human-readable PR title based on actual file changes"""
+    """Generate a short 1-3 word PR title based on the commit message/description"""
     if not changes_summary:
-        return "Update project files"
+        return "Project Updates"
     
-    # Get detailed diff information
-    try:
-        diff_result = subprocess.run("git diff HEAD --numstat", shell=True, capture_output=True, text=True, timeout=10)
-        diff_lines = diff_result.stdout.strip().split('\n') if diff_result.stdout.strip() else []
-        
-        file_changes = {}
-        for line in diff_lines:
-            if line.strip():
-                parts = line.split('\t')
-                if len(parts) >= 3:
-                    added = parts[0] if parts[0] != '-' else '0'
-                    filename = parts[2]
-                    file_changes[filename] = {'added': int(added) if added.isdigit() else 0}
-    except:
-        file_changes = {}
-    
+    # Analyze file types to create a short title
     lines = changes_summary.strip().split('\n')
-    modified_files = []
-    added_files = []
-    deleted_files = []
+    has_python = any('.py' in line for line in lines)
+    has_docs = any(('Documentation/' in line or '.md' in line) for line in lines)
+    has_config = any(('.vscode/' in line or '.json' in line or '.yml' in line) for line in lines)
     
-    for line in lines:
-        if line.startswith(' M '):
-            modified_files.append(line[3:])
-        elif line.startswith(' A ') or line.startswith('A '):
-            added_files.append(line[3:])
-        elif line.startswith(' D ') or line.startswith('D '):
-            deleted_files.append(line[3:])
-    
-    # Generate specific, human-readable title
-    main_changes = []
-    
-    # Analyze major changes first
-    for filename in modified_files:
+    # Create 1-3 word titles based on what was changed
+    if has_python and has_docs:
+        return "Code & Docs"
+    elif has_python and has_config:
+        return "System Updates"
+    elif has_python:
+        return "Code Improvements"
+    elif has_docs:
+        return "Documentation"
+    elif has_config:
+        return "Configuration"
+    else:
+        return "Project Updates"
+
+
         file_info = file_changes.get(filename, {})
         added_lines = file_info.get('added', 0)
         
@@ -920,48 +897,13 @@ def generate_smart_pr_title(changes_summary):
             return f"{primary} and {len(main_changes)-1} other updates"
 
 def generate_smart_pr_description(changes_summary, diff_summary, commit_message):
-    """Generate a detailed, human-readable PR description based on actual changes"""
-    description_parts = []
+    """Generate a detailed, human-readable PR description that matches the commit message"""
+    # PR description should be the same as the commit message
+    if commit_message:
+        return commit_message
     
-    # Get detailed diff for better analysis
-    try:
-        diff_result = subprocess.run("git diff HEAD --numstat", shell=True, capture_output=True, text=True, timeout=10)
-        diff_lines = diff_result.stdout.strip().split('\n') if diff_result.stdout.strip() else []
-        
-        file_changes = {}
-        for line in diff_lines:
-            if line.strip():
-                parts = line.split('\t')
-                if len(parts) >= 3:
-                    added = parts[0] if parts[0] != '-' else '0'
-                    deleted = parts[1] if parts[1] != '-' else '0'
-                    filename = parts[2]
-                    file_changes[filename] = {
-                        'added': int(added) if added.isdigit() else 0,
-                        'deleted': int(deleted) if deleted.isdigit() else 0
-                    }
-    except:
-        file_changes = {}
-    
-    # Add comprehensive summary (don't just repeat commit message)
-    description_parts.append("## Overview")
-    
-    # Analyze the actual changes to create a meaningful overview
-    total_files = len(file_changes)
-    total_added = sum(f.get('added', 0) for f in file_changes.values())
-    total_deleted = sum(f.get('deleted', 0) for f in file_changes.values())
-    
-    if total_files == 1 and '.vscode/git_sync.py' in file_changes:
-        if total_added > 200:
-            description_parts.append("Major overhaul of the git synchronization system with significant improvements to commit message generation, PR creation, and GitHub Copilot integration.")
-        elif total_added > 50:
-            description_parts.append("Substantial improvements to the git sync automation system, focusing on better message generation and enhanced user experience.")
-        else:
-            description_parts.append("Refinements to the git sync system with bug fixes and minor enhancements.")
-    elif total_files <= 3:
-        description_parts.append(f"Focused updates to {total_files} files with {total_added} lines added and {total_deleted} lines removed, improving core functionality.")
-    else:
-        description_parts.append(f"Comprehensive changes across {total_files} files ({total_added}+ additions, {total_deleted} deletions) enhancing multiple system components.")
+    # If no commit message, generate one using the same logic as commit generation
+    return generate_smart_commit_message(changes_summary)[0] or "Updated project files with improvements"
     
     if changes_summary:
         lines = changes_summary.strip().split('\n')
