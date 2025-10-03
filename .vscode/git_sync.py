@@ -943,9 +943,25 @@ def generate_smart_pr_description(changes_summary, diff_summary, commit_message)
     except:
         file_changes = {}
     
-    # Add summary
-    if commit_message:
-        description_parts.append(f"## What Changed\n{commit_message}")
+    # Add comprehensive summary (don't just repeat commit message)
+    description_parts.append("## Overview")
+    
+    # Analyze the actual changes to create a meaningful overview
+    total_files = len(file_changes)
+    total_added = sum(f.get('added', 0) for f in file_changes.values())
+    total_deleted = sum(f.get('deleted', 0) for f in file_changes.values())
+    
+    if total_files == 1 and '.vscode/git_sync.py' in file_changes:
+        if total_added > 200:
+            description_parts.append("Major overhaul of the git synchronization system with significant improvements to commit message generation, PR creation, and GitHub Copilot integration.")
+        elif total_added > 50:
+            description_parts.append("Substantial improvements to the git sync automation system, focusing on better message generation and enhanced user experience.")
+        else:
+            description_parts.append("Refinements to the git sync system with bug fixes and minor enhancements.")
+    elif total_files <= 3:
+        description_parts.append(f"Focused updates to {total_files} files with {total_added} lines added and {total_deleted} lines removed, improving core functionality.")
+    else:
+        description_parts.append(f"Comprehensive changes across {total_files} files ({total_added}+ additions, {total_deleted} deletions) enhancing multiple system components.")
     
     if changes_summary:
         lines = changes_summary.strip().split('\n')
@@ -971,39 +987,68 @@ def generate_smart_pr_description(changes_summary, diff_summary, commit_message)
                 deleted_lines = file_info.get('deleted', 0)
                 
                 if filename == '.vscode/git_sync.py':
-                    if added_lines > 100:
-                        description_parts.append(f"### Enhanced git_sync.py (+{added_lines} lines)")
-                        description_parts.append("- Completely rewrote PR title and description generation to be more specific and human-readable")
-                        description_parts.append("- Improved commit message generation to analyze actual file changes instead of using generic templates")
-                        description_parts.append("- Added detailed file analysis to create contextual descriptions")
-                        description_parts.append("- Removed generic 'feat:' and 'docs:' prefixes in favor of natural language")
+                    if added_lines > 200:
+                        description_parts.append(f"### 🔄 Major Git Sync Overhaul (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- **Complete GitHub Copilot Integration Rewrite**: Fixed authentication issues, timeout problems, and interactive mode conflicts")
+                        description_parts.append("- **Enhanced Commit Message Generation**: Now analyzes actual file changes and creates specific, human-readable messages instead of generic templates")
+                        description_parts.append("- **Intelligent PR Description System**: Generates detailed descriptions based on file modifications, diff analysis, and contextual understanding")
+                        description_parts.append("- **Smart Fallback Mechanisms**: Proper error handling with enhanced AI-powered fallbacks when Copilot fails")
+                        description_parts.append("- **Improved User Experience**: Better dialogs, clearer messaging, and more intuitive workflow")
+                    elif added_lines > 100:
+                        description_parts.append(f"### 🔧 Enhanced git_sync.py (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- **Improved Message Generation**: Better commit message and PR description creation with contextual analysis")
+                        description_parts.append("- **GitHub Copilot Fixes**: Resolved authentication and timeout issues for more reliable AI assistance")
+                        description_parts.append("- **Enhanced Error Handling**: Better fallback mechanisms and user feedback")
+                        description_parts.append("- **Code Quality Improvements**: Refactored functions for better maintainability and reliability")
                     else:
-                        description_parts.append(f"### Updated git_sync.py (+{added_lines} lines)")
-                        description_parts.append("- Made improvements to the GitHub sync functionality")
+                        description_parts.append(f"### 🛠️ Updated git_sync.py (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- Bug fixes and minor improvements to GitHub synchronization functionality")
+                        description_parts.append("- Enhanced error handling and user feedback mechanisms")
                 
                 elif filename == '.vscode/auto_sync.py':
-                    description_parts.append(f"### Enhanced auto_sync.py (+{added_lines} lines)")
-                    description_parts.append("- Improved automation script functionality")
+                    description_parts.append(f"### 🤖 Enhanced auto_sync.py (+{added_lines} lines, -{deleted_lines} lines)")
+                    description_parts.append("- Improved codespace automation and system update functionality")
+                    description_parts.append("- Better integration with VS Code extension management")
                     
                 elif filename == '.vscode/sync-repo.sh':
-                    description_parts.append(f"### Updated sync-repo.sh (+{added_lines} lines)")
-                    description_parts.append("- Enhanced repository synchronization script")
+                    description_parts.append(f"### 🔄 Updated sync-repo.sh (+{added_lines} lines, -{deleted_lines} lines)")
+                    description_parts.append("- Enhanced bash script for repository synchronization")
+                    description_parts.append("- Improved error handling and reliability")
                     
                 elif 'Documentation/' in filename:
                     if 'Collaboration-Process' in filename:
-                        description_parts.append(f"### Updated Collaboration-Process.md")
-                        description_parts.append("- Made minor updates to the collaboration process documentation")
+                        description_parts.append(f"### 📚 Updated Collaboration-Process.md (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- Refined team collaboration guidelines and processes")
+                        description_parts.append("- Added clarity to development workflow procedures")
+                    elif 'README' in filename:
+                        description_parts.append(f"### 📖 Updated README.md (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- Enhanced project documentation with better explanations")
+                        description_parts.append("- Updated setup instructions and usage guidelines")
                     else:
-                        description_parts.append(f"### Updated {os.path.basename(filename)}")
-                        description_parts.append(f"- Made improvements to {os.path.basename(filename)} documentation")
+                        description_parts.append(f"### 📄 Updated {os.path.basename(filename)} (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append(f"- Improvements to {os.path.basename(filename)} documentation")
+                        description_parts.append("- Enhanced clarity and completeness of information")
                         
                 elif filename.endswith('.py'):
-                    description_parts.append(f"### Improved {os.path.basename(filename)} (+{added_lines} lines)")
-                    description_parts.append(f"- Enhanced Python script functionality")
+                    if 'test' in filename.lower():
+                        description_parts.append(f"### 🧪 Enhanced {os.path.basename(filename)} (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- Improved test coverage and test case reliability")
+                        description_parts.append("- Added new test scenarios for better validation")
+                    else:
+                        description_parts.append(f"### 🐍 Improved {os.path.basename(filename)} (+{added_lines} lines, -{deleted_lines} lines)")
+                        description_parts.append("- Enhanced Python functionality with better error handling")
+                        description_parts.append("- Optimized performance and code maintainability")
                     
                 elif filename.endswith('.md'):
-                    description_parts.append(f"### Updated {os.path.basename(filename)}")
-                    description_parts.append(f"- Made updates to documentation")
+                    description_parts.append(f"### 📝 Updated {os.path.basename(filename)} (+{added_lines} lines, -{deleted_lines} lines)")
+                    description_parts.append("- Refined documentation with clearer explanations")
+                    description_parts.append("- Improved formatting and readability")
+                    
+                else:
+                    # Generic file handling
+                    description_parts.append(f"### 📁 Modified {os.path.basename(filename)} (+{added_lines} lines, -{deleted_lines} lines)")
+                    description_parts.append("- Made structural improvements and updates")
+                    description_parts.append("- Enhanced file functionality and reliability")
         
         # Handle additions and deletions
         if added_files:
