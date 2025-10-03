@@ -106,6 +106,24 @@ if is_container_setup; then
     fi
     
     mark_completed "extensions"
+    update_status "Setting up terminal prompt for GitHub environment"
+    
+    # Setup terminal prompt to ensure GitHub user appears correctly
+    echo -e "${BLUE}🖥️  TERMINAL PROMPT SETUP${NC}"
+    echo "=" * 40
+    
+    if [ -f ".devcontainer/setup-terminal-prompt.sh" ]; then
+        echo "🔧 Setting up GitHub environment for terminal prompt..."
+        if bash .devcontainer/setup-terminal-prompt.sh --container-init; then
+            echo -e "${GREEN}✅ Terminal prompt setup completed${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Terminal prompt setup had some issues${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Terminal prompt setup script not found${NC}"
+    fi
+    
+    mark_completed "terminal-prompt"
     update_status "Container setup completed successfully"
     
     # Create final completion marker with timestamp
@@ -119,6 +137,7 @@ if is_container_setup; then
     echo -e "${GREEN}✅ Ubuntu updates: Complete${NC}"
     echo -e "${GREEN}✅ Repository sync: Complete${NC}"
     echo -e "${GREEN}✅ VS Code extensions: Complete${NC}"
+    echo -e "${GREEN}✅ Terminal prompt: Complete${NC}"
     echo -e "${GREEN}✅ Completion marker: /tmp/container-setup/SETUP-COMPLETE${NC}"
     echo "=" * 60
     echo -e "${BLUE}🚀 VS Code auto-sync task can now safely proceed${NC}"
