@@ -256,6 +256,31 @@ fi
 
 echo ""
 echo "=" * 60
+
+# Always ensure we end up on Testing branch for development work
+FINAL_BRANCH=$(git branch --show-current)
+if [ "$FINAL_BRANCH" != "Testing" ]; then
+    echo -e "${BLUE}🔄 Ensuring you're on Testing branch for development work...${NC}"
+    
+    # Check if Testing branch exists
+    if git branch --list Testing | grep -q Testing; then
+        # Local Testing branch exists, switch to it
+        git checkout Testing --quiet
+        echo -e "${GREEN}✅ Switched to Testing branch for development!${NC}"
+    elif git branch -r --list origin/Testing | grep -q origin/Testing; then
+        # Remote Testing branch exists, create local tracking branch
+        git checkout -b Testing origin/Testing --quiet
+        echo -e "${GREEN}✅ Created and switched to Testing branch for development!${NC}"
+    else
+        # No Testing branch exists, create it from current branch
+        echo -e "${YELLOW}⚠️ Testing branch doesn't exist. Creating it from $FINAL_BRANCH...${NC}"
+        git checkout -b Testing --quiet
+        echo -e "${GREEN}✅ Created Testing branch for development!${NC}"
+    fi
+else
+    echo -e "${GREEN}✅ Already on Testing branch - ready for development!${NC}"
+fi
+
 echo -e "${GREEN}🎉 Smart Auto-Sync Complete!${NC}"
 
 # Optional: Run the VS Code auto_sync script after this

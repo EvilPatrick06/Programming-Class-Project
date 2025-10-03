@@ -1617,11 +1617,8 @@ def main():
             else:
                 show_vscode_notification("⚠️ Failed to checkout main branch for sync", "warning")
             
-            # Return to original branch
-            if original_branch and original_branch != "Testing":
-                run_command_execute(f"git checkout {original_branch}", f"Return to {original_branch} branch")
-            elif original_branch != "Testing":
-                run_command_execute("git checkout Testing", "Switch to Testing branch")
+            # Always return to Testing branch for development work
+            run_command_execute("git checkout Testing", "Switch to Testing branch for continued development")
         
         step_counter += 1
     
@@ -1858,6 +1855,47 @@ def main():
     # Show final status
     print("\nFinal status:")
     run_command_preview("git status", "Final git status")
+    
+    # Always ensure we end on Testing branch for development work
+    try:
+        final_branch = subprocess.run("git branch --show-current", shell=True, capture_output=True, text=True).stdout.strip()
+        if final_branch != "Testing":
+            print(f"\n🔄 Ensuring you're on Testing branch for continued development...")
+            print(f"   Currently on: {final_branch}")
+            
+            # Check if Testing branch exists locally
+            testing_exists = subprocess.run("git branch --list Testing", shell=True, capture_output=True, text=True)
+            if testing_exists.stdout.strip():
+                # Local Testing branch exists
+                switch_result = subprocess.run("git checkout Testing", shell=True, capture_output=True, text=True)
+                if switch_result.returncode == 0:
+                    show_vscode_notification("✅ Switched to Testing branch for development!", "success")
+                    print("✅ Now on Testing branch for continued development!")
+                else:
+                    print(f"⚠️ Failed to switch to Testing branch: {switch_result.stderr}")
+            else:
+                # Check if remote Testing branch exists
+                remote_testing = subprocess.run("git branch -r --list origin/Testing", shell=True, capture_output=True, text=True)
+                if remote_testing.stdout.strip():
+                    # Create local Testing branch from remote
+                    create_result = subprocess.run("git checkout -b Testing origin/Testing", shell=True, capture_output=True, text=True)
+                    if create_result.returncode == 0:
+                        show_vscode_notification("✅ Created and switched to Testing branch for development!", "success")
+                        print("✅ Created local Testing branch and switched to it!")
+                    else:
+                        print(f"⚠️ Failed to create Testing branch from remote: {create_result.stderr}")
+                else:
+                    # Create new Testing branch from current branch
+                    create_result = subprocess.run("git checkout -b Testing", shell=True, capture_output=True, text=True)
+                    if create_result.returncode == 0:
+                        show_vscode_notification("✅ Created new Testing branch for development!", "success")
+                        print("✅ Created new Testing branch for development!")
+                    else:
+                        print(f"⚠️ Failed to create new Testing branch: {create_result.stderr}")
+        else:
+            print(f"\n✅ Already on Testing branch - ready for development!")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not ensure Testing branch: {e}")
     
     # Clean up any temporary files
     cleanup_temp_files()
