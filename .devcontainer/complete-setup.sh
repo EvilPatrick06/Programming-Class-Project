@@ -108,19 +108,26 @@ if is_container_setup; then
     mark_completed "extensions"
     update_status "Container setup completed successfully"
     
-    # Create final completion marker
+    # Create final completion marker with timestamp
+    echo "$(date '+%Y-%m-%d %H:%M:%S')" > /tmp/container-setup/completion-time
     touch /tmp/container-setup/SETUP-COMPLETE
-    echo "$(date)" > /tmp/container-setup/completion-time
+    update_status "All container setup operations completed successfully"
     
     echo ""
     echo -e "${GREEN}🎉 CONTAINER SETUP COMPLETE!${NC}"
-    echo "=" * 50
+    echo "=" * 60
     echo -e "${GREEN}✅ Ubuntu updates: Complete${NC}"
     echo -e "${GREEN}✅ Repository sync: Complete${NC}"
     echo -e "${GREEN}✅ VS Code extensions: Complete${NC}"
-    echo "=" * 50
-    echo -e "${BLUE}🚀 VS Code can now safely run additional tasks${NC}"
+    echo -e "${GREEN}✅ Completion marker: /tmp/container-setup/SETUP-COMPLETE${NC}"
+    echo "=" * 60
+    echo -e "${BLUE}🚀 VS Code auto-sync task can now safely proceed${NC}"
+    echo -e "${BLUE}📁 Setup status directory: /tmp/container-setup/${NC}"
     echo ""
+    
+    # List all completion markers for debugging
+    echo -e "${BLUE}🔍 Completion markers created:${NC}"
+    ls -la /tmp/container-setup/
     
 else
     echo -e "${YELLOW}⚠️  Not in container setup context - skipping full setup${NC}"
