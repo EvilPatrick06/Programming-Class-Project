@@ -540,19 +540,27 @@ def main():
         target_branch = current_branch
         create_pr = False
         sync_testing = False
+        merge_pr = False
         
     elif "Push to main" in push_option:
-        # Push to main branch (and also sync Testing to keep it up-to-date)
-        if current_branch == "main":
-            print("🔄 Will push to main branch and sync Testing")
-            target_branch = "main"
-            create_pr = False
-            sync_testing = True
+        # Push to main branch via pull request (like the original script)
+        print(f"🔄 Will push {current_branch} and create pull request to main")
+        target_branch = "main"
+        create_pr = True
+        sync_testing = True
+        
+        # Ask about immediate merge (like the original script did)
+        merge_response = get_vscode_input(
+            f"Would you also like to merge the pull request to main immediately?",
+            ["Yes, merge immediately", "No, leave for review"]
+        )
+        
+        if merge_response and "Yes" in merge_response:
+            merge_pr = True
+            print("📋 Will create PR and merge to main, then sync Testing")
         else:
-            print(f"🔄 Will push {current_branch} changes to main branch and sync Testing")
-            target_branch = "main"
-            create_pr = False
-            sync_testing = True
+            merge_pr = False
+            print("📋 Will create PR to main for review, then sync Testing")
             
     elif "Push to Testing" in push_option:
         # Push to Testing branch
@@ -561,11 +569,13 @@ def main():
             target_branch = "Testing"
             create_pr = False
             sync_testing = False
+            merge_pr = False
         else:
             print(f"🔄 Will push {current_branch} changes to Testing branch")
             target_branch = "Testing"
             create_pr = False
             sync_testing = False
+            merge_pr = False
             
     elif "Create pull request" in push_option:
         # Create PR workflow
