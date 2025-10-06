@@ -37,19 +37,20 @@ def play_wordy(rows, cols, word_length, difficulty):
     word = pick_word(difficulty)
     word_letters = list(word)
 
-    for attempt in range(rows):
+   for attempt in range(rows):
+    while True:
         guess = input(f"Attempt {attempt + 1}: Enter a {word_length}-letter word: ").lower()
         if len(guess) != word_length:
             print("Invalid length, try again.")
-            attempt -= 1
             continue
-        guess_letters = list(guess)
+        break
+    guess_letters = list(guess)
 
-        if guess == word:
-            print("Congratulations! You guessed the word!")
-            break
-    else:
-        print(f"Sorry, you ran out of attempts. The word was: {word}")
+    if guess == word:
+        print("Congratulations! You guessed the word!")
+        break
+else:
+    print(f"Sorry, you ran out of attempts. The word was: {word}")
 
     # First color correct letters green, then yellow for wrong spot
     def color_square(turtle_obj, row, col, color, rows, cols):
@@ -145,3 +146,4 @@ def main_menu():
 
 main_menu()
 turtle.done()
+
