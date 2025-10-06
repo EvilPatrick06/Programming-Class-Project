@@ -1,3 +1,4 @@
+import turtle
 import random
 
 WORDY_EASY = ["able", "acid", "aged", "also", "area", "army", "away", "baby", "back", "ball", "band", "bank", "base", "bath", "bear", "beat", "been", "beer", "bell", "belt", "best", "bike", "bill", "bird", "blow", "blue", "boat", "body", "bone", "book", "born", "both", "boys", "busy", "call", "calm", "came", "camp", "card", "care", "cars", "case", "cash", "cast", "cats", "cell", "chat", "chip", "city", "club", "coal", "coat", "code", "cold", "come", "cook", "cool", "copy", "corn", "cost", "crew", "crop", "dark", "data", "date", "days", "dead", "deal", "dear", "deep", "desk", "diet", "dirt", "dish", "does", "done", "door", "down", "draw", "drew", "drop", "drug", "dual", "duck", "dust", "duty", "each", "earn", "east", "easy", "edge", "eggs", "else", "even", "ever", "evil", "exit", "eyes", "face", "fact", "fail", "fair", "fall", "fans", "farm", "fast", "fate", "fear", "feed", "feel", "feet", "fell", "felt", "file", "fill", "film", "find", "fine", "fire", "firm", "fish", "fist", "fits", "five", "flag", "flat", "flew", "flow", "folk", "food", "foot", "ford", "fork", "form", "fort", "four", "free", "from", "fuel", "full", "fund", "gain", "game", "gate", "gave", "gear", "gets", "gift", "girl", "give", "glad", "goal", "goes", "gold", "golf", "gone", "good", "grab", "grew", "grey", "grow", "guys", "hair", "half", "hall", "hand", "hang", "hard", "hate", "have", "head", "hear", "heat", "held", "help", "here", "hide", "high", "hill", "hint", "hire", "hits", "hold", "hole", "home", "hope", "host", "hour", "huge", "hung", "hunt", "hurt", "idea", "inch", "into", "iron", "item", "jail", "jane", "jazz", "join", "joke", "jump", "june", "jury", "just", "keep", "kept", "keys", "kick", "kids", "kill", "kind", "king", "knee", "knew", "know", "lack", "lady", "laid", "lake", "land", "lane", "last", "late", "lead", "left", "legs", "less", "lets", "life", "lift", "like", "line", "link", "list", "live", "load", "loan", "lock", "long", "look", "lord", "lose", "loss", "lost", "lots", "loud", "love", "luck", "made", "mail", "main", "make", "male", "mall", "many", "mark", "mass", "math", "meal", "mean", "meat", "meet", "melt", "menu", "mess", "mice", "mile", "milk", "mind", "mine", "miss", "mode", "mood", "moon", "more", "most", "move", "much", "must", "name", "navy", "near", "neck", "need", "news", "next", "nice", "nine", "none", "noon", "nose", "note", "nuts", "okay", "once", "only", "open", "oral", "over", "pace", "pack", "page", "paid", "pain", "pair", "palm", "park", "part", "pass", "past", "path", "peak", "pick", "pics", "pile", "pink", "pipe", "plan", "play", "plot", "plus", "poem", "pole", "poll", "pool", "poor", "pope", "port", "post", "pull", "pure", "push", "puts", "race", "rain", "rank", "rate", "read", "real", "rear", "rely", "rent", "rest", "rice", "rich", "ride", "ring", "rise", "risk", "road", "rock", "role", "roll", "roof", "room", "root", "rope", "rose", "rule", "runs", "safe", "said", "sail", "sale", "salt", "same", "sand", "save", "says", "seal", "seat", "seed", "seek", "seem", "seen", "self", "sell", "send", "sent", "ship", "shoe", "shop", "shot", "show", "shut", "sick", "side", "sign", "silk", "sing", "sink", "site", "size", "skin", "skip", "slip", "slow", "snap", "snow", "soap", "soft", "soil", "sold", "sole", "some", "song", "soon", "sort", "soul", "soup", "spot", "star", "stay", "step", "stir", "stop", "such", "suit", "sure", "swim", "take", "tale", "talk", "tall", "tank", "tape", "task", "team", "tell", "tend", "tent", "term", "test", "text", "than", "that", "them", "then", "they", "thin", "this", "thus", "tide", "tied", "ties", "time", "tiny", "tips", "tire", "told", "tone", "took", "tool", "tops", "torn", "tour", "town", "toys", "tree", "trim", "trip", "true", "tune", "turn", "twin", "type", "unit", "used", "user", "uses", "vary", "vast", "very", "view", "vote", "wait", "wake", "walk", "wall", "want", "warm", "warn", "wash", "wave", "ways", "weak", "wear", "week", "well", "went", "were", "west", "what", "when", "wide", "wife", "wild", "will", "wind", "wine", "wing", "wire", "wise", "wish", "with", "wood", "wool", "word", "wore", "work", "worn", "yard", "year", "your", "zero", "zone"]
@@ -7,7 +8,6 @@ WORDY_HARD = ["absolute", "abstract", "academic", "accepted", "accident", "accur
 tries = 6
 attempt = 0
 score = 0
-
 
 # Get the guess
 def guessing():
@@ -116,30 +116,105 @@ def main_menu():
         print(" \n Welcome to Wordy! You have 6 tries to guess the correct 5 letter word.\n After each guess, you'll receive feedback on how many letters are in the right position, as well as which letters are correct but in the wrong position. Good luck!")
         difficulty = input("\n Choose your difficulty: \n\n1: Easy\n2: Medium\n3: Hard\n \n").lower()
         if difficulty == "easy" or difficulty == "1":
+            ROWS = 6
+            COLS = 4
             gen_wordy_easy()
             check()
         elif difficulty == "medium" or difficulty == "2":
+            ROWS = 6
+            COLS = 5
             gen_wordy_medium()
             check()
         elif difficulty == "hard" or difficulty == "3":
+            ROWS = 6
+            COLS = 6
             gen_wordy_hard()
             check()
-
-
+        else:
+            print("Invalid choice, defaulting to medium.")
+            ROWS = 6
+            COLS = 5
+            gen_wordy_medium()
+            check()
     elif game == "tres" or game == "2":
         print("sorry, under construction rn :'(")
-    
     elif game == "quit" or game == "3":
         print("\n Exiting the game. Goodbye! \n")
         exit()
-        
-    else:
-        print(" \n Invalid input, please choose Wordy, Tres or corresponding number and check your spelling")
-        print ("Please try again.\n")
-        main_menu()
+    
 
+#Constants
+SQUARE_SIZE = 70
+GRID_COLOR = "black"
+BACKGROUND_COLOR = "white"
+
+def draw_grid(rows, cols):
+    jc = turtle.Turtle()
+    jc.hideturtle()
+    jc.speed(0)
+    jc.pensize(3)
+    jc.penup()
+    jc.goto(0, rows * SQUARE_SIZE / 2 + 10)  # position title above grid
+    jc.write("Wordy", align="center", font=("Verdana", 40, "bold"))
+
+    #Draw grid
+    def draw_square(x, y, size):
+        jc.penup()
+        jc.goto(x, y)
+        jc.pendown()
+        for _ in range(4):
+            jc.forward(size)
+            jc.right(90)
+
+    #Starting position (top-left)
+    start_x = -cols * SQUARE_SIZE / 2
+    start_y = rows * SQUARE_SIZE / 2
+
+    #Draw the grid based on difficulty
+    for row in range(rows):
+        for col in range(cols):
+            x = start_x + col * SQUARE_SIZE
+            y = start_y - row * SQUARE_SIZE
+            draw_square(x, y, SQUARE_SIZE)
+
+def main_menu():
+    game = input(" \n What game do you want to play:\n\n1: Wordy?\n2: Tres?\n3: Quit? \n \n").lower()
+    if game == "wordy" or game == "1":
+        print(" \n Welcome to Wordy! You have 6 tries to guess the correct 5 letter word.\n After each guess, you'll receive feedback on how many letters are in the right position, as well as which letters are correct but in the wrong position. Good luck!")
+        difficulty = input("\n Choose your difficulty: \n\n1: Easy\n2: Medium\n3: Hard\n \n").lower()
+        if difficulty == "easy" or difficulty == "1":
+            ROWS = 6
+            COLS = 4
+            draw_grid(ROWS, COLS)
+            gen_wordy_easy()
+            check()
+        elif difficulty == "medium" or difficulty == "2":
+            ROWS = 6
+            COLS = 5
+            draw_grid(ROWS, COLS)
+            gen_wordy_medium()
+            check()
+        elif difficulty == "hard" or difficulty == "3":
+            ROWS = 6
+            COLS = 6
+            draw_grid(ROWS, COLS)
+            gen_wordy_hard()
+            check()
+        else:
+            print("Invalid choice, defaulting to medium.")
+            ROWS = 6
+            COLS = 5
+            draw_grid(ROWS, COLS)
+            gen_wordy_medium()
+            check()
+    elif game == "tres" or game == "2":
+        print("sorry, under construction rn :'(")
+    elif game == "quit" or game == "3":
+        print("\n Exiting the game. Goodbye! \n")
+        exit()
 
 main_menu()
+turtle.done()
 
 
 #Make Letter Capital in outputword_che
