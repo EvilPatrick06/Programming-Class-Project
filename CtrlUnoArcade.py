@@ -216,5 +216,3 @@ def main_menu():
 main_menu()
 turtle.done()
 
-
-#Make Letter Capital in outputword_che
