@@ -113,7 +113,7 @@ def main_menu():
     
     game = input(" \n What game do you want to play:\n\n1: Wordy?\n2: Tres?\n3: Quit? \n \n").lower()
     if game == "wordy" or game == "1":
-        print(" \n Welcome to Wordy! You have 6 tries to guess the correct 5 letter word.\n After each guess, you'll receive feedback on how many letters are in the right position, as well as which letters are correct but in the wrong position. Good luck!")
+        print(" \n Welcome to Wordy! You have 6 tries to guess the correct word.\n After each guess, you'll receive feedback on how many letters are in the right position, as well as which letters are correct but in the wrong position. Good luck!")
         difficulty = input("\n Choose your difficulty: \n\n1: Easy\n2: Medium\n3: Hard\n \n").lower()
         if difficulty == "easy" or difficulty == "1":
             ROWS = 6
@@ -215,4 +215,5 @@ def main_menu():
 
 main_menu()
 turtle.done()
+
 
