@@ -127,7 +127,7 @@ def main_menu():
             check()
         elif difficulty == "hard" or difficulty == "3":
             ROWS = 6
-            COLS = 6
+            COLS = 8
             gen_wordy_hard()
             check()
         else:
@@ -215,5 +215,6 @@ def main_menu():
 
 main_menu()
 turtle.done()
+
 
 
