@@ -18,58 +18,36 @@ def guessing():
 
 
 # pick the word
-def pick_word(difficulty):
+def pick_word(difficulty, word_length):
+    # Choose the pool by difficulty and prefer words matching the requested length
     if difficulty == "easy":
-        return random.choice(WORDY_EASY)
+        pool = WORDY_EASY
     elif difficulty == "medium":
-        return random.choice(WORDY_MEDIUM)
+        pool = WORDY_MEDIUM
     else:
-        return random.choice(WORDY_HARD)
-    
-# --- Main game logic ---
-def play_wordy(rows, cols, word_length, difficulty):
-    jc = turtle.Turtle()
-    jc.hideturtle()
-    jc.speed(0)
-    jc.pensize(3)
+        pool = WORDY_HARD
+    candidates = [w for w in pool if len(w) == word_length]
+    if candidates:
+        return random.choice(candidates)
+    # fallback if no exact-length word exists in pool
+    return random.choice(pool)
 
-    draw_grid(rows, cols, jc)
-    word = pick_word(difficulty)
-    word_letters = list(word)
+# First color correct letters green, then yellow for wrong spot
+def color_square(turtle_obj, row, col, color, rows, cols):
+    start_x = -cols * SQUARE_SIZE / 2
+    start_y = rows * SQUARE_SIZE / 2
+    x = start_x + col * SQUARE_SIZE
+    y = start_y - row * SQUARE_SIZE
+    turtle_obj.penup()
+    turtle_obj.goto(x, y)
+    turtle_obj.pendown()
+    turtle_obj.fillcolor(color)
+    turtle_obj.begin_fill()
+    for _ in range(4):
+        turtle_obj.forward(SQUARE_SIZE)
+        turtle_obj.right(90)
+    turtle_obj.end_fill()
 
-   for attempt in range(rows):
-    while True:
-        guess = input(f"Attempt {attempt + 1}: Enter a {word_length}-letter word: ").lower()
-        if len(guess) != word_length:
-            print("Invalid length, try again.")
-            continue
-        break
-    guess_letters = list(guess)
-
-    if guess == word:
-        print("Congratulations! You guessed the word!")
-        break
-else:
-    print(f"Sorry, you ran out of attempts. The word was: {word}")
-
-    # First color correct letters green, then yellow for wrong spot
-    def color_square(turtle_obj, row, col, color, rows, cols):
-        start_x = -cols * SQUARE_SIZE / 2
-        start_y = rows * SQUARE_SIZE / 2
-        x = start_x + col * SQUARE_SIZE
-        y = start_y - row * SQUARE_SIZE
-        turtle_obj.penup()
-        turtle_obj.goto(x, y)
-        turtle_obj.pendown()
-        turtle_obj.fillcolor(color)
-        turtle_obj.begin_fill()
-        for _ in range(4):
-            turtle_obj.forward(SQUARE_SIZE)
-            turtle_obj.right(90)
-        turtle_obj.end_fill()
-
-
-        
 
 #Constants
 SQUARE_SIZE = 70
@@ -143,6 +121,78 @@ def main_menu():
     elif game == "quit" or game == "3":
         print("\n Exiting the game. Goodbye! \n")
         exit()
+
+def play_wordy(rows, cols, word_length, difficulty):
+    jc = turtle.Turtle()
+    jc.hideturtle()
+    jc.speed(0)
+    jc.pensize(3)
+
+    # draw base grid
+    draw_grid(rows, cols)
+
+    # use a separate turtle for coloring and writing
+    drawer = turtle.Turtle()
+    drawer.hideturtle()
+    drawer.speed(0)
+    drawer.pensize(3)
+
+    word = pick_word(difficulty, word_length)
+    word_letters = list(word)
+
+    guessed = False
+    for attempt in range(rows):
+        while True:
+            guess = input(f"Attempt {attempt + 1}: Enter a {word_length}-letter word: ").lower()
+            if len(guess) != word_length:
+                print("Invalid length, try again.")
+                continue
+            break
+        guess_letters = list(guess)
+
+        # Two-pass coloring: first mark exact matches (green)
+        colored = [None] * cols   # 'green'/'yellow'/'grey' or None
+        used_in_word = [False] * cols
+
+        for i in range(cols):
+            if i < len(guess_letters) and i < len(word_letters) and guess_letters[i] == word_letters[i]:
+                color_square(drawer, attempt, i, "green", rows, cols)
+                write_letter(drawer, guess_letters[i], attempt, i, rows, cols)
+                colored[i] = "green"
+                used_in_word[i] = True
+
+        # Second pass: mark letters that exist elsewhere (yellow), else grey
+        for i in range(cols):
+            if colored[i] is not None:
+                continue
+            if i >= len(guess_letters):
+                # Empty cell (shouldn't happen with validation), fill grey
+                color_square(drawer, attempt, i, "light grey", rows, cols)
+                continue
+            letter = guess_letters[i]
+            found = False
+            for j in range(cols):
+                if not used_in_word[j] and j < len(word_letters) and word_letters[j] == letter:
+                    found = True
+                    used_in_word[j] = True
+                    break
+            if found:
+                color_square(drawer, attempt, i, "yellow", rows, cols)
+                write_letter(drawer, letter, attempt, i, rows, cols)
+                colored[i] = "yellow"
+            else:
+                color_square(drawer, attempt, i, "light grey", rows, cols)
+                write_letter(drawer, letter, attempt, i, rows, cols)
+                colored[i] = "grey"
+
+        if guess == word:
+            print("Congratulations! You guessed the word!")
+            guessed = True
+            break
+
+    if not guessed:
+        print(f"Sorry, you ran out of attempts. The word was: {word}")
+
 
 main_menu()
 turtle.done()

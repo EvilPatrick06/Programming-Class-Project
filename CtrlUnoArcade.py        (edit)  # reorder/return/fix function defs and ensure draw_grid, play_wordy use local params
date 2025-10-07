@@ -1,0 +1,21 @@
+def draw_grid(rows, cols, jc):
+    grid = [[' ' for _ in range(cols)] for _ in range(rows)]
+    return grid
+
+def play_wordy(difficulty, rows, cols, word_length):
+    # Game logic here
+    pass
+
+def pick_word(word_length):
+    # Function to pick a word of a given length
+    return "example"
+
+# Example usage
+rows = 5
+cols = 5
+jc = 'X'
+difficulty = 'easy'
+word_length = 5
+
+grid = draw_grid(rows, cols, jc)
+print(grid)
