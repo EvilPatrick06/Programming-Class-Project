@@ -3,7 +3,7 @@ FROM python:3.12-slim
 
 # Install system packages for Tk / turtle and other tools
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3-tk tk-dev xvfb git curl fonts-dejavu && \
+    apt-get install -y --no-install-recommends python3-tk tk-dev xvfb imagemagick git curl fonts-dejavu && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # (Optional) Pre-install Python deps here if you add a requirements.txt:
