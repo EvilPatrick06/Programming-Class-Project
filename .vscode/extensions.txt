@@ -23,9 +23,6 @@ github.copilot-chat
 github.github-vscode-theme
 github.vscode-pull-request-github
 
-# Remote Development
-ms-azuretools.vscode-containers
-
 # Markdown
 davidanson.vscode-markdownlint
 yzhang.markdown-all-in-one

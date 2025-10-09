@@ -1,7 +1,7 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
+    "version": "2.0.0",
+    "tasks": [
+        {
             "label": "Auto Update Codespace on Startup",
             "type": "shell",
             "command": "bash",
@@ -118,26 +118,6 @@
             },
             "problemMatcher": [],
             "detail": "Run the auto-sync wrapper manually with full visibility (doesn't wait for startup delay)"
-        },
-        {
-          "label": "Run Turtle Game",
-          "type": "shell",
-          "command": "xvfb-run",
-          "args": [
-            "-a",
-            "python",
-            "CtrlUnoArcade.py"
-          ],
-          "presentation": {
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "shared",
-            "showReuseMessage": false,
-            "clear": false
-          },
-          "problemMatcher": [],
-          "detail": "Launch the turtle-based Wordy game using Xvfb for headless display"
         }
-  ]
+    ]
 }
