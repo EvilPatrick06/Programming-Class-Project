@@ -118,6 +118,27 @@
             },
             "problemMatcher": [],
             "detail": "Run the auto-sync wrapper manually with full visibility (doesn't wait for startup delay)"
+        },
+        {
+            "label": "Run Turtle Game",
+            "type": "shell",
+            "command": "xvfb-run",
+            "args": [
+                "-a",
+                "python",
+                "CtrlUnoArcade.py"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Launch the turtle-based Wordy game using Xvfb for headless display"
         }
     ]
 }
