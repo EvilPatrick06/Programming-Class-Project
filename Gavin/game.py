@@ -8,6 +8,7 @@ COLOR_CARDS = RED_CARDS + GREEN_CARDS + BLUE_CARDS + YELLOW_CARDS
 WILD_CARDS = ["Wild", "WildDrawFour"]
 ZERO_CARDS = ["R0", "G0", "B0", "Y0"]
 CARDS = COLOR_CARDS + WILD_CARDS + ZERO_CARDS
+COLORS = ["R", "G", "B", "Y"]
 
 t = True
 color_card_limits = {}
@@ -91,21 +92,17 @@ def starting_hands():
 
 
 def setup_first_card():
-    global current_card
+    global current_card, active_color
     current_card = deck[0]
     print()
+    print("The first card on the board is:", current_card)
     
     # Handle wild cards as the first card
-    if current_card in WILD_CARDS and current_card == "Wild":
-        current_card = input("The first card is a wild card! Please choose a color (R, G, B, Y): ").upper()
-        print("The first card is:", current_card + "Wild")
-        print()
-    elif current_card in WILD_CARDS and current_card == "WildDrawFour":
-        # Wild Draw Four cannot be the first card - a new card must be drawn 
-        # Will implement later
-        pass
+    if current_card in WILD_CARDS:
+        active_color = random.choice(COLORS)
+        print(f"The active color is: {active_color}")
     else:
-        print("The first card on the board is:", current_card)
+        active_color = current_card[0]  # First letter is the color
     print()
 
 def get_player1():
@@ -198,28 +195,45 @@ def player_4_hand():
     global player4_hand
     player4_hand = [card for card in player_hands[3][:] if card not in played_cards]
 
-def is_valid_play(card, current_card):
+def is_valid_play(card, current_card, active_color):
     # Convert input to uppercase for consistency
     card = card.upper()
-    
-    # Check if card exists in player's hand
     
     # Check if it's a wild card (can always be played)
     if card in WILD_CARDS:
         return True
     
     # Check if colors match (first character)
-    if card[0] == current_card[0]:
+    if card[0] == active_color:
         return True
         
     # Check if numbers/actions match (characters after the first)
-    if card[1:] == current_card[1:]:
+    if current_card not in WILD_CARDS and card[1:] == current_card[1:]:
         return True
         
     return False
 
+def choose_color():
+    while True:
+        print("Choose a color (R, G, B, Y): ")
+        color = input().upper()
+        if color in COLORS:
+            return color
+        else:
+            print("Invalid color. Please choose R, G, B, or Y.")
+
+def draw_card(player_hand):
+    if len(deck) > 0:
+        card = deck.pop()
+        player_hand.append(card)
+        print(f"You drew: {card}")
+        return card
+    else:
+        print("The deck is empty!")
+        return None
+
 def game_loop():
-    global player1_hand, player2_hand, player3_hand, player4_hand, played_cards, current_card
+    global player1_hand, player2_hand, player3_hand, player4_hand, played_cards, current_card, active_color
     
     game_over = False
     current_player = 1
@@ -227,19 +241,32 @@ def game_loop():
     while not game_over:
         if current_player == 1:
             print("It is Player 1's turn.")
-            print("Current card on top:", current_card)
+            print(f"Current card on top: {current_card}")
+            if current_card in WILD_CARDS:
+                print(f"Active color: {active_color}")
             print("Your hand is currently:", player1_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play?: ").upper()
+                card_input = input("Which card would you like to play? (or type 'draw' to draw): ").upper()
                 
-                if card_input in player1_hand and is_valid_play(card_input, current_card):
+                if card_input == "DRAW":
+                    draw_card(player1_hand)
+                    valid_move = True
+                elif card_input in player1_hand and is_valid_play(card_input, current_card, active_color):
                     player1_hand.remove(card_input)
                     current_card = card_input
                     played_cards.append(card_input)
                     print("Player 1 played:", card_input)
+                    
+                    # Handle wild card color selection
+                    if card_input in WILD_CARDS:
+                        active_color = choose_color()
+                        print(f"Player 1 chose {active_color} as the active color")
+                    else:
+                        active_color = card_input[0]
+                        
                     valid_move = True
                     
                     # Check win condition
@@ -258,19 +285,32 @@ def game_loop():
                 
         elif current_player == 2:
             print("\nIt is Player 2's turn.")
-            print("Current card on top:", current_card)
+            print(f"Current card on top: {current_card}")
+            if current_card in WILD_CARDS:
+                print(f"Active color: {active_color}")
             print("Your hand is currently:", player2_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play?: ").upper()
-
-                if card_input in player2_hand and is_valid_play(card_input, current_card):
+                card_input = input("Which card would you like to play? (or type 'draw' to draw): ").upper()
+                
+                if card_input == "DRAW":
+                    draw_card(player2_hand)
+                    valid_move = True
+                elif card_input in player2_hand and is_valid_play(card_input, current_card, active_color):
                     player2_hand.remove(card_input)
                     current_card = card_input
                     played_cards.append(card_input)
                     print("Player 2 played:", card_input)
+                    
+                    # Handle wild card color selection
+                    if card_input in WILD_CARDS:
+                        active_color = choose_color()
+                        print(f"Player 2 chose {active_color} as the active color")
+                    else:
+                        active_color = card_input[0]
+                        
                     valid_move = True
                     
                     # Check win condition
@@ -292,19 +332,32 @@ def game_loop():
                 
         elif current_player == 3:
             print("\nIt is Player 3's turn.")
-            print("Current card on top:", current_card)
+            print(f"Current card on top: {current_card}")
+            if current_card in WILD_CARDS:
+                print(f"Active color: {active_color}")
             print("Your hand is currently:", player3_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play?: ").upper()
-
-                if card_input in player3_hand and is_valid_play(card_input, current_card):
+                card_input = input("Which card would you like to play? (or type 'draw' to draw): ").upper()
+                
+                if card_input == "DRAW":
+                    draw_card(player3_hand)
+                    valid_move = True
+                elif card_input in player3_hand and is_valid_play(card_input, current_card, active_color):
                     player3_hand.remove(card_input)
                     current_card = card_input
                     played_cards.append(card_input)
                     print("Player 3 played:", card_input)
+                    
+                    # Handle wild card color selection
+                    if card_input in WILD_CARDS:
+                        active_color = choose_color()
+                        print(f"Player 3 chose {active_color} as the active color")
+                    else:
+                        active_color = card_input[0]
+                        
                     valid_move = True
                     
                     # Check win condition
@@ -326,19 +379,32 @@ def game_loop():
                 
         elif current_player == 4:
             print("\nIt is Player 4's turn.")
-            print("Current card on top:", current_card)
+            print(f"Current card on top: {current_card}")
+            if current_card in WILD_CARDS:
+                print(f"Active color: {active_color}")
             print("Your hand is currently:", player4_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play?: ").upper()
-
-                if card_input in player4_hand and is_valid_play(card_input, current_card):
+                card_input = input("Which card would you like to play? (or type 'draw' to draw): ").upper()
+                
+                if card_input == "DRAW":
+                    draw_card(player4_hand)
+                    valid_move = True
+                elif card_input in player4_hand and is_valid_play(card_input, current_card, active_color):
                     player4_hand.remove(card_input)
                     current_card = card_input
                     played_cards.append(card_input)
                     print("Player 4 played:", card_input)
+                    
+                    # Handle wild card color selection
+                    if card_input in WILD_CARDS:
+                        active_color = choose_color()
+                        print(f"Player 4 chose {active_color} as the active color")
+                    else:
+                        active_color = card_input[0]
+                        
                     valid_move = True
                     
                     # Check win condition

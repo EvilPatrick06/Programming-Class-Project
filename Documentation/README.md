@@ -13,6 +13,19 @@ This is a simple command-line interface (CLI) application written in **Python**,
 
 Tres is a card game where players compete to be the first to play all their cards by matching either colors or numbers. The game draws inspiration from Uno, but introduces a new mechanic: when a player reaches exactly three cards, a punishment round is triggered. This replaces Uno's "call Uno" rule.
 
+### Tres Basic Rules
+
+    - Match cards by either color or number.
+    - Be the first to play all your cards to win.
+    - Skip Card: Play a skip card to skip the next player's turn.
+    - Wild Card: Play a wild card to change the current color to any color of your choice.
+    - +2 Card: Play a +2 card to force the next player to draw two cards.
+    - +4 Card: Play a +4 card to force the next player to draw four cards. 
+    Also change the current color to a color of your choice.
+    - Reverse Card: Play a reverse card to change the order of play.
+    - You may stack +2 and +4 cards, has to be with the same type of card.
+    - When you have exactly 3 cards, the punishment mechanic activates.
+
 ### Punishment Mechanic
 
 When a player has exactly 3 cards, they can initiate a punishment round:
@@ -34,14 +47,29 @@ This mechanic adds suspense and strategic depth to the game whenever a player re
 
 Wordy is a word-guessing game inspired by Wordle, but with several twists:
 
-- Words are randomly selected from a predefined list and can be of any length.
-- Players have a limited number of attempts to guess the word.
-- After each guess, feedback is provided:
-  - The number of letters in the correct position.
-  - The number of correct letters in the wrong position.
-  - If your guess has the wrong number of letters, the game will tell you, but it will not reveal the actual word length.
+### Wordy Basic Rules
 
----
+    - Words are randomly selected from a predefined list and can be of any length.
+    - Choose your difficulty level: Easy has 4 letters, Medium has 6 letters, and Hard has 8 letters.
+    - You have a limited number of attempts to guess the word (You only get 6 of them!).
+    - Be strategic with your guesses to find the secret word in as few attempts as possible.
+    - Any English word is allowed, including proper nouns. 
+    - No special characters.
+
+### Feedback System
+
+    After each guess, you'll receive feedback:
+    
+        - The number of letters in the correct position.
+        - The number of correct letters but in the wrong position.
+
+### Strategy Tips
+
+    - Start with common letters and vowels.
+    - Use the feedback to eliminate impossible letters.
+    - Pay attention to letter positions to narrow down possibilities.
+
+Good luck guessing the secret word!""")
 
 ## Development Environment
 
@@ -80,15 +108,15 @@ The codespace includes an advanced extension management system:
 
 Extensions are organized by category in `.vscode/extensions.txt`:
 
-```txt
-# Python Development
+### Python Development
+
 ms-python.python
 ms-python.vscode-pylance
 
-# Git and Version Control  
+## Git and Version Control  
+
 eamodio.gitlens
 github.copilot
-```
 
 The script runs automatically on codespace startup and can also be triggered manually through the VS Code Tasks menu.
 
