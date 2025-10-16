@@ -94,7 +94,8 @@ def write_letter(turtle_obj, letter, row, col, rows, cols):
 
 
 def main_menu():
-    game = input(" \n What game do you want to play:\n\n1: Wordy?\n2: Tres?\n3: Quit? \n \n").lower()
+    game = input(" \n What game do you want to play:\n\n1: Wordy?\n2: Tres?\n3: Help?\n4: Quit? \n \n").lower()
+    
     if game == "wordy" or game == "1":
         print(" \n Welcome to Wordy! You have 6 tries to guess the correct word.\n After each guess, you'll receive feedback on how many letters are in the right position, as well as which letters are correct but in the wrong position. Good luck!")
         difficulty = input("\n Choose your difficulty: \n\n1: Easy (4 letters)\n2: Medium (5 letters)\n3: Hard (8 letters)\n \n").lower()
@@ -116,12 +117,87 @@ def main_menu():
             print("Invalid choice, defaulting to medium.")
             ROWS, COLS = difficulty_levels["medium"]
             play_wordy(ROWS, COLS, COLS, "medium")
+    
     elif game == "tres" or game == "2":
         print("sorry, under construction rn :'(")
-    elif game == "quit" or game == "3":
+        
+    elif game == "help" or game == "3":
+        help_choice = input(" \n What game do you want help with:\n\n1: Wordy?\n2: Tres?\n3: Quit? \n \n").lower()
+        help_choice2 = input(" \n What would you like to do now?:\n\n1: \"help\"?\n2: \"main_menu\"?\n3: \"quit\"? \n \n").lower()
+        
+        if help_choice == "wordy" or help_choice == "1":
+            print("""\n# Welcome to Wordy!
+
+        Wordy is a word-guessing game inspired by Wordle, but with a difficulty twists:
+
+        # Wordy Basic Rules
+
+            - Words are randomly selected from a predefined list and can be of any length.
+            - Choose your difficulty level: Easy has 4 letters, Medium has 6 letters, and Hard has 8 letters.
+            - You have a limited number of attempts to guess the word (You only get 6 of them!).
+            - Be strategic with your guesses to find the secret word in as few attempts as possible.
+
+        # Feedback System
+
+            After each guess, you'll receive feedback:
+            
+                - The number of letters in the correct position.
+                - The number of correct letters but in the wrong position.
+
+        # Strategy Tips
+
+            - Start with common letters and vowels.
+            - Use the feedback to eliminate impossible letters.
+            - Pay attention to letter positions to narrow down possibilities.
+
+        Good luck guessing the secret word!""")
+        print(help_choice2)
+        
+        if help_choice == "tres" or help_choice == "2":
+            print("""\n# Welcome to Tres!
+
+        Tres is a card game where players compete to be the first to play all of their cards. 
+        Do this by matching either colors or numbers. 
+        The game draws inspiration from Uno, but introduces a unique mechanic: 
+        when a player reaches exactly three cards, a punishment round is triggered.
+
+        # Tres Basic Rules
+
+            - Match cards by either color or number.
+            - Be the first to play all your cards to win.
+            - Skip Card: Play a skip card to skip the next player's turn.
+            - Wild Card: Play a wild card to change the current color to any color of your choice.
+            - +2 Card: Play a +2 card to force the next player to draw two cards.
+            - +4 Card: Play a +4 card to force the next player to draw four cards. 
+            Also change the current color to a color of your choice.
+            - Reverse Card: Play a reverse card to change the order of play.
+            - You may stack +2 and +4 cards, has to be with the same type of card.
+            - When you have exactly 3 cards, the punishment mechanic activates.
+
+        # Punishment Mechanic
+
+            When you have exactly 3 cards, you can initiate a punishment round:
+
+                1. **Choose a Number**: Select a number between 1 and 100.
+                2. **Secret Number**: The game randomly generates a secret number between 1 and 100.
+                - If your number is **higher** than the secret number, you must punish yourself.
+                - If your number is **lower** than the secret number, you can punish all other players.
+                - If you match the **exact** secret number, the punishment effect is doubled (2x multiplier).
+                3. Punishment Amount: The game randomly generates a number between 1 and 5 cards to draw as punishment.
+                - If you guessed the exact secret number, this amount is doubled.
+                - The punishment is applied either to you (if higher) or to all other players (if lower or exact).
+
+            This mechanic adds suspense and strategic depth whenever a player reaches three cards. Good luck!""")
+            print(help_choice2)
+            
+        if help_choice == "quit" or help_choice == "3":
+            print("\n Exiting help. Goodbye! \n")
+            exit()
+
+    elif game == "quit" or game == "4":
         print("\n Exiting the game. Goodbye! \n")
         exit()
-
+    
 def play_wordy(rows, cols, word_length, difficulty):
     jc = turtle.Turtle()
     jc.hideturtle()
