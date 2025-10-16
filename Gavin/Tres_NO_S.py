@@ -408,6 +408,6 @@ def game_loop():
 if __name__ == "__main__":
     tres_main()
     
-    
+
 #### add a timing function to the beggining of game before 1st players turn to give players a warning that the game is about to start and to look away if they are not the first player.
 #### Add a spacing to drawing scenario
