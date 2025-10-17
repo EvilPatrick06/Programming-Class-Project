@@ -1,8 +1,7 @@
-"""
-Arcade Game Application
-Currently contains two games: Wordy (a word guessing game) and Tres (a card matching game)
-Author: CtrlUno
-"""
+# Arcade Game Application
+# Currently contains two games and 3 menus: Wordy (a word guessing game) and Tres (a card matching game), Main Menu (Where a user selects the game they wish to play or a menu), Help Menu (Here a user can find the rules and how to play a game), and Quit Menu (Here a user gets prompted to confirm that they want to quit entirely, or if they want to go to a differen  menu).
+# Authors/Team: CtrlUno (Gavin Knotts, Jabriel Neal, and Joshua Casey)
+# We use GitHub for version control and collaboration.
 
 import random
 
@@ -44,12 +43,13 @@ BLUE_CARDS = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9"]
 YELLOW_CARDS = ["Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9"]
 COLOR_CARDS = RED_CARDS + GREEN_CARDS + BLUE_CARDS + YELLOW_CARDS  # All color cards combined
 ZERO_CARDS = ["R0", "G0", "B0", "Y0"]  # Zero cards for each color
-CARDS = COLOR_CARDS + ZERO_CARDS        # Complete deck
+WILD_CARDS = ["W"]  # Wild card 
+CARDS = COLOR_CARDS + ZERO_CARDS + WILD_CARDS        # Complete deck
 
 # Game state tracking variables
 color_card_limits = {}   # Tracks availability of color cards
 zero_card_limits = {}    # Tracks availability of zero cards
-
+wild_card_limit = {}      # Tracks availability of wild card
 #------------------------------------------------------
 # WORDY GAME FUNCTIONS
 #------------------------------------------------------
@@ -238,9 +238,10 @@ def deck_limits():
     Initialize the limits for each card type in the Tres deck.
     Color cards have 2 copies each, zero cards have 1 copy each.
     """
-    global color_card_limits, zero_card_limits
+    global color_card_limits, zero_card_limits, wild_card_limit
     color_card_limits = {card: 2 for card in COLOR_CARDS}
     zero_card_limits = {card: 1 for card in ZERO_CARDS}
+    wild_card_limit = {card: 4 for card in WILD_CARDS}
 
 def gen_deck():
     """
@@ -249,7 +250,7 @@ def gen_deck():
     Returns:
         list: A shuffled deck of Tres cards
     """
-    deck = COLOR_CARDS*2 + ZERO_CARDS
+    deck = COLOR_CARDS*2 + WILD_CARDS*4 + ZERO_CARDS
     random.shuffle(deck)
     return deck
 
@@ -285,14 +286,47 @@ def starting_hands():
         [card for card in deck[22:29]],
     ]
 
+def setup_first_card():
+    """
+    Sets up the first card in play from the top of the deck.
+    Displays this card to all players.
+    """
+    global current_card
+    current_card = deck[0]
+    print()
+    
     if real_player_count == 2:
         player_hands[0]
         player_hands[1]
         print()
         get_player1()
         get_player2()
-        print()
-        print("All players are ready. Game is starting...")
+        print(f"""
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+                                                                The first card in play is: {current_card}           
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               """)
+
     elif real_player_count == 3:
         player_hands[0]
         player_hands[1]
@@ -302,6 +336,7 @@ def starting_hands():
         get_player3()
         print()
         print("All players are ready. Game is starting...")
+    
     elif real_player_count == 4:
         player_hands[0]
         player_hands[1]
@@ -317,34 +352,50 @@ def starting_hands():
 def draw_card():
     """
     Draws a card from the top of the deck.
+    If deck is empty, reshuffles played cards to create a new deck.
     
     Returns:
         str: The drawn card, or None if deck is empty
     """
-    global deck
+    global deck, played_cards, current_card
+    
     if deck:
         return deck.pop(0)
-    else:
-        print("The deck is empty! No more cards can be drawn.")
-        return None
-
-def setup_first_card():
-    """
-    Sets up the first card in play from the top of the deck.
-    Displays this card to all players.
-    """
-    global current_card
-    current_card = deck[0]
+    
+    # The deck is empty, check if we can reshuffle played cards
+    elif played_cards:
+        print("The deck is empty! Reshuffling the discard pile...")
+        
+        # Save the current card (it's in play)
+        current_in_play = current_card
+        
+        # Remove current card from played cards if it's there
+        if current_in_play in played_cards:
+            played_cards.remove(current_in_play)
+            
+        # Shuffle the played cards to create a new deck
+        random.shuffle(played_cards)
+        deck = played_cards.copy()
+        played_cards = []  # Clear played cards
+        
+        # Add current card back to played cards
+        played_cards.append(current_in_play)
+        
+        if deck:
+            return deck.pop(0)
+    
+    # No cards left at all
+    else: print("Error no cards left to draw. There is no way this should happen. Please play a card if you can.")
+    print("Reminder your hand is ", player_hands[0])
+    print("The current card in play is ", current_card)
     print()
-    print("The first card in play is:", current_card)
-    print()
+    return None
 
 def get_player1():
     """
     Prompts player 1 to confirm readiness.
     Loops until player confirms they are ready.
     """
-    print()
     print("Get Player 1")
     response = input("Is player 1 ready? (y/yes, or n/no): ").lower()
     if response == "yes" or response == "y":
@@ -443,7 +494,6 @@ def get_real_player_count():
             else:
                 print()
                 print("Invalid input. Please enter a number between 2 and 4.")
-                print()
         except ValueError:
             print()
             print("Invalid input. Please enter a valid number between 2 and 4.")
@@ -490,20 +540,31 @@ def is_valid_play(card, current_card):
         current_card (str): The current card on top of the play pile
         
     Returns:
-        bool: True if the play is valid, False otherwise
+        tuple: (is_valid, updated_card) - Boolean indicating if play is valid and the updated current card
     """
     # Convert input to uppercase for consistency
     card = card.upper()
     
     # Check if colors match (first character)
-    if card[0] == current_card[0]:
-        return True
-        
+    if card[0] == current_card[0] or card == "W":
+        if card == "W":
+            card_input = input("Wild card played! What color do you want to choose? (R, G, B, Y): ").lower()
+            wild_card_input = card_input.upper()
+            if wild_card_input in ["R", "G", "B", "Y"]:
+                print(f"You chose {card_input} as the new color.")
+                updated_card = wild_card_input + "W"  # Create updated card with new color
+                print("The card on top is now:", updated_card)
+                return True, updated_card
+            else:
+                print("Invalid color choice. Please choose R, G, B, or Y.")
+                return False, current_card
+        return True, current_card
+    
     # Check if numbers match (characters after the first)
-    if card[1:] == current_card[1:]:
-        return True
+    if card[1:] == current_card[1:] or current_card[1:] == "R" or current_card[1:] == "G" or current_card[1:] == "B" or current_card[1:] == "Y":
+        return True, current_card
         
-    return False
+    return False, current_card
 
 def game_loop():
     """
@@ -517,6 +578,18 @@ def game_loop():
     
     while not game_over:
         if current_player == 1:
+            print("""
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               """)
             print("It is Player 1's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player1_hand)
@@ -524,170 +597,281 @@ def game_loop():
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                print()
                 card_input = card_input.upper()
 
-                if card_input == "DRAW":
+                if card_input == "DRAW" or card_input == "D":
                     drawn_card = draw_card()
                     if drawn_card:
                         player1_hand.append(drawn_card)
+                        print()
                         print("You drew:", drawn_card)
                         print("Your new hand is:", player1_hand)
                         print("Remember, the card on top is still:", current_card)
                         print()
                     continue
 
-                elif card_input in player1_hand and is_valid_play(card_input, current_card):
-                    player1_hand.remove(card_input)
-                    current_card = card_input
-                    played_cards.append(card_input)
-                    print("Player 1 played:", card_input)
-                    valid_move = True
+                elif card_input in player1_hand:
+                    is_valid, updated_card = is_valid_play(card_input, current_card)
+                    if is_valid:
+                        player1_hand.remove(card_input)
+                        # If it's a wild card, use the updated card with color
+                        if card_input == "W":
+                            current_card = updated_card
+                        else:
+                            current_card = card_input
+                        played_cards.append(card_input)
+                        print("Player 1 played:", card_input)
+                        print()
+                        valid_move = True
                     
-                    # Check win condition
-                    if len(player1_hand) == 0:
-                        print("Player 1 wins!")
-                        game_over = True
-                        break
-                    # Check Tres condition
-                    elif len(player1_hand) == 3:
-                        print("Player 1 has TRES!")
-                        # Implement Tres punishment later
+                        # Check win condition
+                        if len(player1_hand) == 0:
+                            print("Player 1 wins!")
+                            game_over = True
+                            break
+                        # Check Tres condition
+                        elif len(player1_hand) == 3:
+                            print("Player 1 has TRES!")
+                            # Implement Tres punishment later
+                    else:
+                        print()
+                        print("Invalid move! Try again.")
+                        print("Remember, the card on top is still:", current_card)
+                        print("Remember your hand is currently:", player1_hand)
+                        print()
                 else:
+                    print()
                     print("Invalid move! Try again.")
-                    
+                    print("Remember, the card on top is still:", current_card)
+                    print("Remember your hand is currently:", player1_hand)
+                    print()
+
             current_player = 2
                 
         elif current_player == 2:
-            print("\nIt is Player 2's turn.")
+            print("""
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               """)
+            print("It is Player 2's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player2_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                print()
                 card_input = card_input.upper()
-                
-                if card_input == "DRAW":
+
+                if card_input == "DRAW" or card_input == "D":
                     drawn_card = draw_card()
                     if drawn_card:
                         player2_hand.append(drawn_card)
+                        print()    
                         print("You drew:", drawn_card)
                         print("Your new hand is:", player2_hand)
                         print("Remember, the card on top is still:", current_card)
                         print()
                     continue
 
-                elif card_input in player2_hand and is_valid_play(card_input, current_card):
-                    player2_hand.remove(card_input)
-                    current_card = card_input
-                    played_cards.append(card_input)
-                    print("Player 2 played:", card_input)
-                    valid_move = True
+                elif card_input in player2_hand:
+                    is_valid, updated_card = is_valid_play(card_input, current_card)
+                    if is_valid:
+                        player2_hand.remove(card_input)
+                        # If it's a wild card, use the updated card with color
+                        if card_input == "W":
+                            current_card = updated_card
+                        else:
+                            current_card = card_input
+                        played_cards.append(card_input)
+                        print("Player 2 played:", card_input)
+                        print()
+                        valid_move = True
                     
-                    # Check win condition
-                    if len(player2_hand) == 0:
-                        print("Player 2 wins!")
-                        game_over = True
-                        break
-                    # Check Tres condition
-                    elif len(player2_hand) == 3:
-                        print("Player 2 has TRES!")
-                        # Implement Tres punishment later
+                        # Check win condition
+                        if len(player2_hand) == 0:
+                            print("Player 2 wins!")
+                            game_over = True
+                            break
+                        # Check Tres condition
+                        elif len(player2_hand) == 3:
+                            print("Player 2 has TRES!")
+                            # Implement Tres punishment later
+                    else:
+                        print()
+                        print("Invalid move! Try again.")
+                        print("Remember, the card on top is still:", current_card)
+                        print("Remember your hand is currently:", player2_hand)
+                        print()
                 else:
+                    print()
                     print("Invalid move! Try again.")
-            
+                    print("Remember, the card on top is still:", current_card)
+                    print("Remember your hand is currently:", player2_hand)
+                    print()
+
             if real_player_count >= 3:
                 current_player = 3
             else:
                 current_player = 1
                 
         elif current_player == 3:
-            print("\nIt is Player 3's turn.")
+            print("""
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               """)
+            print("It is Player 3's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player3_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                print()
                 card_input = card_input.upper()
-                
-                if card_input == "DRAW":
+
+                if card_input == "DRAW" or card_input == "D":
                     drawn_card = draw_card()
                     if drawn_card:
                         player3_hand.append(drawn_card)
+                        print()
                         print("You drew:", drawn_card)
                         print("Your new hand is:", player3_hand)
                         print("Remember, the card on top is still:", current_card)
                         print()
                     continue
 
-                elif card_input in player3_hand and is_valid_play(card_input, current_card):
-                    player3_hand.remove(card_input)
-                    current_card = card_input
-                    played_cards.append(card_input)
-                    print("Player 3 played:", card_input)
-                    valid_move = True
+                elif card_input in player3_hand:
+                    is_valid, updated_card = is_valid_play(card_input, current_card)
+                    if is_valid:
+                        player3_hand.remove(card_input)
+                        # If it's a wild card, use the updated card with color
+                        if card_input == "W":
+                            current_card = updated_card
+                        else:
+                            current_card = card_input
+                        played_cards.append(card_input)
+                        print("Player 3 played:", card_input)
+                        print()
+                        valid_move = True
                     
-                    # Check win condition
-                    if len(player3_hand) == 0:
-                        print("Player 3 wins!")
-                        game_over = True
-                        break
-                    # Check Tres condition
-                    elif len(player3_hand) == 3:
-                        print("Player 3 has TRES!")
-                        # Implement Tres punishment later
+                        # Check win condition
+                        if len(player3_hand) == 0:
+                            print("Player 3 wins!")
+                            game_over = True
+                            break
+                        # Check Tres condition
+                        elif len(player3_hand) == 3:
+                            print("Player 3 has TRES!")
+                            # Implement Tres punishment later
+                    else:
+                        print()
+                        print("Invalid move! Try again.")
+                        print("Remember, the card on top is still:", current_card)
+                        print("Remember your hand is currently:", player3_hand)
+                        print()
                 else:
+                    print()
                     print("Invalid move! Try again.")
-            
+                    print("Remember, the card on top is still:", current_card)
+                    print("Remember your hand is currently:", player3_hand)
+                    print()
+
             if real_player_count == 4:
                 current_player = 4
             else:
                 current_player = 1
                 
         elif current_player == 4:
-            print("\nIt is Player 4's turn.")
+            print("""
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               |                                            If you are not player 4 please look away.                                                  |
+               """)
+            print("It is Player 4's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player4_hand)
             print()
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                print()
                 card_input = card_input.upper()
-                
-                if card_input == "DRAW":
+
+                if card_input == "DRAW" or card_input == "D":
                     drawn_card = draw_card()
                     if drawn_card:
                         player4_hand.append(drawn_card)
+                        print()
                         print("You drew:", drawn_card)
                         print("Your new hand is:", player4_hand)
                         print("Remember, the card on top is still:", current_card)
                         print()
                     continue
 
-                elif card_input in player4_hand and is_valid_play(card_input, current_card):
-                    player4_hand.remove(card_input)
-                    current_card = card_input
-                    played_cards.append(card_input)
-                    print("Player 4 played:", card_input)
-                    valid_move = True
+                elif card_input in player4_hand:
+                    is_valid, updated_card = is_valid_play(card_input, current_card)
+                    if is_valid:
+                        player4_hand.remove(card_input)
+                        # If it's a wild card, use the updated card with color
+                        if card_input == "W":
+                            current_card = updated_card
+                        else:
+                            current_card = card_input
+                        played_cards.append(card_input)
+                        print("Player 4 played:", card_input)
+                        print()
+                        valid_move = True
                     
-                    # Check win condition
-                    if len(player4_hand) == 0:
-                        print("Player 4 wins!")
-                        game_over = True
-                        break
-                    # Check Tres condition
-                    elif len(player4_hand) == 3:
-                        print("Player 4 has TRES!")
-                        # Implement Tres punishment later
+                        # Check win condition
+                        if len(player4_hand) == 0:
+                            print("Player 4 wins!")
+                            game_over = True
+                            break
+                        # Check Tres condition
+                        elif len(player4_hand) == 3:
+                            print("Player 4 has TRES!")
+                            # Implement Tres punishment later
+                    else:
+                        print()
+                        print("Invalid move! Try again.")
+                        print("Remember, the card on top is still:", current_card)
+                        print("Remember your hand is currently:", player4_hand)
+                        print()
                 else:
                     print("Invalid move! Try again.")
-            
+                    print("Remember, the card on top is still:", current_card)
+                    print("Remember your hand is currently:", player4_hand)
+                    print()
+
             current_player = 1
             
     # Ask about playing again after game ends
@@ -778,8 +962,7 @@ def help_menu():
 
                 1. **Choose a Number**: Select a number between 1 and 100.
                 2. **Secret Number**: The game randomly generates a secret number between 1 and 100.
-                - If your number is **higher** than the secret number, you must punish yourself.
-                - If your number is **lower** than the secret number, you can punish all other players.
+                - If your number is **higher
                 - If you match the **exact** secret number, the punishment effect is doubled (2x multiplier).
                 3. Punishment Amount: The game randomly generates a number between 1 and 5 cards to draw as punishment.
                 - If you guessed the exact secret number, this amount is doubled.
