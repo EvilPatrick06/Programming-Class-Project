@@ -597,7 +597,7 @@ def gauntlet_num_guess():#50:1
                 print(f"These are very high stakes, stop messing around... You have ${bankroll:,.2f} to play with")
                 continue        
         while True:
-            bet = int(input("Pick the secret number between 1 and 50"))
+            bet = int(input("\n\nPick the secret number between 1 and 50\n\n\t"))
             if bet < 1 or bet > 50 or bet.is_integer() == False or bet == "":
                 print("Too close to the end to make a mistake like that...")
                 continue
