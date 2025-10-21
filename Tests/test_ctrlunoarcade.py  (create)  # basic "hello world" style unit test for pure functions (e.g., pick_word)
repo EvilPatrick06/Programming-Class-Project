@@ -1,5 +1,0 @@
-def pick_word():
-    return "hello world"
-
-def test_pick_word():
-    assert pick_word() == "hello world"
