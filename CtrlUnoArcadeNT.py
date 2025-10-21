@@ -1,82 +1,103 @@
-# Arcade Game Application
-# Currently contains four games and 3 menus: Wordy (a word guessing game), Tres (a card matching game), Hangman (a classic word guessing game), and Gambling Gauntlet (a casino-style progressive betting game), Main Menu (Where a user selects the game they wish to play or a menu), Help Menu (Here a user can find the rules and how to play a game), and Quit Menu (Here a user gets prompted to confirm that they want to quit entirely, or if they want to go to a different menu).
-# Authors/Team: CtrlUno (Gavin Knotts, Jabriel Neal, and Joshua Casey)
-# We use GitHub for version control and collaboration.
+# CtrlUno Arcade - Multi-Game Collection
+# A comprehensive arcade game application featuring four distinct games and navigation menus
+# 
+# Games Included:
+# - Wordy: A word-guessing game with multiple difficulty levels (4, 5, or 8 letter words)
+# - Tres: A card matching game inspired by Uno with unique punishment mechanics
+# - Hangman: Classic word-guessing game with visual hangman display
+# - Gambling Gauntlet: Progressive casino simulation with 7 tables and escalating stakes
+#
+# Menus:
+# - Main Menu: Central hub for game and menu selection
+# - Help Menu: Comprehensive rules and instructions for all games
+# - Quit Menu: Confirmation system for exiting the application
+#
+# Authors: Team CtrlUno (Gavin Knotts, Jabriel Neal, Joshua Casey)
+# Version Control: GitHub for collaboration and project management
 
 import random
 
 #------------------------------------------------------
-# WORD LISTS FOR WORDY GAME
+# WORD LISTS - WORDY GAME
+# Three difficulty levels with carefully curated word lists
 #------------------------------------------------------
 
-# Easy words are 4 letters long
+# Easy difficulty: 4-letter words for beginners
 WORDY_EASY = ["able", "acid", "aged", "also", "area", "army", "away", "baby", "back", "ball", "band", "bank", "base", "bath", "bear", "beat", "been", "beer", "bell", "belt", "best", "bike", "bill", "bird", "blow", "blue", "boat", "body", "bone", "book", "born", "both", "boys", "busy", "call", "calm", "came", "camp", "card", "care", "cars", "case", "cash", "cast", "cats", "cell", "chat", "chip", "city", "club", "coal", "coat", "code", "cold", "come", "cook", "cool", "copy", "corn", "cost", "crew", "crop", "dark", "data", "date", "days", "dead", "deal", "dear", "deep", "desk", "diet", "dirt", "dish", "does", "done", "door", "down", "draw", "drew", "drop", "drug", "dual", "duck", "dust", "duty", "each", "earn", "east", "easy", "edge", "eggs", "else", "even", "ever", "evil", "exit", "eyes", "face", "fact", "fail", "fair", "fall", "fans", "farm", "fast", "fate", "fear", "feed", "feel", "feet", "fell", "felt", "file", "fill", "film", "find", "fine", "fire", "firm", "fish", "fist", "fits", "five", "flag", "flat", "flew", "flow", "folk", "food", "foot", "ford", "fork", "form", "fort", "four", "free", "from", "fuel", "full", "fund", "gain", "game", "gate", "gave", "gear", "gets", "gift", "girl", "give", "glad", "goal", "goes", "gold", "golf", "gone", "good", "grab", "grew", "grey", "grow", "guys", "hair", "half", "hall", "hand", "hang", "hard", "hate", "have", "head", "hear", "heat", "held", "help", "here", "hide", "high", "hill", "hint", "hire", "hits", "hold", "hole", "home", "hope", "host", "hour", "huge", "hung", "hunt", "hurt", "idea", "inch", "into", "iron", "item", "jail", "jane", "jazz", "join", "joke", "jump", "june", "jury", "just", "keep", "kept", "keys", "kick", "kids", "kill", "kind", "king", "knee", "knew", "know", "lack", "lady", "laid", "lake", "land", "lane", "last", "late", "lead", "left", "legs", "less", "lets", "life", "lift", "like", "line", "link", "list", "live", "load", "loan", "lock", "long", "look", "lord", "lose", "loss", "lost", "lots", "loud", "love", "luck", "made", "mail", "main", "make", "male", "mall", "many", "mark", "mass", "math", "meal", "mean", "meat", "meet", "melt", "menu", "mess", "mice", "mile", "milk", "mind", "mine", "miss", "mode", "mood", "moon", "more", "most", "move", "much", "must", "name", "navy", "near", "neck", "need", "news", "next", "nice", "nine", "none", "noon", "nose", "note", "nuts", "okay", "once", "only", "open", "oral", "over", "pace", "pack", "page", "paid", "pain", "pair", "palm", "park", "part", "pass", "past", "path", "peak", "pick", "pics", "pile", "pink", "pipe", "plan", "play", "plot", "plus", "poem", "pole", "poll", "pool", "poor", "pope", "port", "post", "pull", "pure", "push", "puts", "race", "rain", "rank", "rate", "read", "real", "rear", "rely", "rent", "rest", "rice", "rich", "ride", "ring", "rise", "risk", "road", "rock", "role", "roll", "roof", "room", "root", "rope", "rose", "rule", "runs", "safe", "said", "sail", "sale", "salt", "same", "sand", "save", "says", "seal", "seat", "seed", "seek", "seem", "seen", "self", "sell", "send", "sent", "ship", "shoe", "shop", "shot", "show", "shut", "sick", "side", "sign", "silk", "sing", "sink", "site", "size", "skin", "skip", "slip", "slow", "snap", "snow", "soap", "soft", "soil", "sold", "sole", "some", "song", "soon", "sort", "soul", "soup", "spot", "star", "stay", "step", "stir", "stop", "such", "suit", "sure", "swim", "take", "tale", "talk", "tall", "tank", "tape", "task", "team", "tell", "tend", "tent", "term", "test", "text", "than", "that", "them", "then", "they", "thin", "this", "thus", "tide", "tied", "ties", "time", "tiny", "tips", "tire", "told", "tone", "took", "tool", "tops", "torn", "tour", "town", "toys", "tree", "trim", "trip", "true", "tune", "turn", "twin", "type", "unit", "used", "user", "uses", "vary", "vast", "very", "view", "vote", "wait", "wake", "walk", "wall", "want", "warm", "warn", "wash", "wave", "ways", "weak", "wear", "week", "well", "went", "were", "west", "what", "when", "wide", "wife", "wild", "will", "wind", "wine", "wing", "wire", "wise", "wish", "with", "wood", "wool", "word", "wore", "work", "worn", "yard", "year", "your", "zero", "zone"]
 
-# Medium words are 5 letters long
+# Medium difficulty: 5-letter words for intermediate players
 WORDY_MEDIUM = ["about", "above", "abuse", "actor", "acute", "admit", "adopt", "adult", "after", "again", "agent", "agree", "ahead", "alarm", "album", "alert", "alien", "align", "alike", "alive", "allow", "alone", "along", "alter", "among", "anger", "angle", "angry", "apart", "apple", "apply", "arena", "argue", "arise", "array", "arrow", "aside", "asset", "avoid", "awake", "award", "aware", "badly", "baker", "bases", "basic", "beach", "began", "begin", "being", "below", "bench", "billy", "birth", "black", "blame", "blind", "block", "blood", "bloom", "blown", "blues", "blunt", "blush", "board", "boast", "bonds", "boost", "booth", "bound", "brain", "brand", "brass", "brave", "bread", "break", "breed", "brief", "bring", "broad", "broke", "brown", "brush", "build", "built", "burst", "buyer", "cable", "calif", "carry", "catch", "cause", "chain", "chair", "chaos", "charm", "chart", "chase", "cheap", "check", "chest", "chief", "child", "china", "chose", "civil", "claim", "class", "clean", "clear", "click", "climb", "clock", "close", "cloud", "clown", "clubs", "coach", "coast", "could", "count", "court", "cover", "craft", "crash", "crazy", "cream", "crime", "cross", "crowd", "crown", "crude", "curve", "cycle", "daily", "dance", "dated", "dealt", "death", "debut", "delay", "depth", "doing", "doubt", "dozen", "draft", "drama", "drank", "dream", "dress", "drill", "drink", "drive", "drove", "dying", "eager", "early", "earth", "eight", "elite", "empty", "enemy", "enjoy", "enter", "entry", "equal", "error", "event", "every", "exact", "exist", "extra", "faith", "false", "fault", "fiber", "field", "fifth", "fifty", "fight", "final", "first", "fixed", "flash", "fleet", "floor", "fluid", "focus", "force", "forth", "forty", "forum", "found", "frame", "frank", "fraud", "fresh", "front", "fruit", "fully", "funny", "giant", "given", "glass", "globe", "going", "grace", "grade", "grand", "grant", "grass", "grave", "great", "green", "gross", "group", "grown", "guard", "guess", "guest", "guide", "happy", "harry", "heart", "heavy", "hence", "henry", "horse", "hotel", "house", "human", "hurry", "image", "index", "inner", "input", "issue", "japan", "jimmy", "joint", "jones", "judge", "known", "label", "large", "laser", "later", "laugh", "layer", "learn", "lease", "least", "leave", "legal", "level", "lewis", "light", "limit", "links", "lives", "local", "loose", "lower", "lucky", "lunch", "lying", "magic", "major", "maker", "march", "maria", "match", "maybe", "mayor", "meant", "media", "metal", "might", "minor", "minus", "mixed", "model", "money", "month", "moral", "motor", "mount", "mouse", "mouth", "moved", "movie", "music", "needs", "never", "newly", "night", "noise", "north", "noted", "novel", "nurse", "occur", "ocean", "offer", "often", "order", "other", "ought", "paint", "panel", "paper", "party", "peace", "peter", "phase", "phone", "photo", "piano", "picked", "piece", "pilot", "pitch", "place", "plain", "plane", "plant", "plate", "plays", "plaza", "point", "pound", "power", "press", "price", "pride", "prime", "print", "prior", "prize", "proof", "proud", "prove", "queen", "quick", "quiet", "quite", "radio", "raise", "range", "rapid", "ratio", "reach", "ready", "realm", "rebel", "refer", "relax", "repay", "reply", "right", "rigid", "risky", "river", "robin", "roger", "roman", "rough", "round", "route", "royal", "rural", "salad", "sales", "sat", "sauce", "scale", "scare", "scene", "scope", "score", "sense", "serve", "seven", "shall", "shape", "share", "sharp", "sheet", "shelf", "shell", "shift", "shine", "shirt", "shock", "shoot", "short", "shown", "sides", "sight", "simon", "since", "sixth", "sixty", "sized", "skill", "sleep", "slide", "small", "smart", "smile", "smith", "smoke", "snake", "snow", "soapy", "social", "solar", "solid", "solve", "sorry", "sound", "south", "space", "spare", "speak", "speed", "spend", "spent", "split", "spoke", "sport", "staff", "stage", "stake", "stand", "start", "state", "stays", "steal", "steam", "steel", "steep", "steer", "stern", "stick", "still", "stock", "stone", "stood", "store", "storm", "story", "strip", "stuck", "study", "stuff", "style", "sugar", "suite", "super", "sweet", "swift", "swing", "swiss", "table", "taken", "taste", "taxes", "teach", "terms", "texas", "thank", "theft", "their", "theme", "there", "these", "thick", "thing", "think", "third", "those", "three", "threw", "throw", "thumb", "tiger", "tight", "timer", "title", "today", "topic", "total", "touch", "tough", "tower", "track", "trade", "train", "trait", "treat", "trend", "trial", "tribe", "trick", "tried", "tries", "truck", "truly", "trust", "truth", "twice", "twist", "tyler", "uncle", "under", "undue", "union", "unity", "until", "upper", "upset", "urban", "usage", "usual", "valid", "value", "video", "virus", "visit", "vital", "vocal", "voice", "waste", "watch", "water", "wave", "ways", "wealth", "weary", "weigh", "weird", "wheel", "where", "which", "while", "white", "whole", "whose", "wiped", "wired", "woman", "world", "worry", "worse", "worst", "worth", "would", "write", "wrong", "wrote", "young", "yours", "youth", "zones"]
 
-# Hard words are 8 letters long
+# Hard difficulty: 8-letter words for advanced players
 WORDY_HARD = ["absolute", "abstract", "academic", "accepted", "accident", "accuracy", "accurate", "achieved", "acquired", "activity", "actually", "addition", "adequate", "adjacent", "adjusted", "advanced", "advisory", "advocate", "affected", "aircraft", "although", "analysis", "annually", "answered", "anywhere", "apparent", "appeared", "approach", "approval", "approved", "argument", "arranged", "ArticleS", "assemble", "assembly", "assessed", "assigned", "assisted", "assuming", "attached", "attacked", "attempts", "attended", "attorney", "audience", "authored", "automate", "autonomy", "bathroom", "becoming", "behavior", "believed", "benefits", "birthday", "boundary", "breakfast", "bringing", "brothers", "building", "business", "calendar", "campaign", "capacity", "category", "chairman", "champion", "chapters", "chemical", "children", "choosing", "churches", "circular", "citation", "citizens", "civilian", "claiming", "cleaning", "clearing", "climbing", "clinical", "clothing", "coaching", "cocktail", "collapse", "collected", "colonial", "colorful", "combines", "commands", "commerce", "commonly", "communicate", "compared", "compiler", "complete", "composed", "compound", "computed", "computer", "concepts", "concrete", "confused", "congress", "connects", "consider", "consists", "constant", "contains", "contests", "contexts", "continue", "contract", "contrast", "controls", "convince", "creating", "creative", "criminal", "crossing", "crushing", "cultural", "customer", "database", "deadline", "deciding", "decision", "declared", "decrease", "delivery", "demands", "democrat", "depends", "describe", "designed", "designer", "detailed", "detected", "develop", "dialogue", "diamond", "differed", "digital", "directly", "director", "disabled", "disaster", "discount", "discover", "disguise", "disorder", "disposed", "distance", "distinct", "district", "dividend", "division", "document", "domestic", "dominant", "downtown", "dramatic", "drawings", "dropdown", "duration", "dynamics", "economic", "educated", "election", "electric", "eligible", "employee", "employer", "enabling", "encoding", "endorsed", "engaging", "engineer", "enhanced", "enormous", "entering", "entirely", "entitled", "envelope", "equality", "equation", "equipped", "estimate", "evaluate", "eventual", "everyone", "evidence", "exampled", "exchange", "exciting", "executed", "exercise", "existing", "expected", "expertise", "explains", "explored", "extended", "external", "facebook", "facility", "familiar", "families", "featured", "features", "feedback", "feelings", "festival", "filename", "filtered", "finished", "floating", "followed", "football", "forecast", "foreign", "formally", "formerly", "formulae", "fraction", "frequent", "friendly", "function", "funding", "gathered", "generate", "genetics", "geometry", "goldfish", "graduate", "graphics", "greatest", "handbook", "handling", "hardware", "headline", "heritage", "highway", "historic", "holidays", "hometown", "hospital", "hundreds", "husband", "identify", "identity", "illusion", "imagined", "immature", "imperial", "implicit", "imported", "improved", "incident", "includes", "increase", "indicate", "indirect", "industry", "infected", "infinite", "informed", "initiate", "injured", "innocent", "inserted", "inspired", "instance", "instinct", "intended", "interact", "interest", "internal", "internet", "interval", "intimate", "involved", "isolated", "keyboard", "knowledge", "language", "launched", "learning", "lectures", "leverage", "lifetime", "likewise", "limiting", "listened", "literacy", "literary", "location", "machines", "magnetic", "maintain", "majority", "managing", "marriage", "material", "meanings", "measured", "mechanic", "medicine", "meetings", "membrane", "memorial", "mentions", "merchant", "midnight", "military", "minimize", "ministry", "minority", "missiles", "missions", "mistakes", "modeling", "moderate", "modified", "molecule", "momentum", "monitors", "mortgage", "motivated", "mountain", "movement", "multiple", "national", "negative", "networks", "normally", "notebook", "noticein", "november", "numbered", "numerous", "observed", "obtained", "occasion", "occupied", "occurred", "offering", "official", "offshore", "operates", "operator", "opinions", "opponent", "optional", "ordinary", "organize", "oriental", "original", "outdated", "outlined", "outright", "overcome", "overhead", "overseas", "overview", "packages", "painting", "paradise", "parallel", "parental", "partners", "passport", "password", "patience", "patterns", "payments", "peaceful", "performs", "personal", "persuade", "petition", "physical", "pictures", "planning", "platform", "pleasure", "policies", "politics", "popular", "portrait", "position", "positive", "possible", "possibly", "practice", "precious", "prepared", "presence", "preserve", "pressure", "previous", "princess", "priority", "prisoner", "probably", "problems", "proceed", "products", "progress", "projects", "promises", "property", "proposal", "proposed", "prospect", "protocol", "provided", "provider", "province", "publicly", "purchase", "purposes", "pursuant", "quantity", "question", "quotient", "reaction", "readings", "realized", "reasoned", "received", "recently", "recorded", "recovery", "redirect", "reducing", "referred", "reflects", "regarded", "regional", "register", "regulate", "rejected", "relation", "relative", "released", "relevant", "reliable", "remained", "removing", "repeated", "replaced", "reported", "republic", "required", "research", "reserved", "resident", "resolved", "resource", "response", "resulted", "returned", "revealed", "reversed", "reviewed", "revision", "rewards", "sandwich", "schedule", "sciences", "security", "selected", "semester", "sequence", "services", "sessions", "settings", "shoulder", "siblings", "silently", "simulate", "situated", "slightly", "software", "solution", "somebody", "somewhat", "southern", "speaking", "specific", "specimen", "spelling", "spending", "sponsors", "standard", "standing", "stations", "sterling", "straight", "strategy", "strength", "striking", "strongly", "struggle", "students", "subjects", "subtitle", "suitable", "summoned", "supplies", "supposed", "supports", "surprise", "survived", "swimming", "symbolic", "symphony", "symptoms", "syndrome", "teachers", "teaching", "teamwork", "technics", "terminal", "textbook", "theories", "thinking", "thoughts", "thousand", "threatens", "thursday", "together", "tomorrow", "tracking", "training", "transfer", "traveled", "treasure", "triangle", "tropical", "troubled", "tumbling", "tutorial", "umbrella", "unbiased", "uncommon", "undefied", "underway", "unfunny", "universe", "unlikely", "unnotice", "unsigned", "username", "vacation", "validate", "variable", "vehicles", "verified", "versions", "vertical", "vicinity", "violence", "virginia", "visiting", "warranty", "watching", "weakness", "whatever", "wildlife", "withdraw", "wondered", "workflow", "workload", "workshop", "wrapping", "yourself"]
 
 #------------------------------------------------------
 # GLOBAL VARIABLES - WORDY GAME
+# State management for word guessing gameplay
 #------------------------------------------------------
 
-hint = []                # List to store hint display for player
-cor_word = []            # List containing the letters of the correct word
-score = 0                # Player's score for current guess
-t = True                 # Control flag for loops
-cor_let_wrong_spot = []  # List of correctly guessed letters in wrong positions
-attempts = 0             # Number of attempts player has made
-guess = []               # Player's current guess
-words = []               # Selected word list based on difficulty
-word_length = 5          # Length of words in the current difficulty level
+hint = []                # Visual display of correctly guessed letters and positions
+cor_word = []            # Target word split into individual characters
+score = 0                # Current guess accuracy score (correct positions)
+t = True                 # General-purpose boolean flag for loop control
+cor_let_wrong_spot = []  # Letters that exist in word but are in wrong positions
+attempts = 0             # Current number of guess attempts made by player
+guess = []               # Player's current guess split into characters
+words = []               # Active word list based on selected difficulty level
+word_length = 5          # Length of words for current difficulty (4, 5, or 8)
 
 #------------------------------------------------------
-# GLOBAL VARIABLES - TRES GAME
+# CARD LISTS - Tres GAME
+# Card type definitions and deck composition
 #------------------------------------------------------
 
-# Card definitions by color and number
+# Card type definitions organized by color and value
 RED_CARDS = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9"]
 GREEN_CARDS = ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9"]
 BLUE_CARDS = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9"]
 YELLOW_CARDS = ["Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9"]
-COLOR_CARDS = RED_CARDS + GREEN_CARDS + BLUE_CARDS + YELLOW_CARDS  # All color cards combined
-ZERO_CARDS = ["R0", "G0", "B0", "Y0"]  # Zero cards for each color
-WILD_CARDS = ["W"]  # Wild card 
-CARDS = COLOR_CARDS + ZERO_CARDS + WILD_CARDS        # Complete deck
+COLOR_CARDS = RED_CARDS + GREEN_CARDS + BLUE_CARDS + YELLOW_CARDS  # Standard numbered cards (36 total)
+ZERO_CARDS = ["R0", "G0", "B0", "Y0"]  # Special zero-value cards (4 total)
+WILD_CARDS = ["W"]  # Wild cards that can change color (4 total in deck)
+CARDS = COLOR_CARDS + ZERO_CARDS + WILD_CARDS  # Complete card type definitions
 
-# Game state tracking variables
-color_card_limits = {}   # Tracks availability of color cards
-zero_card_limits = {}    # Tracks availability of zero cards
-wild_card_limit = {}      # Tracks availability of wild card
+#------------------------------------------------------
+# GLOBAL VARIABLES - TRES GAME
+# Card game state tracking and deck management
+#------------------------------------------------------
+
+# Game state and availability tracking
+color_card_limits = {}   # Tracks remaining copies of each color card (2 per card type)
+zero_card_limits = {}    # Tracks remaining copies of each zero card (1 per color)
+wild_card_limit = {}     # Tracks remaining wild cards (4 total)
 
 #------------------------------------------------------
 # GLOBAL VARIABLES - HANGMAN GAME
+# Classic word-guessing game with visual feedback
 #------------------------------------------------------
 
-# Word list for Hangman game
+# Comprehensive word list spanning various categories and difficulties
 HANGMAN_WORDS = ["avatar","matrix","sherlock","pikachu","gollum","beetlejuice","inception","jumanji","justice","ethics","truth","absurd","reason","skeptic","existence","nirvana","jaguar","volcano","tsunami","orchid","glacier","falcon","cactus","panther","quiz","lynx","fjord","zeal","knit","echo","vex","jazz","labyrinth","philosopher","conundrum","paradoxical","metamorphosis","transcendence","hallucination","revolutionary","entropy","illusion","clarity","chaos","serenity","whimsy","grit","valor","myth","legend","oracle","cipher","riddle","enigma","symbol","ritual","dream","vision","fable","tale","story","narrative","dialogue","monologue","soliloquy","tragedy","comedy","satire","irony","parody","meme","advertisement","slogan","tagline","brand","identity","persona","mask","guise","shadow","light","darkness","twilight","dawn","sunset","moonlight","starlight","galaxy","nebula","cosmos","universe","dimension","portal","threshold","liminal","abyss","void","infinity","eternity","time","space","gravity","quantum","atom","particle","wave","frequency","vibration","energy","force","motion","momentum","balance","equilibrium","duality","unity","harmony","discord","conflict","peace","war","battle","struggle","resistance","rebellion","revolution","uprising","awakening","enlightenment","wisdom","knowledge","learning","education","school","teacher","student","mentor","guide","hero","villain","antihero","champion","guardian","protector","warrior","fighter","survivor","wanderer","seeker","pilgrim","traveler","explorer","adventurer","nomad","outsider","stranger","friend","enemy","rival","partner","companion","ally","foe","monster","beast","creature","animal","bird","fish","insect","reptile","mammal","plant","tree","flower","leaf","root","seed","fruit","vegetable","grain","earth","soil","rock","stone","crystal","gem","metal","gold","silver","iron","copper","bronze","steel","glass","mirror","window","door","gate","wall","tower","castle","fortress","temple","shrine","church","mosque","synagogue","altar","sacrifice","offering","prayer","chant","song","melody","rhythm","beat","sound","noise","voice","speech","language","word","letter","text","script","code","signal","message","note","email","call","phone","radio","tv","screen","monitor","keyboard","mouse","tablet","laptop","computer","robot","android","cyborg","machine","engine","motor","gear","wheel","lever","switch","button","sensor","camera","lens","flash","lightbulb","lamp","torch","fire","flame","spark","ember","smoke","ash","dust","cloud","rain","snow","hail","storm","wind","breeze","gust","tornado","hurricane","earthquake","eruption","flood","drought","climate","weather","season","spring","summer","autumn","winter","day","night","hour","minute","second","clock","calendar","schedule","plan","goal","dream","hope","fear","joy","sadness","anger","love","hate","envy","greed","pride","lust","gluttony","sloth","virtue","vice","morality","law","rule","order","freedom","equality","power","control","authority","government","state","nation","country","city","town","village","street","road","path","trail","bridge","river","lake","ocean","sea","bay","coast","beach","island","mountain","hill","valley","canyon","desert","forest","jungle","swamp","marsh","plain","field","meadow","garden","park","zoo","farm","ranch","camp","tent","cabin","house","home","apartment","building","skyscraper","office","store","shop","market","mall","restaurant","cafe","bar","club","theater","cinema","museum","library","hospital","clinic","lab","factory","warehouse","garage","station","airport","port","dock","harbor","ship","boat","car","truck","bus","train","bike","motorcycle","scooter","subway","elevator","escalator","stairs","ladder","rope","chain","lock","key","map","compass","manual","book","novel","poem","essay","article","paper","report","journal","diary","log","record","data","info","fact","lie","rumor","gossip","secret","mystery","clue","evidence","proof","argument","debate","discussion","conversation","question","answer","solution","problem","challenge","task","mission","quest","journey","game","play","win","lose","score","level","stage","round","match","treaty","agreement","contract","deal","trade","exchange","buy","sell","give","take","share","borrow","lend","steal","rob","cheat","trick","deceive","manipulate","dominate","lead","follow","obey","resist","protest","march","strike","vote","elect","judge","sentence","punish","reward","praise","blame","forgive","apologize","regret","remember","forget","think","believe","understand","create","build","destroy","change","grow","shrink","move","stay","run","walk","jump","fly","swim","climb","crawl","dance","sing","talk","listen","watch","look","see","hear","smell","taste","touch","feel"]
-
-# Hangman game state variables
-hangman_right_word = []      # The correct word to guess
-hangman_hint_display = []    # Current hint display showing guessed letters
-hangman_tries = 0            # Number of incorrect guesses
 
 #------------------------------------------------------
 # GLOBAL VARIABLES - GAMBLING GAUNTLET GAME
+# Progressive casino simulation with escalating stakes
 #------------------------------------------------------
 
-gauntlet_bankroll = 0    # Player's current money in the Gauntlet
+gauntlet_bankroll = 0    # Player's current money available for betting
 
 #------------------------------------------------------
 # WORDY GAME FUNCTIONS
+# Word-guessing game with multiple difficulty levels and strategic feedback
 #------------------------------------------------------
 
 def gen_word():
     """
-    Randomly selects a word from the current difficulty word list.
-    Sets the correct word (cor_word) as a list of letters.
+    Randomly selects a target word from the current difficulty's word list.
+    Converts the selected word into a list of individual characters for processing.
+    
+    Global Variables Modified:
+        cor_word: Set to list of characters from randomly selected word
     """
     global cor_word
     cor_word = random.choice(words)
@@ -84,11 +105,23 @@ def gen_word():
     
 def check():
     """
-    Checks the player's guess against the correct word.
-    Updates score, hint display, and tracks letters in wrong positions.
+    Analyzes player's guess against the target word using advanced matching logic.
+    Implements sophisticated letter counting to handle duplicate letters correctly.
+    Provides detailed feedback about letter positions and existence.
+    
+    Algorithm:
+    1. Count all letters in target word
+    2. First pass: Mark exact position matches and decrement available counts
+    3. Second pass: Check remaining letters for wrong-position matches
+    4. Evaluate win/lose conditions based on attempts and accuracy
     
     Returns:
-        str: Game status - "win", "lose", or "continue"
+        str: Game state - "win" (complete match), "lose" (max attempts), or "continue"
+    
+    Global Variables Modified:
+        score: Number of correctly positioned letters
+        attempts: Incremented after each guess
+        hint: Updated with correctly guessed letters
     """
     global cor_word, hint, score, attempts, word_length
     cor_let_wrong_spot = []
@@ -150,10 +183,17 @@ def check():
 
 def get_guess():    
     """
-    Prompts the player for a guess and validates the input.
+    Prompts player for word guess with comprehensive input validation.
+    Ensures guess meets length requirements and contains only alphabetic characters.
+    Provides specific error messages for different validation failures.
+    
+    Validation Checks:
+    - Exact length matching current difficulty
+    - Alphabetic characters only
+    - Non-empty input
     
     Returns:
-        list: The player's validated guess as a list of characters
+        list: Validated player guess as list of lowercase characters
     """
     while True:
         guess = input(f"Enter a {word_length} letter word:\n\n").lower()
@@ -175,14 +215,25 @@ def get_guess():
 
 def give_hint():
     """
-    Placeholder for future hint functionality.
+    Placeholder function for future hint system implementation.
+    Could provide clues like word category, synonym, or letter frequency.
     """
     pass
 
 def wordy_main():
     """
-    Main game loop for the Wordy game.
-    Initializes game state, processes player guesses, and handles end-game logic.
+    Core game loop managing complete Wordy gameplay session.
+    Handles initialization, guess processing, and end-game flow.
+    
+    Game Flow:
+    1. Initialize game state and generate target word
+    2. Display current hint state and get player guess
+    3. Process guess and provide feedback
+    4. Check for win/lose conditions and handle appropriately
+    5. Offer replay options with menu navigation
+    
+    Global Variables Modified:
+        Multiple Wordy game state variables reset for new game
     """
     global hint, cor_word, score, t, cor_let_wrong_spot, attempts, words, word_length, guess
     
@@ -203,16 +254,37 @@ def wordy_main():
         if result == "win" or result == "lose":
             break
     
-    play_again = input("\nWould you like to play again? (y/n): ").lower()
-    if play_again in ['y', 'yes']:
-        wordy_menu()
-    else:
-        main_menu()
+    while True:
+        play_again = input("\nWould you like to play again? (y/n): ").lower()
+        
+        if play_again in ['y', 'yes']:
+            wordy_menu()
+            break
+        
+        elif play_again in ['n', 'no']:
+            quit_menu()
+            break
+
+        else:
+            print()
+            print("Invalid choice. Please try again. Enter y/yes or n/no.")
 
 def wordy_menu():
     """
-    Displays the Wordy game menu and handles difficulty selection.
-    Sets up the appropriate word list based on user's choice.
+    Difficulty selection interface for Wordy game.
+    Provides game instructions and sets up word lists based on player choice.
+    
+    Difficulty Levels:
+    - Easy: 4-letter words for beginners
+    - Medium: 5-letter words for intermediate challenge  
+    - Hard: 8-letter words for advanced players
+    
+    Navigation Options:
+    - Return to main menu, access help, or quit application
+    
+    Global Variables Modified:
+        words: Set to appropriate difficulty word list
+        word_length: Set to match selected difficulty
     """
     global words, word_length
     
@@ -250,12 +322,21 @@ def wordy_menu():
 
 #------------------------------------------------------
 # TRES GAME FUNCTIONS
+# Card matching game with unique punishment mechanics and multi-player support
 #------------------------------------------------------
 
 def deck_limits():
     """
-    Initialize the limits for each card type in the Tres deck.
-    Color cards have 2 copies each, zero cards have 1 copy each.
+    Initializes card availability tracking for deck management.
+    Sets up proper card distribution matching physical card game rules.
+    
+    Card Distribution:
+    - Color cards (R1-R9, G1-G9, etc.): 2 copies each
+    - Zero cards (R0, G0, B0, Y0): 1 copy each
+    - Wild cards: 4 total copies
+    
+    Global Variables Modified:
+        color_card_limits, zero_card_limits, wild_card_limit: Initialize availability counters
     """
     global color_card_limits, zero_card_limits, wild_card_limit
     color_card_limits = {card: 2 for card in COLOR_CARDS}
@@ -264,62 +345,103 @@ def deck_limits():
 
 def gen_deck():
     """
-    Generates and shuffles a complete Tres deck.
+    Creates and shuffles a complete Tres deck following game specifications.
+    Combines all card types with proper quantities and randomizes order.
+    
+    Deck Composition:
+    - 72 color cards (36 types × 2 copies)
+    - 4 zero cards (1 per color)
+    - 4 wild cards
+    Total: 80 cards
     
     Returns:
-        list: A shuffled deck of Tres cards
+        list: Shuffled deck ready for dealing
     """
-    deck = COLOR_CARDS*2 + WILD_CARDS*4 + ZERO_CARDS
+    # Create the deck with appropriate card counts
+    deck = []
+    
+    # Add color cards (2 copies each)
+    for card in COLOR_CARDS:
+        deck.extend([card, card])
+    
+    # Add zero cards (1 copy each)
+    deck.extend(ZERO_CARDS)
+    
+    # Add wild cards (4 copies)
+    deck.extend(WILD_CARDS * 4)
+    
+    # Shuffle and return
     random.shuffle(deck)
     return deck
 
-# Initialize the deck
-deck = gen_deck()
-    
-def gen_card():
-    """
-    Randomly selects a card from the available cards.
-    Updates the card_limits to track used cards.
-    """
-    global card_limits, cor_card
-    available = [card for card, count in card_limits.items() if count > 0]
-    
-    if available:
-        cor_card = random.choice(available)
-        card_limits[cor_card] -= 1
-    else:
-        print("Warning: No more cards available!")
-        cor_card = None
+# Initialize deck and discard pile at module level for game state persistence
+deck = []
+played_cards = []
+
+
 
 def starting_hands():
     """
-    Distributes starting hands to players based on the number of real players.
-    Each player receives 7 cards from the shuffled deck.
+    Distributes initial 7-card hands to all players based on player count.
+    Removes dealt cards from main deck to prevent duplication.
+    
+    Distribution Process:
+    1. Get number of real players (2-4)
+    2. Deal 7 consecutive cards to each player from shuffled deck
+    3. Remove dealt cards from deck (28 cards for 4 players)
+    4. Store hands in indexed player_hands list
+    
+    Global Variables Modified:
+        player_hands: Populated with starting hands
+        deck: Reduced by dealt cards (28 cards removed)
     """
-    global player_hands
+    global player_hands, deck
     get_real_player_count()
-    player_hands = [
-        [card for card in deck[1:8]],
-        [card for card in deck[8:15]],
-        [card for card in deck[15:22]],
-        [card for card in deck[22:29]],
-    ]
+    
+    # Deal 7 cards to each real player and remove them from the deck
+    # Keep player_hands as a list of 4 lists so other code indexing player_hands[2]/[3] stays valid
+    player_hands = [[], [], [], []]
+
+    # For each real player, slice 7 cards off the top of the deck and assign
+    for p in range(real_player_count):
+        start = p * 7
+        end = start + 7
+        player_hands[p] = list(deck[start:end])
+
+    # Remove the dealt cards from the deck
+    cards_dealt = real_player_count * 7
+    deck = deck[cards_dealt:]
 
 def setup_first_card():
     """
-    Sets up the first card in play from the top of the deck.
-    Displays this card to all players.
+    Establishes initial game state by placing first card in play.
+    Provides player readiness confirmation and game start sequence.
+    
+    Process:
+    1. Draw top card from deck as starting play card
+    2. Add card to discard pile tracking
+    3. Display card to all players with privacy warnings
+    4. Confirm all players are ready based on player count
+    
+    Global Variables Modified:
+        current_card: Set to first card in play
+        played_cards: First card added to discard pile
     """
-    global current_card
-    current_card = deck[0]
+    global current_card, deck, played_cards
+    
+    # Take the first card from the deck
+    current_card = deck.pop(0)
+    
+    # Add it to the discard pile
+    played_cards.append(current_card)
+    
     print()
     
     if real_player_count == 2:
         player_hands[0]
         player_hands[1]
         print()
-        get_player1()
-        get_player2()
+        get_ready()
         print(f"""
                |                                                                                                                                       |
                |                                                                                                                                       |
@@ -333,15 +455,16 @@ def setup_first_card():
                |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
                |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
                |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
-               |                                                                                                                                       |
-               |                                                                                                                                       |
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
-                                                                The first card in play is: {current_card}           
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
                |                                                                                                                                       |
                |                                                                                                                                       |
                """)
@@ -350,31 +473,84 @@ def setup_first_card():
         player_hands[0]
         player_hands[1]
         player_hands[2]
-        get_player1()
-        get_player2()
-        get_player3()
-        print()
-        print("All players are ready. Game is starting...")
+        get_ready()
+        print(f"""
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               """)
     
     elif real_player_count == 4:
         player_hands[0]
         player_hands[1]
         player_hands[2]
         player_hands[3]
-        get_player1()
-        get_player2()
-        get_player3()
-        get_player4()
-        print()
-        print("All players are ready. Game is starting...")
+        get_ready()
+        print(f"""
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |          All players are ready. Game is starting...  If you are not player 1 please look away after the first card is shown.          |  
+               |                                                                                                                                       |
+               |                                                                                                                                       |
+               """)
 
 def draw_card():
     """
-    Draws a card from the top of the deck.
-    If deck is empty, reshuffles played cards to create a new deck.
+    Handles card drawing with automatic deck reshuffling when needed.
+    Implements smart deck management to prevent game stoppage.
+    
+    Draw Logic:
+    1. If deck has cards, draw from top
+    2. If deck empty but discard pile has cards, reshuffle discard pile
+    3. Keep one copy of current card on top of discard pile
+    4. Return error if no cards available anywhere
     
     Returns:
-        str: The drawn card, or None if deck is empty
+        str: Drawn card identifier or None if no cards available
+    
+    Global Variables Modified:
+        deck: Cards removed when drawn or replenished from discard pile
+        played_cards: Reset to only current card after reshuffling
     """
     global deck, played_cards, current_card
     
@@ -382,127 +558,82 @@ def draw_card():
         return deck.pop(0)
     
     # The deck is empty, check if we can reshuffle played cards
-    elif played_cards:
+    elif len(played_cards) > 1:  # Need at least 2 cards (current + at least 1 played)
         print("The deck is empty! Reshuffling the discard pile...")
         
-        # Save the current card (it's in play)
-        current_in_play = current_card
+        # Create new deck from all played cards EXCEPT one instance of the current card
+        cards_to_reshuffle = played_cards.copy()
         
-        # Remove current card from played cards if it's there
-        if current_in_play in played_cards:
-            played_cards.remove(current_in_play)
+        # Remove one instance of the current card (keep it on top of discard pile)
+        if current_card in cards_to_reshuffle:
+            cards_to_reshuffle.remove(current_card)
+        
+        # If we found cards to reshuffle
+        if cards_to_reshuffle:
+            # Shuffle and create new deck
+            random.shuffle(cards_to_reshuffle)
+            deck = cards_to_reshuffle
             
-        # Shuffle the played cards to create a new deck
-        random.shuffle(played_cards)
-        deck = played_cards.copy()
-        played_cards = []  # Clear played cards
-        
-        # Add current card back to played cards
-        played_cards.append(current_in_play)
-        
-        if deck:
+            # Reset played_cards to only contain the current card (one instance)
+            played_cards = [current_card]
+            
             return deck.pop(0)
     
     # No cards left at all
-    else: print("Error no cards left to draw. There is no way this should happen. Please play a card if you can.")
-    print("Reminder your hand is ", player_hands[0])
-    print("The current card in play is ", current_card)
+    print("Error: No cards left to draw. There is no way this should happen. Please play a card if you can.")
+    print("Reminder your hand is:", player1_hand if 'player1_hand' in globals() else "unknown")
+    print("The current card in play is:", current_card)
     print()
     return None
 
-def get_player1():
+def get_ready():
     """
-    Prompts player 1 to confirm readiness.
-    Loops until player confirms they are ready.
+    Player readiness confirmation system.
+    Ensures proper turn management and prevents accidental gameplay.
+    Loops until valid confirmation received.
+    
+    Input Validation: Accepts 'y'/'yes' or 'n'/'no' responses only
     """
-    print("Get Player 1")
-    response = input("Is player 1 ready? (y/yes, or n/no): ").lower()
+    response = input("Is everyone ready? (y/yes, or n/no): ").lower()
     if response == "yes" or response == "y":
         print()
-        print("Player 1 is ready!")
+        print("Everyone is ready!")
         player_hands[0]
     elif response == "no" or response == "n":
         print()
-        print("Player 1 is not ready. Please get ready.")
-        get_player1()
+        print("Not everyone is ready. Please get ready.")
+        get_ready()
     else:
         print()
         print("Invalid input. Please enter y/yes or n/no.")
-        get_player1()
-
-def get_player2():
-    """
-    Prompts player 2 to confirm readiness.
-    Loops until player confirms they are ready.
-    """
-    print()
-    print("Get Player 2")
-    response = input("Is player 2 ready? (y/yes, or n/no): ").lower()
-    if response == "yes" or response == "y":
-        print()
-        print("Player 2 is ready!")
-        player_hands[1]
-    elif response == "no" or response == "n":
-        print()
-        print("Player 2 is not ready. Please get ready.")
-        get_player2()
-    else:
-        print()
-        print("Invalid input. Please enter y/yes or n/no.")
-        get_player2()
-
-def get_player3():
-    """
-    Prompts player 3 to confirm readiness.
-    Loops until player confirms they are ready.
-    """
-    print()
-    print("Get Player 3")
-    response = input("Is player 3 ready? (y/yes, or n/no): ").lower()
-    if response == "yes" or response == "y":
-        print()
-        print("Player 3 is ready!")
-        player_hands[2]
-    elif response == "no" or response == "n":
-        print()
-        print("Player 3 is not ready. Please get ready.")
-        get_player3()
-    else:
-        print()
-        print("Invalid input. Please enter y/yes or n/no.")
-        get_player3()
-
-def get_player4():
-    """
-    Prompts player 4 to confirm readiness.
-    Loops until player confirms they are ready.
-    """
-    print()
-    print("Get Player 4")
-    response = input("Is player 4 ready? (y/yes, or n/no): ").lower()
-    if response == "yes" or response == "y":
-        print()
-        print("Player 4 is ready!")
-        player_hands[3]
-    elif response == "no" or response == "n":
-        print()
-        print("Player 4 is not ready. Please get ready.")
-        get_player4()
-    else:
-        print()
-        print("Invalid input. Please enter y/yes or n/no.")
-        get_player4()
+        get_ready()
 
 def tres_menu():
     """
-    Displays the welcome message and rules for the Tres game.
+    Displays welcome message and core rules for Tres game.
+    Sets player expectations for gameplay mechanics and victory conditions.
+    
+    Key Information Provided:
+    - Objective: First to play all cards wins
+    - Matching rules: Colors or numbers
+    - Tres punishment mechanic warning
+    - Multi-player competitive nature
     """
-    print("\n Welcome to Tres! \n Compete with other players to be the first to play all your cards. \n Match either colors or numbers. \n But beware - when someone reaches exactly three cards, the punishment mechanic could activate! \n Good luck and may the odds be in your favor! \n")
+    print("\n Welcome to Tres! \n Compete with other players to be the first to play all of your cards. \n Match either colors or numbers. \n But beware - when someone reaches exactly three cards, the punishment mechanic could activate! \n Good luck and may the odds be in your favor! \n")
 
 def get_real_player_count():
     """
-    Gets the number of real players for the Tres game.
-    Validates input to ensure it's between 2 and 4 players.
+    Collects and validates number of human players for game session.
+    Supports 2-4 players with input validation and error handling.
+    
+    Validation:
+    - Must be integer between 2 and 4
+    - Handles ValueError for non-numeric input
+    - Loops until valid input received
+    
+    Global Variables Modified:
+        real_player_count: Set to validated player count
+        t: Loop control flag
     """
     global real_player_count, t
     while t:
@@ -518,48 +649,65 @@ def get_real_player_count():
             print("Invalid input. Please enter a valid number between 2 and 4.")
             print()
 
-# Initialize the list of played cards
-played_cards = []
+
 
 def player_1_hand():
     """
-    Updates player 1's hand by filtering out played cards.
+    Updates Player 1's hand reference for easy access during gameplay.
+    Maintains synchronization with main player_hands data structure.
+    
+    Global Variables Modified:
+        player1_hand: Direct reference to player_hands[0]
     """
     global player1_hand
-    player1_hand = [card for card in player_hands[0][:] if card not in played_cards]
+    # Player hands are already updated when cards are played, no need to filter
+    player1_hand = player_hands[0]
 
 def player_2_hand():
     """
-    Updates player 2's hand by filtering out played cards.
+    Updates Player 2's hand reference for easy access during gameplay.
+    Maintains synchronization with main player_hands data structure.
     """
     global player2_hand
-    player2_hand = [card for card in player_hands[1][:] if card not in played_cards]
+    # Player hands are already updated when cards are played, no need to filter
+    player2_hand = player_hands[1]
 
 def player_3_hand():
     """
-    Updates player 3's hand by filtering out played cards.
+    Updates Player 3's hand reference for easy access during gameplay.
+    Only relevant when player count >= 3.
     """
     global player3_hand
-    player3_hand = [card for card in player_hands[2][:] if card not in played_cards]
+    # Player hands are already updated when cards are played, no need to filter
+    player3_hand = player_hands[2]
 
 def player_4_hand():
     """
-    Updates player 4's hand by filtering out played cards.
+    Updates Player 4's hand reference for easy access during gameplay.
+    Only relevant when player count = 4.
     """
     global player4_hand
-    player4_hand = [card for card in player_hands[3][:] if card not in played_cards]
+    # Player hands are already updated when cards are played, no need to filter
+    player4_hand = player_hands[3]
 
 def is_valid_play(card, current_card):
     """
-    Checks if a card can be played on the current card.
-    Valid plays match either color (first character) or number (second character).
+    Determines if a proposed card play is legal according to Tres rules.
+    Handles color matching, number matching, and wild card logic.
+    
+    Validation Rules:
+    - Colors must match (first character): R, G, B, Y
+    - Numbers must match (remaining characters): 0-9
+    - Wild cards (W) are always playable and change color
+    - Wild cards prompt for new color selection
     
     Args:
-        card (str): The card attempting to be played
-        current_card (str): The current card on top of the play pile
+        card (str): Card player wants to play (e.g., "R5", "W")
+        current_card (str): Current card on top of play pile
         
     Returns:
-        tuple: (is_valid, updated_card) - Boolean indicating if play is valid and the updated current card
+        tuple: (is_valid_boolean, updated_current_card)
+               For wild cards, updated_card includes chosen color
     """
     # Convert input to uppercase for consistency
     card = card.upper()
@@ -587,8 +735,27 @@ def is_valid_play(card, current_card):
 
 def game_loop():
     """
-    Main game loop for Tres. Handles player turns, card plays, and win conditions.
-    Continues until a player has played all their cards.
+    Main Tres gameplay engine managing turn-based card play.
+    Handles player turns, card validation, win conditions, and privacy management.
+    
+    Turn Management:
+    - Rotates through players based on real_player_count
+    - Displays privacy warnings for multi-player sessions
+    - Shows current game state (hand, top card)
+    - Processes card plays and draw actions
+    
+    Win Conditions:
+    - First player to empty hand wins immediately
+    - Tres condition (3 cards) triggers special announcement
+    
+    Privacy Features:
+    - Clear screen warnings between players
+    - Individual hand display only during player's turn
+    
+    Global Variables Modified:
+        current_card: Updated when valid cards are played
+        player_hands: Cards removed when played, added when drawn
+        played_cards: Tracks all cards played to discard pile
     """
     global player1_hand, player2_hand, player3_hand, player4_hand, played_cards, current_card
     
@@ -597,21 +764,26 @@ def game_loop():
     
     while not game_over:
         if current_player == 1:
-            print("""
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               |                                            If you are not player 1 please look away.                                                  |
-               """)
             print("It is Player 1's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player1_hand)
+
+            wild_card = False
+            while not wild_card:
+                if current_card == "W":
+                    card_input = input("Wild card played! What color do you want to choose? (R, G, B, Y): ").lower()
+                    wild_card_input = card_input.upper()
+                    if wild_card_input in ["R", "G", "B", "Y"]:
+                        print(f"You chose {card_input} as the new color.")
+                        updated_card = wild_card_input + "W"  # Create updated card with new color
+                        print("The card on top is now:", updated_card)
+                        current_card = updated_card
+                        print("Reminder your hand is currently:", player1_hand)
+                    elif wild_card_input not in ["R", "G", "B", "Y"]:
+                        print("Invalid color choice. Please choose R, G, B, or Y.")
+                        continue
+
+
             print()
             
             valid_move = False
@@ -666,22 +838,10 @@ def game_loop():
                     print("Remember, the card on top is still:", current_card)
                     print("Remember your hand is currently:", player1_hand)
                     print()
-
+            print("\n" * 500)
             current_player = 2
                 
         elif current_player == 2:
-            print("""
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               |                                            If you are not player 2 please look away.                                                  |
-               """)
             print("It is Player 2's turn.")
             print("Current card on top:", current_card)
             print("Your hand is currently:", player2_hand)
@@ -892,21 +1052,60 @@ def game_loop():
                     print()
 
             current_player = 1
-            
+
     # Ask about playing again after game ends
-    play_again = input("\nWould you like to play again? (y/n): ").lower()
-    if play_again in ['y', 'yes']:
-        global deck
-        deck = gen_deck()  # Generate a new deck
-        tres_main()
-    else:
-        main_menu()
+    while True:        
+        tres_play_again = input("Would you like to play again? (yes/no): ").lower()
+
+        if tres_play_again in ["yes", "y"]:
+            what_game = input("\n1: Keep playing Tres?, Enter: \"Continue\"\n2: Main Menu, Enter: \"Main Menu\"\n\n").lower()
+
+            if what_game in ["continue", "1"]:
+                tres_main()
+                break
+           
+            elif what_game in ["main menu", "2"]:
+                main_menu()
+                break
+
+        elif tres_play_again in ["no", "n"]:
+            quit_menu()
+            break
+        
+        else:
+            print()
+            print("Invalid choice. Please try again. Enter y/yes or n/no.")
 
 def tres_main():
     """
-    Main entry point for the Tres game.
-    Initializes the game, sets up players and hands, and starts the game loop.
+    Primary entry point for Tres game sessions.
+    Handles complete game setup, execution, and cleanup.
+    
+    Initialization Sequence:
+    1. Reset all game state variables for clean start
+    2. Generate and shuffle new deck
+    3. Display rules and get player count
+    4. Deal starting hands and set up first card
+    5. Launch main game loop
+    6. Handle post-game replay options
+    
+    Global Variables Reset:
+        deck, played_cards, player_hands: Clean slate for new game
+        Individual player hand references: Reset to empty lists
     """
+    global deck, played_cards, player_hands, player1_hand, player2_hand, player3_hand, player4_hand
+    
+    # Reset deck and discard pile for new game
+    deck = gen_deck()
+    played_cards = []
+    player_hands = [[], [], [], []]  # Reset player hands
+    
+    # Reset individual player hand globals
+    player1_hand = []
+    player2_hand = []
+    player3_hand = []
+    player4_hand = []
+    
     tres_menu()
     deck_limits()
     starting_hands()
@@ -921,12 +1120,21 @@ def tres_main():
 
 #------------------------------------------------------
 # HANGMAN GAME FUNCTIONS
+# Classic word-guessing game with visual hangman progression
 #------------------------------------------------------
 
 def hangman_gen_word():
     """
-    Randomly selects a word from the Hangman word list.
-    Sets the correct word (hangman_right_word) as a list of letters.
+    Selects random word from comprehensive Hangman word list.
+    Converts selected word to character list for letter-by-letter processing.
+    
+    Word Selection:
+    - Chooses from 500+ words spanning multiple categories
+    - Includes various difficulties and word lengths
+    - Words range from simple to complex vocabulary
+    
+    Global Variables Modified:
+        hangman_right_word: Target word as list of characters
     """
     global hangman_right_word
     words = HANGMAN_WORDS.copy()
@@ -936,16 +1144,40 @@ def hangman_gen_word():
 
 def hangman_hint():
     """
-    Initializes the hint display with underscores for each letter.
-    Called at the start of a new game.
+    Initializes visual hint display with underscores for each letter position.
+    Creates the classic Hangman blank word representation.
+    
+    Display Format: " _ " for each letter with spaces for readability
+    
+    Global Variables Modified:
+        hangman_hint_display: List of blanks matching word length
     """
     global hangman_right_word, hangman_hint_display
     hangman_hint_display = [" _ "] * len(hangman_right_word)
 
 def hangman_check():
     """
-    Main game loop for Hangman.
-    Handles player guesses, displays hangman figure, and checks win/lose conditions.
+    Core Hangman gameplay loop with guess processing and visual feedback.
+    Manages letter guessing, hangman drawing, and win/lose detection.
+    
+    Game Mechanics:
+    - Tracks used letters to prevent duplicates
+    - Updates hint display when letters are found
+    - Draws progressive hangman figure for wrong guesses
+    - Enforces 6-guess limit before loss
+    
+    Input Validation:
+    - Single alphabetic characters only
+    - Prevents duplicate guesses
+    - Clear error messages for invalid input
+    
+    Visual Progression:
+    - ASCII art hangman drawn step by step
+    - 6 progressive stages from head to full figure
+    
+    Global Variables Modified:
+        hangman_hint_display: Updated with correct letter guesses
+        hangman_tries: Incremented for each wrong guess
     """
     global hangman_hint_display, hangman_right_word, hangman_tries
     hangman_right_word = list(hangman_right_word)
@@ -1020,27 +1252,50 @@ def hangman_check():
 
 def hangman_playagain():
     """
-    Prompts the player to play Hangman again or return to the main menu.
+    Post-game navigation for Hangman sessions.
+    Offers options to replay Hangman, return to main menu, or quit application.
+    
+    Navigation Options:
+    - Continue: Start new Hangman game
+    - Main Menu: Return to game selection
+    - Quit: Exit application entirely
+    
+    Input validation with clear error messages for invalid choices.
     """
-    while True:
+    while True:        
         hangman_play_again = input("Would you like to play again? (yes/no): ").lower()
-        
+
         if hangman_play_again in ["yes", "y"]:
             what_game = input("\n1: Keep playing Hangman?, Enter: \"Continue\"\n2: Main Menu, Enter: \"Main Menu\"\n\n").lower()
             
             if what_game in ["continue", "1"]:
                 hangman_menu()
                 break
+           
             elif what_game in ["main menu", "2"]:
                 main_menu()
                 break
+        
         elif hangman_play_again in ["no", "n"]:
             quit_menu()
             break
+        
+        else:
+            print()
+            print("Invalid choice. Please try again. Enter y/yes or n/no.")
 
 def hangman_menu():
     """
-    Displays the Hangman welcome message and starts a new game.
+    Hangman game introduction and initialization.
+    Displays game rules, starts word generation, and launches gameplay.
+    
+    Setup Sequence:
+    1. Display welcome message and rules
+    2. Generate random target word
+    3. Initialize hint display
+    4. Start main game loop
+    
+    Provides clear expectations about hangman consequences and gameplay.
     """
     print("\n\n***************************************************************************")
     print("Welcome to Hangman! Guess the secret word.")
@@ -1053,12 +1308,19 @@ def hangman_menu():
 
 #------------------------------------------------------
 # GAMBLING GAUNTLET GAME FUNCTIONS
+# Progressive casino simulation with 7 escalating tables
 #------------------------------------------------------
 
 def gauntlet_intro():
     """
-    Displays the introduction and rules for the Gambling Gauntlet.
-    Sets the initial bankroll to $1,000.
+    Sets the atmosphere for the Gambling Gauntlet experience.
+    Establishes initial bankroll and explains the high-stakes progression system.
+    
+    Game Setup:
+    - Starting bankroll: $1,000
+    - Goal: Reach millionaire status through 7 tables
+    - Risk: Bankruptcy ends the game immediately
+    - Progressive difficulty and minimum bets
     """
     print("\n\nWelcome to the Gambling Gauntlet Casino.\n")
     print("You have $1,000 and a chance to leave a millionaire.\n")
@@ -1069,8 +1331,17 @@ def gauntlet_intro():
 
 def gauntlet_heads_or_tails():
     """
-    Table 1: Heads or Tails (1:1 payout)
-    Simple coin flip game. Player must reach $3,000 to advance.
+    Table 1: Basic coin flip game with 1:1 payout odds.
+    Entry-level gambling with simple 50/50 probability.
+    
+    Game Rules:
+    - Choose heads (1) or tails (2)
+    - Even money payout on wins
+    - Target: Reach $3,000 to unlock next table
+    - No minimum bet requirement
+        
+    Global Variables Modified:
+        gauntlet_bankroll: Increased/decreased based on bet outcomes
     """
     global gauntlet_bankroll
     play = True
@@ -1126,11 +1397,18 @@ def gauntlet_heads_or_tails():
 
 def gauntlet_color_wheel():
     """
-    Table 2: Color Wheel (2:1 payout)
-    Three color options. Player must reach $15,000 to advance.
-    """
+    Table 2: Three-color wheel with 3:1 payout odds.
+    Increased risk and reward compared to coin flip.
+    
+    Game Rules:
+    - Choose Red (1), Black (2), or Green (3)
+    - Triple payout on correct guess
+    - Target: Reach $15,000 to advance
+    - 33.3% win probability
+        """
     global gauntlet_bankroll
     play = True
+    
     
     while play:
         colors = [1, 2, 3]
@@ -1188,9 +1466,15 @@ def gauntlet_color_wheel():
 
 def gauntlet_cups():
     """
-    Table 3: Five Cups (8.5:1 payout)
-    Player picks one of five cups. Must reach $50,000 to advance.
-    """
+    Table 3: Five-cup shell game with 8.5:1 payout odds.
+    Classic casino game with moderate difficulty.
+    
+    Game Rules:
+    - Choose cup 1-5 hiding the prize
+    - 8.5× payout on correct guess
+    - Target: Reach $50,000 to advance
+    - 20% win probability
+        """
     global gauntlet_bankroll
     play = True
     
@@ -1205,7 +1489,7 @@ def gauntlet_cups():
         
         if wager > gauntlet_bankroll:
             print()
-            print(f"Don't go getting funny now. You have ${gauntlet_bankroll:,.2f} to bet.")
+            print("Don't go getting funny now. You have ${gauntlet_bankroll:,.2f} to bet.")
             print()
             continue
 
@@ -1222,7 +1506,8 @@ def gauntlet_cups():
             continue
         
         if bet < 1 or bet > 5:
-            print("Can't let you do that friendo, try again...")
+            print("Can't let you do that friendo, try again (with 1-5)...")
+            print()
             continue
         
         toss = [1, 2, 3, 4, 5]
@@ -1246,9 +1531,15 @@ def gauntlet_cups():
 
 def gauntlet_clock():
     """
-    Table 4: Clock Game (12:1 payout)
-    Player guesses the hour (1-12). Must reach $125,000 to advance.
-    """
+    Table 4: Clock hour guessing with 12:1 payout odds.
+    Time-themed game with increased complexity.
+    
+    Game Rules:
+    - Guess which hour (1-12) the clock lands on
+    - 12× payout on correct guess
+    - Target: Reach $125,000 to unlock the next challenge
+    - 8.33% win probability
+        """
     global gauntlet_bankroll
     hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     
@@ -1265,7 +1556,7 @@ def gauntlet_clock():
         
         if wager > gauntlet_bankroll:
             print()
-            print(f"Don't go getting funny now. You have ${gauntlet_bankroll:,.2f} to bet.")
+            print("Don't go getting funny now. You have ${gauntlet_bankroll:,.2f} to bet.")
             print()
             continue
         
@@ -1310,9 +1601,15 @@ def gauntlet_clock():
 
 def gauntlet_rat_race():
     """
-    Table 5: Rat Race (20:1 payout)
-    Player picks one of 16 rats. Must reach $250,000 to advance.
-    """
+    Table 5: Sixteen-rat race with 20:1 payout odds.
+    High-stakes animal racing simulation.
+    
+    Game Rules:
+    - Choose winning rat number (1-16)
+    - 20× payout on correct guess
+    - Target: Reach $250,000 to advance
+    - 6.25% win probability
+        """
     global gauntlet_bankroll
     
     while True:
@@ -1320,6 +1617,7 @@ def gauntlet_rat_race():
         
         try:
             wager = int(input("How much would you like to bet? $"))
+        
         except ValueError:
             print()
             print("Invalid input. Please enter a valid dollar amount.")
@@ -1327,11 +1625,21 @@ def gauntlet_rat_race():
             continue
         
         if wager > gauntlet_bankroll:
+            print()
             print("You ain't that rich yet...")
+            print(f"You only have ${gauntlet_bankroll:,.2f} to bet.")
+            print()
             continue
         
+        if wager <= 0:
+            print()
+            print(f"Stop playing around. Bet at least $1. Remember you have ${gauntlet_bankroll:,.2f}. Place your bet.")
+            print()
+            continue
+
         try:
             bet = int(input("Choose the number of the winning rat. (1-16)\n\n"))
+        
         except ValueError:
             print("Invalid input. Please enter a number (1-16).")
             continue
@@ -1345,7 +1653,7 @@ def gauntlet_rat_race():
             print(f"You win!\n\nBankroll: ${gauntlet_bankroll:,.2f}\n")
         else:
             gauntlet_bankroll -= wager
-            print(f"You lose... Bankroll: ${gauntlet_bankroll:,.2f}\n\nThe winning rat was #{winner}")
+            print(f"You lose... Bankroll: ${gauntlet_bankroll:,.2f}\nThe winning rat was #{winner}")
         
         if gauntlet_bankroll <= 0:
             print("\n\nYa gone broke kid... take out a loan")
@@ -1357,10 +1665,16 @@ def gauntlet_rat_race():
 
 def gauntlet_num_guess():
     """
-    Table 6: Secret Number (50:1 payout)
-    Player has 3 attempts to guess a number between 1-50.
-    Must reach $500,000 to advance to final table.
-    """
+    Table 6: Secret number guessing with 50:1 payout and multiple attempts.
+    Most complex table with interactive gameplay.
+    
+    Game Rules:
+    - Guess secret number between 1-50
+    - 3 attempts with "higher/lower" clues
+    - 50× payout on correct guess within attempts
+    - Target: Reach $500,000 to advance to final table
+    - Variable win probability based on strategy
+        """
     global gauntlet_bankroll
     
     while True:
@@ -1369,19 +1683,25 @@ def gauntlet_num_guess():
         
         try:
             wager = int(input("How much would you like to bet?\n\n$"))
+        
         except ValueError:
             print()
             print("Invalid input. Please enter a valid dollar amount.")
             print()
             continue
         
-        if wager < 0 or wager > gauntlet_bankroll:
+        if wager > gauntlet_bankroll:
             print(f"These are very high stakes, stop messing around... You have ${gauntlet_bankroll:,.2f} to play with")
+            continue
+
+        if wager <= 0:
+            print(f"Stop playing around. Bet at least $1. Remember you have ${gauntlet_bankroll:,.2f}. Place your bet.")
             continue
         
         while True:
             try:
                 bet = int(input("\n\nPick the secret number between 1 and 50\n\n"))
+            
             except ValueError:
                 print("Invalid input. Please enter a number (1-50).")
                 continue
@@ -1391,7 +1711,8 @@ def gauntlet_num_guess():
                 continue
             
             if bet > correct_number:
-                print("Your guess is too high👆")
+                print()
+                print("Your guess is too high 👆")
                 attempts += 1
                 
                 if attempts >= 3:
@@ -1406,7 +1727,8 @@ def gauntlet_num_guess():
                 continue
             
             elif bet < correct_number:
-                print("Your guess is too low👇")
+                print()
+                print("Your guess is too low 👇")
                 attempts += 1
                 
                 if attempts >= 3:
@@ -1428,14 +1750,22 @@ def gauntlet_num_guess():
                 break
         
         if gauntlet_bankroll >= 500000:
-            print("Fantastic, quite incredible what you've done. Allow me to show you to your final table... Best of luck")
+            print("Fantastic, quite incredible what you've done. Allow me to show you to our final table... Best of luck")
             break
 
 def gauntlet_make_or_break():
     """
-    Final Table: Make or Break (All-in coin flip)
-    Player bets entire bankroll on one final coin flip.
-    Win and cash out, lose and lose everything.
+    Final Table: All-in coin flip determining ultimate victory or total loss.
+    Climactic finale where entire bankroll is wagered on single flip.
+    
+    Game Rules:
+    - Mandatory all-in bet (entire bankroll)
+    - Simple heads or tails choice
+    - Win: Double bankroll and complete gauntlet
+    - Lose: Lose everything and end game
+    - 50% win probability
+    
+    Post-Game: Humorous "fees and taxes" reduce final winnings significantly.
     """
     global gauntlet_bankroll
     play = True
@@ -1451,8 +1781,10 @@ def gauntlet_make_or_break():
         
         if bet in ["1", "heads"]:
             bet = 1
+        
         elif bet in ["2", "tails"]:
             bet = 2
+        
         else:
             print()
             print("That's a bad bet friend. Try again.")
@@ -1461,15 +1793,17 @@ def gauntlet_make_or_break():
         
         if result == bet:
             gauntlet_bankroll += wager
+            print()
             print(f"You have completed the gauntlet!! You get to cash out all your winnings.\n\nBankroll: ${gauntlet_bankroll:,.2f}")
             print(f"After taxes of course that only leaves you with ${gauntlet_bankroll/2:,.2f}.")
             
             gauntlet_bankroll = gauntlet_bankroll / 2
             gauntlet_bankroll = gauntlet_bankroll - 20000 - 10000 - 5000 - 100000
-            
+
             print(f"Oh and of course the gratuity, drink fee, parking, and a well...\n\nDon't worry about the rest.\nThis is your profits from today. Bye.\n\nProfits: ${gauntlet_bankroll:,.2f}")
             gauntlet_replay()
             break
+        
         else:
             gauntlet_bankroll -= wager
             print(f"You lose...\n\nBankroll: ${gauntlet_bankroll:,.2f}")
@@ -1481,8 +1815,23 @@ def gauntlet_make_or_break():
 
 def gauntlet_menu():
     """
-    Main entry point for the Gambling Gauntlet game.
-    Guides players through all six tables plus the final table.
+    Main Gambling Gauntlet orchestrator managing progression through all tables.
+    Guides players through complete casino experience from start to finish.
+    
+    Table Progression:
+    1. Introduction and rules explanation
+    2. Table 1: Heads or Tails (reach $3K)
+    3. Table 2: Color Wheel (reach $15K) 
+    4. Table 3: Five Cups (reach $50K)
+    5. Table 4: Clock Game (reach $125K)
+    6. Table 5: Rat Race (reach $250K)
+    7. Table 6: Secret Number (reach $500K)
+    8. Final Table: Make or Break (all-in)
+    
+    Each table unlocks only after reaching the previous table's target bankroll.
+    
+    Global Variables Modified:
+        gauntlet_bankroll: Reset to $1,000 at start, modified throughout progression
     """
     global gauntlet_bankroll
     gauntlet_bankroll = 1000
@@ -1499,11 +1848,13 @@ def gauntlet_menu():
     print("\n\nTABLE 2: COLOR WHEEL\n")
     print("Three colors. One spin. Red, Black, or Green.\n")
     print("Pick right, triple your bet. Reach $15,000 and the next table opens.")
+    print(f"you have ${gauntlet_bankroll:,.2f}")
     gauntlet_color_wheel()
     
     print("\n\nTABLE 3: FIVE CUPS\n")
     print("Five cups. One hides the jackpot.\n")
     print("The odds are steep, but the payout's sweet. Hit $50,000 to move on.")
+    print(f"you have ${gauntlet_bankroll:,.2f}")
     gauntlet_cups()
     
     print("\n\nTABLE 4: CLOCK GAME\n")
@@ -1529,29 +1880,65 @@ def gauntlet_menu():
 
 def gauntlet_replay():
     """
-    Prompts the player to play the Gambling Gauntlet again or return to the main menu.
+    Post-gauntlet navigation offering replay or menu return options.
+    Handles player choice for continuing gambling or exploring other games.
+    
+    Navigation Options:
+    - Continue: Restart Gambling Gauntlet from beginning
+    - Main Menu: Return to game selection hub
+    - Quit: Exit application
+    
+    Input validation ensures proper choice handling.
     """
     while True:
-        play_again = input("Would you like to play again? (yes/no): ").lower()
-        
-        if play_again in ["yes", "y"]:
+        gauntlet_play_again = input("\nWould you like to play again? (yes/no): ").lower()
+
+        if gauntlet_play_again in ["yes", "y"]:
             what_game = input("\n1: Keep playing Gambler's Gauntlet?, Enter: \"Continue\"\n2: Main Menu, Enter: \"Main Menu\"\n\n").lower()
-            
+
             if what_game in ["continue", "1"]:
                 gauntlet_menu()
                 break
+            
             elif what_game in ["main menu", "2"]:
                 main_menu()
                 break
-        elif play_again in ["no", "n"]:
-            main_menu()
+        
+        elif gauntlet_play_again in ["no", "n"]:
+            quit_menu()
             break
+        
+        else:
+            print()
+            print("Invalid choice. Please try again. Enter y/yes or n/no.")
 
 #------------------------------------------------------
 # HELP MENU FUNCTIONS
+# Comprehensive game documentation and rule explanations
 #------------------------------------------------------
 
 def help_menu():
+    """
+    Interactive help system providing detailed rules for all arcade games.
+    Offers comprehensive documentation with strategies and gameplay mechanics.
+    
+    Available Help Topics:
+    1. Wordy: Word guessing rules, difficulty levels, feedback system
+    2. Tres: Card matching rules, punishment mechanics, multi-player strategy
+    3. Hangman: Classic rules, strategy tips, visual progression
+    4. Gambling Gauntlet: All 7 tables, odds, progression requirements
+    
+    Navigation Features:
+    - Return to help for additional topics
+    - Access main menu or quit from help system
+    - Input validation with clear error handling
+    
+    Each help section includes:
+    - Basic rules and objectives
+    - Detailed gameplay mechanics
+    - Strategic tips and advice
+    - Special features and unique mechanics
+    """
     help_choice = input(" \n What game do you want help with:\n\n1: Wordy?\n2: Tres?\n3: Hangman?\n4: Gambling Gauntlet?\n5: Quit? \n \n").lower()
 
     if help_choice in ["wordy", "1"]:
@@ -1662,7 +2049,7 @@ def help_menu():
             5. **Rat Race** (20:1) - Reach $250,000
             6. **Secret Number** (50:1) - Reach $500,000
             7. **Make or Break** (All-in) - Win big or lose everything
-
+    
         # Strategy Tips
 
             - Manage your bankroll carefully.
@@ -1689,10 +2076,27 @@ def help_menu():
 
 #------------------------------------------------------
 # QUIT MENU FUNCTIONS
+# Application exit confirmation and navigation safety
 #------------------------------------------------------
 
 def quit_menu():
+    """
+    Exit confirmation system preventing accidental application closure.
+    Provides last-chance navigation to help or main menu.
     
+    Safety Features:
+    - Confirmation required before exiting
+    - Access to help if player needs information
+    - Return to main menu option
+    - Clear exit message when confirmed
+    
+    Options:
+    1. Help: Access game documentation
+    2. Main Menu: Return to game selection
+    3. Quit: Confirmed application exit with goodbye message
+    
+    Input validation ensures proper choice handling before exit.
+    """
     quit_choice = input(" \n Are you sure you want to quit?:\n\n1: Need help?, Enter: \"Help\"\n2: Go Back to Main Menu?, Enter: \"Main Menu\"\n3: Quit? \n \n").lower()
 
     if quit_choice in ["help", "1"]:
@@ -1707,12 +2111,32 @@ def quit_menu():
 
 #------------------------------------------------------
 # MAIN MENU FUNCTIONS
+# Central navigation hub and application entry point
 #------------------------------------------------------
 
 def main_menu():
     """
-    Displays the main menu and handles game selection.
-    Entry point for the entire application.
+    Primary navigation interface and application entry point.
+    Provides access to all games, help system, and exit functionality.
+    
+    Available Options:
+    1. Wordy: Word-guessing game with multiple difficulties
+    2. Tres: Multi-player card matching game
+    3. Hangman: Classic word-guessing with visual feedback
+    4. Gambling Gauntlet: Progressive casino simulation
+    5. Help: Comprehensive game documentation
+    6. Quit: Confirmed application exit
+    
+    Features:
+    - Clear option presentation with multiple input formats
+    - Robust input validation and error handling
+    - Seamless navigation between all application components
+    - Fallback error handling for invalid selections
+    
+    Input Flexibility:
+    - Accepts both numeric (1-6) and text-based inputs
+    - Case-insensitive text matching
+    - Alternative names supported (e.g., "gauntlet" for Gambling Gauntlet)
     """
     game = input(" \n What would do you like to play / do?:\n\n1: Wordy?\n2: Tres?\n3: Hangman?\n4: Gambling Gauntlet?\n5: Help?\n6: Quit? \n \n").lower()
 

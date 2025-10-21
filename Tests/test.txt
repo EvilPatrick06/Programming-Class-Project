@@ -1,17 +1,510 @@
+/usr/local/bin/python /workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py
+ 
+ What would do you like to play / do?:
+
+1: Wordy?
+2: Tres?
+3: Hangman?
+4: Gambling Gauntlet?
+5: Help?
+6: Quit? 
+ 
+2
+
+ Welcome to Tres! 
+ Compete with other players to be the first to play all your cards. 
+ Match either colors or numbers. 
+ But beware - when someone reaches exactly three cards, the punishment mechanic could activate! 
+ Good luck and may the odds be in your favor! 
+
+Enter the number of players (2-4): 3
+
+Get Player 1
+Is player 1 ready? (y/yes, or n/no): y
+
+Player 1 is ready!
+
+Get Player 2
+Is player 2 ready? (y/yes, or n/no): y
+
+Player 2 is ready!
+
+Get Player 3
+Is player 3 ready? (y/yes, or n/no): y
+
+Player 3 is ready!
+
+All players are ready. Game is starting...
+
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               
+It is Player 1's turn.
+Current card on top: R2
+Your hand is currently: ['R8', 'B9', 'R1', 'B2', 'B9', 'B4', 'G6']
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: r8
+
+Player 1 played: R8
+
+
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               |                                            If you are not player 2 please look away.                                                  |
+               
+It is Player 2's turn.
+Current card on top: R8
+Your hand is currently: ['R4', 'Y4', 'Y4', 'B8', 'B1', 'B6', 'G2']
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: r4
+
+Player 2 played: R4
+
+
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               |                                            If you are not player 3 please look away.                                                  |
+               
+It is Player 3's turn.
+Current card on top: R4
+Your hand is currently: ['G7', 'Y7', 'Y9', 'R6', 'B2', 'R7', 'B5']
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: r6
+
+Player 3 played: R6
+
+
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               |                                            If you are not player 1 please look away.                                                  |
+               
+It is Player 1's turn.
+Current card on top: R6
+Your hand is currently: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6']
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B7
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R2
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G0
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: W
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G6
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: W
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y0
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y6
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G4
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B0
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G9
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y6
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6']
+Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y2
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+]                                                                                                                                                                                            Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G7
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7']                                                                                                                                                                                      Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B4
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4']                                                                                                                                                                                Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8']                                                                                                                                                                          Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3']                                                                                                                                                                    Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3']                                                                                                                                                              Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R6
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6']                                                                                                                                                        Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G2
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2']                                                                                                                                                  Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5']                                                                                                                                            Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5']                                                                                                                                      Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3']                                                                                                                                Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5']                                                                                                                          Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1']                                                                                                                    Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R4
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4']                                                                                                              Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R7
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7']                                                                                                        Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5']                                                                                                  Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8']                                                                                            Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1']                                                                                      Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1']                                                                                Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3']                                                                          Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R9
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9']                                                                    Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y9
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9']                                                              Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5']                                                        Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y3
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3']                                                  Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y7
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7']                                            Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: G5
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5']                                      Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: Y1
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1']                                Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: W
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W']                           Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: B7
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W', 'B7']                     Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
 The deck is empty! Reshuffling the discard pile...
-Error: No cards left to draw. There is no way this should happen.
-Traceback (most recent call last):
-  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 1047, in <module>
+
+You drew: R4
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W', 'B7', 'R4']               Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R8
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W', 'B7', 'R4', 'R8']         Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+
+You drew: R2
+Your new hand is: ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6', 'Y2'
+, 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W', 'B7', 'R4', 'R8', 'R2']   Remember, the card on top is still: R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: d
+
+Error no cards left to draw. There is no way this should happen. Please play a card if you can.
+Reminder your hand is  ['B9', 'R1', 'B2', 'B9', 'B4', 'G6', 'B7', 'R2', 'R8', 'G0', 'R3', 'W', 'G6', 'Y5', 'W', 'G1', 'G8', 'Y0', 'G8', 'B3', 'Y6', 'G4', 'Y8', 'G3', 'B0', 'Y1', 'G9', 'Y6',
+ 'Y2', 'G7', 'B4', 'B8', 'B3', 'G3', 'R6', 'G2', 'R5', 'Y5', 'R3', 'G5', 'G1', 'R4', 'R7', 'B5', 'Y8', 'R1', 'B1', 'Y3', 'R9', 'Y9', 'R5', 'Y3', 'Y7', 'G5', 'Y1', 'W', 'B7', 'R4', 'R8', 'R2']                                                                                                                                                                                           The current card in play is  R6
+
+Which card would you like to play? Or 'draw/d' to pick a card from the deck: ^CTraceback (most recent call last):
+  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 1823, in <module>
     main_menu()
-  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 1037, in main_menu
+  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 1809, in main_menu
     tres_main()
-  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 918, in tres_main
+  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 968, in tres_main
     game_loop()
-  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 771, in game_loop
-    drawn_card = draw_card()
-                 ^^^^^^^^^^^
-  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 398, in draw_card
-    if current_player == 1:
-       ^^^^^^^^^^^^^^
-NameError: name 'current_player' is not defined
-@EvilPatrick06 ➜ /workspaces/Programming-Class-Project (Testing) $ d
+  File "/workspaces/Programming-Class-Project/CtrlUnoArcadeNT.py", line 640, in game_loop
+    card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
