@@ -58,7 +58,11 @@ BLUE_CARDS = ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9"]
 YELLOW_CARDS = ["Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9"]
 COLOR_CARDS = RED_CARDS + GREEN_CARDS + BLUE_CARDS + YELLOW_CARDS  # Standard numbered cards (36 total)
 ZERO_CARDS = ["R0", "G0", "B0", "Y0"]  # Special zero-value cards (4 total)
-WILD_CARDS = ["W"]  # Wild cards that can change color (4 total in deck)
+SKIP_CARDS = ["RSKIP", "GSKIP", "BSKIP", "YSKIP"]  # Skip cards that skip the next player's turn (4 total in deck)
+DRAW2_CARDS = ["RDRAW2", "GDRAW2", "BDRAW2", "YDRAW2"]  # Draw Two cards that force next player to draw 2 cards (4 total in deck)
+REVERSE_CARDS = ["RREVERSE", "GREVERSE", "BREVERSE", "YREVERSE"]  # Reverse cards that change play direction (4 total in deck)
+WILD_CARDS = ["WILD"]  # Wild cards that can change color (4 total in deck)
+WILD_DRAW4_CARDS = ["WILD+4"]  # Wild Draw Four cards that change color and force next player to draw 4 cards (4 total in deck)
 CARDS = COLOR_CARDS + ZERO_CARDS + WILD_CARDS  # Complete card type definitions
 
 #------------------------------------------------------
@@ -69,7 +73,12 @@ CARDS = COLOR_CARDS + ZERO_CARDS + WILD_CARDS  # Complete card type definitions
 # Game state and availability tracking
 color_card_limits = {}   # Tracks remaining copies of each color card (2 per card type)
 zero_card_limits = {}    # Tracks remaining copies of each zero card (1 per color)
+skip_card_limit = {}     # Tracks remaining skip cards (4 total)
+draw2_card_limit = {}    # Tracks remaining draw two cards (4 total)
+reverse_card_limit = {}  # Tracks remaining reverse cards (4 total)
 wild_card_limit = {}     # Tracks remaining wild cards (4 total)
+wild_draw4_card_limit = {}  # Tracks remaining wild draw four cards (4 total)
+
 
 #------------------------------------------------------
 # GLOBAL VARIABLES - HANGMAN GAME
@@ -333,15 +342,23 @@ def deck_limits():
     Card Distribution:
     - Color cards (R1-R9, G1-G9, etc.): 2 copies each
     - Zero cards (R0, G0, B0, Y0): 1 copy each
-    - Wild cards: 4 total copies
-    
+    - Skip Cards: (RSKIP, GSKIP, BSKIP, YSKIP): 4 total copies
+    - Draw Two Cards: (RDRAW2, GDRAW2, BDRAW2, YDRAW2): 4 total copies
+    - Reverse Cards: (RREVERSE, GREVERSE, BREVERSE, YREVERSE): 4 total copies
+    - Wild cards: (WILD) 4 total copies
+    - Wild Draw Four cards: (WILD+4) 4 total copies
+
     Global Variables Modified:
-        color_card_limits, zero_card_limits, wild_card_limit: Initialize availability counters
+        color_card_limits, zero_card_limits, wild_card_limit, skip_card_limits, draw2_card_limits, reverse_card_limits, wild_draw4_card_limit: Initialize availability counters
     """
-    global color_card_limits, zero_card_limits, wild_card_limit
+    global color_card_limits, zero_card_limits, skip_card_limits, draw2_card_limits, reverse_card_limits, wild_card_limit, wild_draw4_card_limit
     color_card_limits = {card: 2 for card in COLOR_CARDS}
     zero_card_limits = {card: 1 for card in ZERO_CARDS}
+    skip_card_limits = {card: 4 for card in SKIP_CARDS}
+    draw2_card_limits = {card: 4 for card in DRAW2_CARDS}
+    reverse_card_limits = {card: 4 for card in REVERSE_CARDS}
     wild_card_limit = {card: 4 for card in WILD_CARDS}
+    wild_draw4_card_limit = {card: 4 for card in WILD_DRAW4_CARDS}
 
 def gen_deck():
     """
@@ -367,9 +384,26 @@ def gen_deck():
     # Add zero cards (1 copy each)
     deck.extend(ZERO_CARDS)
     
-    # Add wild cards (4 copies)
-    deck.extend(WILD_CARDS * 4)
-    
+    # Add skip cards (4 copies each)
+    for card in SKIP_CARDS:
+        deck.extend([card, card, card, card])
+
+    # Add draw two cards (4 copies each)
+    for card in DRAW2_CARDS:
+        deck.extend([card, card, card, card])
+
+    # Add reverse cards (4 copies each)
+    for card in REVERSE_CARDS:
+        deck.extend([card, card, card, card])
+
+    # Add WILD cards (4 copies)
+    for card in WILD_CARDS:
+        deck.extend([card, card, card, card])
+
+    # Add WILD+4 cards (4 copies)
+    for card in WILD_DRAW4_CARDS:
+        deck.extend([card, card, card, card])
+
     # Shuffle and return
     random.shuffle(deck)
     return deck
@@ -649,8 +683,6 @@ def get_real_player_count():
             print("Invalid input. Please enter a valid number between 2 and 4.")
             print()
 
-
-
 def player_1_hand():
     """
     Updates Player 1's hand reference for easy access during gameplay.
@@ -698,11 +730,11 @@ def is_valid_play(card, current_card):
     Validation Rules:
     - Colors must match (first character): R, G, B, Y
     - Numbers must match (remaining characters): 0-9
-    - Wild cards (W) are always playable and change color
+    - Wild cards (Wild) are always playable and change color
     - Wild cards prompt for new color selection
     
     Args:
-        card (str): Card player wants to play (e.g., "R5", "W")
+        card (str): Card player wants to play (e.g., "R5", "WILD")
         current_card (str): Current card on top of play pile
         
     Returns:
@@ -713,22 +745,40 @@ def is_valid_play(card, current_card):
     card = card.upper()
     
     # Check if colors match (first character)
-    if card[0] == current_card[0] or card == "W":
-        if card == "W":
-            card_input = input("Wild card played! What color do you want to choose? (R, G, B, Y): ").lower()
-            wild_card_input = card_input.upper()
-            if wild_card_input in ["R", "G", "B", "Y"]:
-                print(f"You chose {card_input} as the new color.")
-                updated_card = wild_card_input + "W"  # Create updated card with new color
-                print("The card on top is now:", updated_card)
-                return True, updated_card
-            else:
-                print("Invalid color choice. Please choose R, G, B, or Y.")
-                return False, current_card
+    if card[0] == current_card[0] or card == "WILD" or card == "WILD+4":
+        if card == "WILD":
+            valid_color = False
+            while not valid_color:
+                card_input = input("Wild card played! What color do you want to choose? (R, G, B, Y): ").lower()
+                wild_card_input = card_input.upper()
+                if wild_card_input in ["R", "G", "B", "Y"]:
+                    print(f"You chose {card_input} as the new color.")
+                    updated_card = wild_card_input + "WILD"  # Create updated card with new color
+                    print("The card on top is now:", updated_card)
+                    valid_color = True
+                    return True, updated_card
+                else:
+                    print("Invalid color choice. Please choose R, G, B, or Y.")
+                    # Continue loop until valid input
+
+        if card == "WILD+4":
+            valid_color = False
+            while not valid_color:
+                card_input = input("Wild Draw Four card played! What color do you want to choose? (R, G, B, Y): ").lower()
+                wild_card_input = card_input.upper()
+                if wild_card_input in ["R", "G", "B", "Y"]:
+                    print(f"You chose {card_input} as the new color.")
+                    updated_card = wild_card_input + "WILD+4"  # Create updated card with new color
+                    print("The card on top is now:", updated_card)
+                    valid_color = True
+                    return True, updated_card
+                else:
+                    print("Invalid color choice. Please choose R, G, B, or Y.")
+                    # Continue loop until valid input
         return True, current_card
     
     # Check if numbers match (characters after the first)
-    if card[1:] == current_card[1:] or current_card[1:] == "R" or current_card[1:] == "G" or current_card[1:] == "B" or current_card[1:] == "Y":
+    if card[1:] == current_card[1:] or current_card[1:] in ["R", "G", "B", "Y"]:
         return True, current_card
         
     return False, current_card
@@ -768,27 +818,28 @@ def game_loop():
             print("Current card on top:", current_card)
             print("Your hand is currently:", player1_hand)
 
-            wild_card = False
-            while not wild_card:
-                if current_card == "W":
+            # Check if the current card is a WILD card that needs color selection
+            if current_card == "WILD":
+                valid_color = False
+                while not valid_color:
                     card_input = input("Wild card played! What color do you want to choose? (R, G, B, Y): ").lower()
                     wild_card_input = card_input.upper()
                     if wild_card_input in ["R", "G", "B", "Y"]:
                         print(f"You chose {card_input} as the new color.")
-                        updated_card = wild_card_input + "W"  # Create updated card with new color
+                        updated_card = wild_card_input + "WILD"  # Create updated card with new color
                         print("The card on top is now:", updated_card)
                         current_card = updated_card
                         print("Reminder your hand is currently:", player1_hand)
-                    elif wild_card_input not in ["R", "G", "B", "Y"]:
+                        valid_color = True  # Exit the loop after valid color selection
+                    else:
                         print("Invalid color choice. Please choose R, G, B, or Y.")
-                        continue
-
+                        # Loop continues automatically until valid input
 
             print()
-            
+
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to draw a card from the deck: ").lower()
                 print()
                 card_input = card_input.upper()
 
@@ -807,8 +858,8 @@ def game_loop():
                     is_valid, updated_card = is_valid_play(card_input, current_card)
                     if is_valid:
                         player1_hand.remove(card_input)
-                        # If it's a wild card, use the updated card with color
-                        if card_input == "W":
+                        # If it's a WILD card, use the updated card with color
+                        if card_input == "WILD":
                             current_card = updated_card
                         else:
                             current_card = card_input
@@ -849,7 +900,7 @@ def game_loop():
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to draw a card from the deck: ").lower()
                 print()
                 card_input = card_input.upper()
 
@@ -868,8 +919,8 @@ def game_loop():
                     is_valid, updated_card = is_valid_play(card_input, current_card)
                     if is_valid:
                         player2_hand.remove(card_input)
-                        # If it's a wild card, use the updated card with color
-                        if card_input == "W":
+                        # If it's a WILD card, use the updated card with color
+                        if card_input == "WILD":
                             current_card = updated_card
                         else:
                             current_card = card_input
@@ -925,7 +976,7 @@ def game_loop():
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to draw a card from the deck: ").lower()
                 print()
                 card_input = card_input.upper()
 
@@ -944,8 +995,8 @@ def game_loop():
                     is_valid, updated_card = is_valid_play(card_input, current_card)
                     if is_valid:
                         player3_hand.remove(card_input)
-                        # If it's a wild card, use the updated card with color
-                        if card_input == "W":
+                        # If it's a WILD card, use the updated card with color
+                        if card_input == "WILD":
                             current_card = updated_card
                         else:
                             current_card = card_input
@@ -1001,7 +1052,7 @@ def game_loop():
             
             valid_move = False
             while not valid_move:
-                card_input = input("Which card would you like to play? Or 'draw/d' to pick a card from the deck: ").lower()
+                card_input = input("Which card would you like to play? Or 'draw/d' to draw a card from the deck: ").lower()
                 print()
                 card_input = card_input.upper()
 
@@ -1020,8 +1071,8 @@ def game_loop():
                     is_valid, updated_card = is_valid_play(card_input, current_card)
                     if is_valid:
                         player4_hand.remove(card_input)
-                        # If it's a wild card, use the updated card with color
-                        if card_input == "W":
+                        # If it's a WILD card, use the updated card with color
+                        if card_input == "WILD":
                             current_card = updated_card
                         else:
                             current_card = card_input
