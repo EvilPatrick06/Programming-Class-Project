@@ -1,0 +1,27 @@
+
+
+# read(), reads the entire file
+# readline(), reads one line at a time
+# readlines(), reads the entire file as a list of lines
+# strip(), removes the \n and any spaces
+
+keep_going= True
+tres_count=0
+yellow_count=0
+
+file=open("tres.py","r")
+print("The file is reopened.")
+term=file.readline(1).strip() # Read first line and strip whitespace
+print(term)
+
+for line in file:
+    term=line.strip()
+    if term=="Tres":
+        tres_count+=1
+    elif term=="Yellow":
+        yellow_count+=1
+
+print("Total 'Tres'", tres_count)
+print("Total 'Yellow'", yellow_count)
+
+file.close()
