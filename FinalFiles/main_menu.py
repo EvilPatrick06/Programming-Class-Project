@@ -24,7 +24,7 @@ from wordy import wordy_menu
 from tres import tres_main
 from hangman import hangman_menu
 from gambling_gauntlet import gauntlet_menu
-from Farkle import farkle_menu
+from farkle import farkle_menu
 
 # Import menu modules
 from help_menu import help_menu
